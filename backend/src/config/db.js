@@ -1,6 +1,12 @@
 const fs = require('fs');
+const path = require('path');
 const mysql = require('mysql2/promise');
 require('dotenv').config();
+
+const localEnvPath = path.resolve(__dirname, '../../.env');
+if (fs.existsSync(localEnvPath)) {
+    require('dotenv').config({ path: localEnvPath });
+}
 
 const loadSslCa = () => {
     const caValue = process.env.DB_SSL_CA || process.env.DB_CA;
