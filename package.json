@@ -2,5 +2,15 @@
   "name": "warung-kopi-root",
   "version": "1.0.0",
   "description": "Root package untuk Vercel",
-  "private": true
+  "private": true,
+  "workspaces": [
+    "backend",
+    "frontend"
+  ],
+  "scripts": {
+    "build": "npm --prefix frontend run build",
+    "dev": "npm --prefix frontend run dev",
+    "preview": "npm --prefix frontend run preview",
+    "start:backend": "npm --prefix backend run start"
+  }
 }
