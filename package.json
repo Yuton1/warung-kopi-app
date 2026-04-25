@@ -1,0 +1,6 @@
+{
+  "name": "warung-kopi-root",
+  "version": "1.0.0",
+  "description": "Root package untuk Vercel",
+  "private": true
+}
