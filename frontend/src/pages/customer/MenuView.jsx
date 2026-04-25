@@ -183,6 +183,16 @@ const MenuView = () => {
     })
   }, [menu, search, category])
 
+  const displayedMenu = useMemo(() => {
+    return [...filteredMenu].sort((a, b) => {
+      if (a.featured !== b.featured) {
+        return Number(b.featured) - Number(a.featured)
+      }
+
+      return String(a.name).localeCompare(String(b.name), 'id')
+    })
+  }, [filteredMenu])
+
   const cartCount = cart.reduce((total, item) => total + item.qty, 0)
   const subtotal = cart.reduce((total, item) => total + item.price * item.qty, 0)
   const cartPoints = Math.floor(subtotal / 1000)
@@ -602,13 +612,13 @@ const MenuView = () => {
             <div className="section-head">
               <div>
                 <span className="eyebrow">Menu Pilihan</span>
-                <h2>{loadingMenu ? 'Memuat menu...' : 'Daftar menu untuk user'}</h2>
+                <h2>{loadingMenu ? 'Memuat menu...' : 'Menu paling sering dipesan'}</h2>
               </div>
-              <p>Setiap menu bisa dipilih ukuran Tall, Grande, atau Venti sebelum masuk keranjang.</p>
+              <p>Grid 3 kolom ini menampilkan menu populer dulu, lalu tetap memuat item lain di bawahnya.</p>
             </div>
 
             <div className="menu-grid">
-              {filteredMenu.map((product) => (
+              {displayedMenu.map((product) => (
                   <ProductCard
                   key={product.id}
                   product={product}

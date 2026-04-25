@@ -4,7 +4,6 @@ const navItems = [
   { to: '/', end: true, label: 'Menu', hint: 'Dashboard', icon: 'home' },
   { to: '/promo', label: 'Promo', hint: 'Penawaran', icon: 'tag' },
   { to: '/pesanan', label: 'Pesanan', hint: 'Riwayat', icon: 'clock' },
-  { to: '/akun', label: 'Akun', hint: 'Profil', icon: 'user' },
   { to: '/lokasi', label: 'Lokasi', hint: 'Kontak', icon: 'map' },
 ]
 
@@ -90,6 +89,13 @@ const CustomerNavbar = () => {
               </NavLink>
             ))}
           </nav>
+
+          <Link to="/akun" className="account-cta">
+            <span className="account-cta__icon" aria-hidden="true">
+              <Icon name="user" />
+            </span>
+            <span>Akun Saya</span>
+          </Link>
         </div>
       </div>
     </header>
@@ -97,4 +103,3 @@ const CustomerNavbar = () => {
 }
 
 export default CustomerNavbar
-
