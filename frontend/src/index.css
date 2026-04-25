@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -9,10 +9,12 @@
   --bg-soft: #fff9f2;
   --coffee-dark: #2c1b0e;
   --coffee-medium: #6a452d;
+  --coffee-hover: #886245;
+  --nav-default: #fff0e5;
   --text-strong: #23160d;
   --text-soft: #6d5b4d;
-  --font-display: 'Fraunces', serif;
-  --font-body: 'Plus Jakarta Sans', sans-serif;
+  --font-display: 'Fredoka', sans-serif;
+  --font-body: 'Fredoka', sans-serif;
 }
 
 * {
