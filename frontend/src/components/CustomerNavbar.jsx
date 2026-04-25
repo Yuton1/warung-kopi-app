@@ -1,10 +1,11 @@
 import { Link, NavLink } from 'react-router-dom'
 
 const navItems = [
-  { to: '/', end: true, label: 'Menu', hint: 'Dashboard', icon: 'home' },
-  { to: '/promo', label: 'Promo', hint: 'Penawaran', icon: 'tag' },
-  { to: '/pesanan', label: 'Pesanan', hint: 'Riwayat', icon: 'clock' },
-  { to: '/lokasi', label: 'Lokasi', hint: 'Kontak', icon: 'map' },
+  { to: '/', end: true, label: 'Home', icon: 'home' },
+  { to: '/', label: 'Menu', icon: 'menu', state: { focusMenu: true } },
+  { to: '/pesanan', label: 'Pesanan', icon: 'clock' },
+  { to: '/akun', label: 'Member', icon: 'user' },
+  { to: '/', label: 'Keranjang', icon: 'cart', state: { scrollToCart: true } },
 ]
 
 const Icon = ({ name }) => {
@@ -19,6 +20,12 @@ const Icon = ({ name }) => {
       return (
         <svg viewBox="0 0 24 24" aria-hidden="true">
           <path d="M20 10.5 13.5 4H6a2 2 0 0 0-2 2v7.5L10.5 20a2 2 0 0 0 2.8 0L20 13.3a2 2 0 0 0 0-2.8ZM8.5 8A1.5 1.5 0 1 1 8.5 5A1.5 1.5 0 0 1 8.5 8Z" />
+        </svg>
+      )
+    case 'menu':
+      return (
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z" />
         </svg>
       )
     case 'clock':
@@ -39,6 +46,12 @@ const Icon = ({ name }) => {
           <path d="M12 2a7 7 0 0 0-7 7c0 4.6 7 13 7 13s7-8.4 7-13a7 7 0 0 0-7-7Zm0 9.5A2.5 2.5 0 1 1 14.5 9 2.5 2.5 0 0 1 12 11.5Z" />
         </svg>
       )
+    case 'cart':
+      return (
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M7 18a2 2 0 1 0 2 2 2 2 0 0 0-2-2Zm10 0a2 2 0 1 0 2 2 2 2 0 0 0-2-2ZM6.2 6l.3 2h12.9a1 1 0 0 1 1 1.2l-1.1 5.5a2 2 0 0 1-2 1.6H8.2a2 2 0 0 1-1.9-1.5L4.7 4H2V2h4a1 1 0 0 1 1 .8L7.4 6Z" />
+        </svg>
+      )
     case 'search':
     default:
       return (
@@ -54,6 +67,7 @@ const CustomerNavbar = () => {
     <header className="site-header">
       <div className="site-header__inner">
         <Link to="/" className="brand-link" aria-label="Warung Kopi home">
+          {/* GAMBAR: Logo Navbar Kiri */}
           <span className="brand-mark" aria-hidden="true">
             <span className="brand-mark__dot" />
           </span>
@@ -63,14 +77,14 @@ const CustomerNavbar = () => {
           </span>
         </Link>
 
-        <div className="site-header__actions">
-          <Link to="/" state={{ focusSearch: true }} className="search-cta" aria-label="Cari menu">
-            <span className="search-cta__icon">
-              <Icon name="search" />
-            </span>
-            <span>Cari menu</span>
-          </Link>
+        <Link to="/" state={{ focusSearch: true }} className="nav-searchbar" aria-label="Cari menu">
+          <span className="nav-searchbar__icon" aria-hidden="true">
+            <Icon name="search" />
+          </span>
+          <span>Cari Menu</span>
+        </Link>
 
+        <div className="site-header__actions">
           <nav className="nav-pills" aria-label="Navigasi pengguna">
             {navItems.map((item) => (
               <NavLink
@@ -78,13 +92,13 @@ const CustomerNavbar = () => {
                 to={item.to}
                 end={item.end}
                 className={({ isActive }) => `nav-pill ${isActive ? 'is-active' : ''}`}
+                state={item.state}
               >
                 <span className="nav-pill__icon" aria-hidden="true">
                   <Icon name={item.icon} />
                 </span>
                 <span className="nav-pill__text">
                   <strong>{item.label}</strong>
-                  <small>{item.hint}</small>
                 </span>
               </NavLink>
             ))}
@@ -94,7 +108,7 @@ const CustomerNavbar = () => {
             <span className="account-cta__icon" aria-hidden="true">
               <Icon name="user" />
             </span>
-            <span>Akun Saya</span>
+            <span>Login</span>
           </Link>
         </div>
       </div>

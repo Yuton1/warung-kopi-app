@@ -80,6 +80,7 @@ const uniqueByKey = (items, getKey) => {
 const MenuView = () => {
   const location = useLocation()
   const searchInputRef = useRef(null)
+  const menuSectionRef = useRef(null)
   const [menu, setMenu] = useState(coffeeSeed)
   const [loadingMenu, setLoadingMenu] = useState(true)
   const [search, setSearch] = useState('')
@@ -130,12 +131,24 @@ const MenuView = () => {
 
   useEffect(() => {
     if (!location.state?.focusSearch) {
-      return
+      if (!location.state?.focusMenu && !location.state?.scrollToCart) {
+        return
+      }
     }
 
     const timer = window.setTimeout(() => {
-      searchInputRef.current?.focus()
-      searchInputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      if (location.state?.focusSearch) {
+        searchInputRef.current?.focus()
+        searchInputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      }
+
+      if (location.state?.focusMenu) {
+        menuSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      }
+
+      if (location.state?.scrollToCart) {
+        document.getElementById('cart-panel')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      }
     }, 0)
 
     return () => window.clearTimeout(timer)
@@ -454,6 +467,65 @@ const MenuView = () => {
       <div className="page-glow page-glow--one" />
       <div className="page-glow page-glow--two" />
 
+      <section className="home-showcase">
+        <div className="home-showcase__hero">
+          <div className="home-showcase__copy">
+            <span className="eyebrow">Jangan Sampai Kehabisan</span>
+            <h1>Promo Mingguan Warung Kopi</h1>
+            <p>
+              Frontend ini tetap fokus ke user dulu: pilih menu, simpan favorit, atur pre-order, gabung group order,
+              langganan kopi, dan cek rekomendasi personal.
+            </p>
+            <div className="hero-actions">
+              <a href="#menu-section" className="btn btn-primary">
+                Detail
+              </a>
+              <a href="#tools" className="btn btn-secondary">
+                Atur pre-order
+              </a>
+            </div>
+          </div>
+
+          <div className="home-showcase__art">
+            {/* GAMBAR: Hero Promo Utama */}
+            <div className="hero-cup-visual" aria-hidden="true">
+              <div className="hero-cup-visual__ring" />
+              <div className="hero-cup-visual__steam" />
+            </div>
+            <div className="home-showcase__dots" aria-hidden="true">
+              <span className="is-active" />
+              <span />
+              <span />
+              <span />
+              <span />
+            </div>
+          </div>
+        </div>
+
+        <aside className="home-showcase__stats">
+          <div className="hero-stat hero-stat--compact">
+            <span>Keranjang aktif</span>
+            <strong>{cartCount} item</strong>
+            <small>{formatRupiah(subtotal)}</small>
+          </div>
+          <div className="hero-stat hero-stat--compact">
+            <span>Poin loyalty</span>
+            <strong>{loyaltyPoints}</strong>
+            <small>{cartPoints} poin dari keranjang ini</small>
+          </div>
+          <div className="hero-stat hero-stat--compact">
+            <span>Jadwal ambil</span>
+            <strong>{pickupTime}</strong>
+            <small>{preOrder ? preOrder.status : 'Belum dijadwalkan'}</small>
+          </div>
+          <div className="hero-stat hero-stat--compact">
+            <span>Menu favorit</span>
+            <strong>{favoriteCoffee}</strong>
+            <small>{subscription ? planStatus : 'Siap dipersonalisasi'}</small>
+          </div>
+        </aside>
+      </section>
+
       <section className="promo-banner">
         <div className="promo-banner__copy">
           <span className="eyebrow">Promo Minggu Ini</span>
@@ -509,51 +581,6 @@ const MenuView = () => {
         </Link>
       </section>
 
-      <header className="hero-card">
-        <div className="hero-card__copy">
-          <span className="eyebrow">Customer Experience</span>
-          <h1>Pemesanan menu Warung Kopi yang hangat, cepat, dan siap dipakai.</h1>
-          <p>
-            Frontend ini fokus ke user dulu: pilih menu, simpan favorit, atur pre-order,
-            gabung group order, langganan kopi, dan cek rekomendasi personal.
-          </p>
-
-          <div className="hero-actions">
-            <a href="#menu" className="btn btn-primary">
-              Mulai pilih menu
-            </a>
-            <a href="#tools" className="btn btn-secondary">
-              Atur pre-order
-            </a>
-          </div>
-        </div>
-
-        <div className="hero-card__visual">
-          <div className="hero-card__stack">
-            <div className="hero-stat">
-              <span>Keranjang aktif</span>
-              <strong>{cartCount} item</strong>
-              <small>{formatRupiah(subtotal)}</small>
-            </div>
-            <div className="hero-stat">
-              <span>Poin loyalty</span>
-              <strong>{loyaltyPoints}</strong>
-              <small>{cartPoints} poin dari keranjang ini</small>
-            </div>
-            <div className="hero-stat">
-              <span>Jadwal ambil</span>
-              <strong>{pickupTime}</strong>
-              <small>{preOrder ? preOrder.status : 'Belum dijadwalkan'}</small>
-            </div>
-            <div className="hero-stat hero-stat--wide">
-              <span>Menu favorit</span>
-              <strong>{favoriteCoffee}</strong>
-              <small>{subscription ? planStatus : 'Siap dipersonalisasi'}</small>
-            </div>
-          </div>
-        </div>
-      </header>
-
       <section className="search-card">
         <label className="field field--search">
           <span>Cari menu</span>
@@ -592,7 +619,7 @@ const MenuView = () => {
               <p>Diambil dari favorit, kategori yang sering dipilih, dan menu unggulan.</p>
             </div>
 
-            <div className="recommendation-strip">
+            <div className="recommendation-strip recommendation-strip--wide">
               {recommendations.map((item) => (
                 <div key={item.id} className="recommendation-card">
                   <div className={`recommendation-card__art ${item.accent}`}>
@@ -608,7 +635,7 @@ const MenuView = () => {
             </div>
           </section>
 
-          <section className="panel" id="menu">
+          <section className="panel" id="menu-section" ref={menuSectionRef}>
             <div className="section-head">
               <div>
                 <span className="eyebrow">Menu Pilihan</span>
@@ -619,7 +646,7 @@ const MenuView = () => {
 
             <div className="menu-grid">
               {displayedMenu.map((product) => (
-                  <ProductCard
+                <ProductCard
                   key={product.id}
                   product={product}
                   isFavorite={favoriteIdSet.has(Number(product.id))}

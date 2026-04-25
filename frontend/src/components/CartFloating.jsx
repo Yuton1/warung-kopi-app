@@ -21,7 +21,7 @@ const CartFloating = ({
   const cartCount = cart.reduce((total, item) => total + item.qty, 0)
 
   return (
-    <aside className="summary-panel">
+    <aside className="summary-panel" id="cart-panel">
       <div className="summary-panel__header">
         <div>
           <span className="eyebrow">Pemesanan Aktif</span>
