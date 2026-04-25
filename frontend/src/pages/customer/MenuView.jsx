@@ -1,20 +1,12 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { Link, useLocation } from 'react-router-dom'
 import CartFloating from '../../components/CartFloating'
 import ProductCard from '../../components/ProductCard'
+import { STORAGE_KEYS, readStoredValue } from '../../data/customerStorage'
+import { promoSeed } from '../../data/promoSeed'
 import { coffeeSeed, categoryFilters, subscriptionPlans } from '../../data/menuSeed'
 import { getProducts } from '../../services/api'
 import { formatRupiah } from '../../utils/formatRupiah'
-
-const STORAGE_KEYS = {
-  cart: 'warungkopi.cart',
-  favorites: 'warungkopi.favorites',
-  history: 'warungkopi.history',
-  loyalty: 'warungkopi.loyalty',
-  subscription: 'warungkopi.subscription',
-  preorder: 'warungkopi.preorder',
-  groupOrder: 'warungkopi.groupOrder',
-  profile: 'warungkopi.profile',
-}
 
 const ACCENT_FALLBACKS = [
   'accent-espresso',
@@ -26,22 +18,6 @@ const ACCENT_FALLBACKS = [
   'accent-cream',
   'accent-sugar',
 ]
-
-const safeParse = (value, fallback) => {
-  try {
-    return value ? JSON.parse(value) : fallback
-  } catch {
-    return fallback
-  }
-}
-
-const readStoredValue = (key, fallback) => {
-  if (typeof window === 'undefined') {
-    return fallback
-  }
-
-  return safeParse(window.localStorage.getItem(key), fallback)
-}
 
 const getInitials = (value) => {
   const words = String(value || 'Warung Kopi').trim().split(/\s+/)
@@ -102,6 +78,8 @@ const uniqueByKey = (items, getKey) => {
 }
 
 const MenuView = () => {
+  const location = useLocation()
+  const searchInputRef = useRef(null)
   const [menu, setMenu] = useState(coffeeSeed)
   const [loadingMenu, setLoadingMenu] = useState(true)
   const [search, setSearch] = useState('')
@@ -149,6 +127,19 @@ const MenuView = () => {
       mounted = false
     }
   }, [])
+
+  useEffect(() => {
+    if (!location.state?.focusSearch) {
+      return
+    }
+
+    const timer = window.setTimeout(() => {
+      searchInputRef.current?.focus()
+      searchInputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    }, 0)
+
+    return () => window.clearTimeout(timer)
+  }, [location.state])
 
   useEffect(() => {
     if (typeof window === 'undefined') {
@@ -453,6 +444,61 @@ const MenuView = () => {
       <div className="page-glow page-glow--one" />
       <div className="page-glow page-glow--two" />
 
+      <section className="promo-banner">
+        <div className="promo-banner__copy">
+          <span className="eyebrow">Promo Minggu Ini</span>
+          <h2>{promoSeed[0].title}</h2>
+          <p>{promoSeed[0].description}</p>
+          <div className="promo-banner__actions">
+            <Link to="/promo" className="btn btn-primary">
+              Lihat semua promo
+            </Link>
+            <span className="promo-code-chip">Kode {promoSeed[0].code}</span>
+          </div>
+        </div>
+
+        <div className="promo-banner__rail">
+          {promoSeed.map((promo) => (
+            <article key={promo.id} className={`promo-rail-card ${promo.accent}`}>
+              <span>{promo.badge}</span>
+              <strong>{promo.title}</strong>
+              <p>{promo.code}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="feature-hub">
+        <Link to="/akun" className="feature-hub__card">
+          <span className="feature-hub__icon">01</span>
+          <div>
+            <strong>Akun Saya</strong>
+            <p>Login, register, dan atur profil pelanggan.</p>
+          </div>
+        </Link>
+        <Link to="/pesanan" className="feature-hub__card">
+          <span className="feature-hub__icon">02</span>
+          <div>
+            <strong>Pesanan Saya</strong>
+            <p>Tracking status dan riwayat order.</p>
+          </div>
+        </Link>
+        <Link to="/promo" className="feature-hub__card">
+          <span className="feature-hub__icon">03</span>
+          <div>
+            <strong>Promo</strong>
+            <p>Diskon, bundling, dan voucher aktif.</p>
+          </div>
+        </Link>
+        <Link to="/lokasi" className="feature-hub__card">
+          <span className="feature-hub__icon">04</span>
+          <div>
+            <strong>Lokasi / Kontak</strong>
+            <p>Alamat warung, maps, dan WhatsApp.</p>
+          </div>
+        </Link>
+      </section>
+
       <header className="hero-card">
         <div className="hero-card__copy">
           <span className="eyebrow">Customer Experience</span>
@@ -502,6 +548,8 @@ const MenuView = () => {
         <label className="field field--search">
           <span>Cari menu</span>
           <input
+            id="menu-search"
+            ref={searchInputRef}
             type="search"
             placeholder="Contoh: latte, matcha, roti bakar"
             value={search}

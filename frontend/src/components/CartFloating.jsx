@@ -87,7 +87,7 @@ const CartFloating = ({
               <div className="cart-row__content">
                 <strong>{item.name}</strong>
                 <span>
-                  {item.size.label} • {formatRupiah(item.price)}
+                  {item.size.label} - {formatRupiah(item.price)}
                 </span>
               </div>
               <div className="cart-row__controls">

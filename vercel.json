@@ -2,5 +2,23 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "version": 2,
   "buildCommand": "npm run build",
-  "outputDirectory": "frontend/dist"
+  "outputDirectory": "frontend/dist",
+  "rewrites": [
+    {
+      "source": "/akun",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/pesanan",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/promo",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/lokasi",
+      "destination": "/index.html"
+    }
+  ]
 }
