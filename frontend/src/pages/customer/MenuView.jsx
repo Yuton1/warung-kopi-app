@@ -141,6 +141,10 @@ const MenuView = () => {
         setSearch(location.state.searchQuery)
       }
 
+      if (typeof location.state?.category === 'string') {
+        setCategory(location.state.category)
+      }
+
       if (location.state?.focusSearch) {
         searchInputRef.current?.focus()
         searchInputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })

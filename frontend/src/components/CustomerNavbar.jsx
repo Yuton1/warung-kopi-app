@@ -3,10 +3,16 @@ import { Link, NavLink, useNavigate } from 'react-router-dom'
 
 const navItems = [
   { to: '/', end: true, label: 'Home', state: null, type: 'link' },
-  { label: 'Menu', state: { focusMenu: true }, type: 'button' },
+  { label: 'Menu', type: 'dropdown' },
   { to: '/pesanan', label: 'Pesanan', state: null, type: 'link' },
   { to: '/akun', label: 'Member', state: null, type: 'link' },
   { label: 'Keranjang', state: { scrollToCart: true }, type: 'button' },
+]
+
+const menuDropdownItems = [
+  { label: 'Minuman', category: 'Minuman' },
+  { label: 'Makanan', category: 'Makanan' },
+  { label: 'Cemilan', category: 'Makanan' },
 ]
 
 const Icon = ({ name }) => {
@@ -14,7 +20,15 @@ const Icon = ({ name }) => {
     case 'search':
     default:
       return (
-        <svg viewBox="0 0 24 24" aria-hidden="true">
+        <svg
+          viewBox="0 0 24 24"
+          aria-hidden="true"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
           <path d="m20 20-4.2-4.2m1.2-4.8a6 6 0 1 1-12 0 6 6 0 0 1 12 0Z" />
         </svg>
       )
@@ -27,6 +41,18 @@ const CustomerNavbar = () => {
 
   const handleInternalNav = (state) => {
     navigate('/', { state })
+  }
+
+  const handleMenuSelect = (event, category) => {
+    event.currentTarget.closest('details')?.removeAttribute('open')
+
+    navigate('/', {
+      state: {
+        focusMenu: true,
+        category,
+        searchQuery: '',
+      },
+    })
   }
 
   const handleSearchSubmit = (event) => {
@@ -69,6 +95,28 @@ const CustomerNavbar = () => {
 
         <nav className="customer-navbar__nav" aria-label="Navigasi pengguna">
           {navItems.map((item) => {
+            if (item.type === 'dropdown') {
+              return (
+                <details key={item.label} className="customer-navbar__menu-group">
+                  <summary className="customer-navbar__pill customer-navbar__pill--menu">
+                    {item.label}
+                  </summary>
+                  <div className="customer-navbar__dropdown" role="menu" aria-label="Kategori menu">
+                    {menuDropdownItems.map((option) => (
+                      <button
+                        key={option.label}
+                        type="button"
+                        className="customer-navbar__dropdown-item"
+                        onClick={(event) => handleMenuSelect(event, option.category)}
+                      >
+                        {option.label}
+                      </button>
+                    ))}
+                  </div>
+                </details>
+              )
+            }
+
             if (item.type === 'button') {
               return (
                 <button
