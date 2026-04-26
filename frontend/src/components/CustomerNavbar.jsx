@@ -4,7 +4,7 @@ const navItems = [
   { to: '/', end: true, label: 'Home', state: null, type: 'link' },
   { label: 'Menu', state: { focusMenu: true }, type: 'button' },
   { to: '/pesanan', label: 'Pesanan', state: null, type: 'link', badge: 2 },
-  { to: '/akun', label: 'Member', state: null, type: 'link' },
+  { to: '/member', label: 'Member', state: null, type: 'link' },
   { label: 'Keranjang', state: { scrollToCart: true }, type: 'button' },
 ];
 
@@ -60,19 +60,20 @@ const CustomerNavbar = () => {
           </div>
         </Link>
 
-        {/* SEARCH BAR SECTION (Berbentuk Link seperti kodemu sebelumnya) */}
-        <Link 
-          to="/" 
-          state={{ focusSearch: true }} 
-          className="hidden md:flex items-center bg-white border border-gray-200 rounded-full px-4 py-2.5 flex-1 max-w-md hover:border-[#886245] transition-colors shadow-sm" 
-          aria-label="Cari menu"
-        >
-          <Icon name="search" className="text-gray-400 mr-2 w-5 h-5" />
-          <span className="text-gray-400 font-medium">Cari Menu</span>
-        </Link>
+        {/* SEARCH BAR SECTION (Berbentuk input agar bisa digunakan) */}
+        <div className="hidden md:flex flex-1 max-w-md relative">
+          <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400">
+            <Icon name="search" />
+          </div>
+          <input 
+            type="text" 
+            placeholder="Cari Menu" 
+            className="w-full bg-white border border-gray-200 rounded-full px-12 py-2.5 focus:ring-[#886245] focus:border-[#886245] outline-none text-gray-700 font-medium transition-all shadow-sm"
+          />
+        </div>
 
         {/* NAVIGATION PILLS SECTION */}
-        <nav className="flex items-center gap-2 md:gap-3 overflow-x-auto no-scrollbar" aria-label="Navigasi pengguna">
+        <nav className="flex items-center gap-2 md:gap-3 overflow-x-auto no-scrollbar pb-1 md:pb-0" aria-label="Navigasi pengguna">
           {navItems.map((item) => {
             // Render sebagai Button jika tipe item adalah 'button'
             if (item.type === 'button') {
