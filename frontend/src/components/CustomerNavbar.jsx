@@ -50,8 +50,6 @@ const CustomerNavbar = () => {
             <span className="brand-mark__placeholder">Logo</span>
           </span>
           <span className="brand-copy brand-copy--navbar">
-            <strong>Drinks</strong>
-            <span>Warung Kopi</span>
           </span>
         </Link>
 
