@@ -1,128 +1,130 @@
-import { Link, NavLink, useNavigate } from 'react-router-dom';
+import { Link, NavLink, useNavigate } from 'react-router-dom'
 
 const navItems = [
-  { to: '/', end: true, label: 'Home', state: null, type: 'link' },
-  { label: 'Menu', state: { focusMenu: true }, type: 'button' },
-  { to: '/pesanan', label: 'Pesanan', state: null, type: 'link', badge: 2 },
-  { to: '/member', label: 'Member', state: null, type: 'link' },
-  { label: 'Keranjang', state: { scrollToCart: true }, type: 'button' },
-];
+  { to: '/', end: true, label: 'Home', icon: 'home', state: null, type: 'link' },
+  { label: 'Menu', icon: 'menu', state: { focusMenu: true }, type: 'button' },
+  { to: '/pesanan', label: 'Pesanan', icon: 'clock', state: null, type: 'link' },
+  { to: '/akun', label: 'Member', icon: 'user', state: null, type: 'link' },
+  { label: 'Keranjang', icon: 'cart', state: { scrollToCart: true }, type: 'button' },
+]
 
-const Icon = ({ name, className = "w-5 h-5" }) => {
+const Icon = ({ name }) => {
   switch (name) {
-    case 'search':
+    case 'home':
       return (
-        <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-          <circle cx="11" cy="11" r="8"></circle>
-          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M4 11.5 12 4l8 7.5v8.5a1 1 0 0 1-1 1h-5.5v-6h-3v6H5a1 1 0 0 1-1-1z" />
         </svg>
-      );
+      )
+    case 'menu':
+      return (
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z" />
+        </svg>
+      )
+    case 'clock':
+      return (
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M12 3a9 9 0 1 0 9 9A9 9 0 0 0 12 3Zm1 4v5.1l4 2.4-1 1.7-5-3V7Z" />
+        </svg>
+      )
     case 'user':
       return (
-        <svg className={className} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
           <path d="M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4Zm0 2c-4.4 0-8 2.3-8 5v1h16v-1c0-2.7-3.6-5-8-5Z" />
         </svg>
-      );
-    case 'logo':
+      )
+    case 'cart':
       return (
-        <svg className={className} viewBox="0 0 24 24" fill="#886245" aria-hidden="true">
-          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z" />
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M7 18a2 2 0 1 0 2 2 2 2 0 0 0-2-2Zm10 0a2 2 0 1 0 2 2 2 2 0 0 0-2-2ZM6.2 6l.3 2h12.9a1 1 0 0 1 1 1.2l-1.1 5.5a2 2 0 0 1-2 1.6H8.2a2 2 0 0 1-1.9-1.5L4.7 4H2V2h4a1 1 0 0 1 1 .8L7.4 6Z" />
         </svg>
-      );
+      )
+    case 'search':
     default:
-      return null;
+      return (
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="m20 20-4.2-4.2m1.2-4.8a6 6 0 1 1-12 0 6 6 0 0 1 12 0Z" />
+        </svg>
+      )
   }
-};
+}
 
 const CustomerNavbar = () => {
-  const navigate = useNavigate();
+  const navigate = useNavigate()
 
   const handleInternalNav = (state) => {
-    navigate('/', { state });
-  };
-
-  // Variabel styling Tailwind agar penulisan class tidak panjang dan berulang
-  const pillBaseStyle = "relative px-5 py-2 md:px-6 md:py-2.5 rounded-full font-semibold text-sm md:text-base whitespace-nowrap transition-all duration-300";
-  const inactiveStyle = "bg-[#FFF0E5] text-[#886245] hover:bg-[#886245] hover:text-white";
-  const activeStyle = "bg-[#886245] text-white shadow-md";
+    navigate('/', { state })
+  }
 
   return (
-    // bg-[#FCF8F5] disesuaikan dengan warna background pada gambar desain
-    <header className="sticky top-0 z-50 w-full bg-[#FCF8F5] py-4 px-4 md:px-8 font-['Fredoka'] shadow-sm">
-      <div className="max-w-[1400px] mx-auto flex items-center justify-between gap-4 md:gap-8">
-        
-        {/* LOGO SECTION */}
-        <Link to="/" className="flex items-center gap-2 flex-shrink-0" aria-label="Warung Kopi home">
-          <Icon name="logo" className="w-10 h-10 text-[#886245]" />
-          <div className="flex flex-col leading-tight text-[#886245]">
-            <span className="text-xl md:text-2xl font-bold tracking-tight">Drinks</span>
-            <span className="text-xs md:text-sm font-medium">Warung Kopi</span>
-          </div>
+    <header className="site-header">
+      <div className="site-header__inner">
+        <Link to="/" className="brand-link brand-link--navbar" aria-label="Warung Kopi home">
+          {/* GAMBAR: Logo Navbar Kiri */}
+          <span className="brand-mark brand-mark--navbar" aria-hidden="true">
+            <span className="brand-mark__dot" />
+          </span>
+          <span className="brand-copy brand-copy--navbar">
+            <strong>Drinks</strong>
+            <span>Warung Kopi</span>
+          </span>
         </Link>
 
-        {/* SEARCH BAR SECTION (Berbentuk input agar bisa digunakan) */}
-        <div className="hidden md:flex flex-1 max-w-md relative">
-          <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400">
+        <Link to="/" state={{ focusSearch: true }} className="nav-searchbar" aria-label="Cari menu">
+          <span className="nav-searchbar__icon" aria-hidden="true">
             <Icon name="search" />
-          </div>
-          <input 
-            type="text" 
-            placeholder="Cari Menu" 
-            className="w-full bg-white border border-gray-200 rounded-full px-12 py-2.5 focus:ring-[#886245] focus:border-[#886245] outline-none text-gray-700 font-medium transition-all shadow-sm"
-          />
-        </div>
+          </span>
+          <span>Cari Menu</span>
+        </Link>
 
-        {/* NAVIGATION PILLS SECTION */}
-        <nav className="flex items-center gap-2 md:gap-3 overflow-x-auto no-scrollbar pb-1 md:pb-0" aria-label="Navigasi pengguna">
+        <nav className="nav-pills" aria-label="Navigasi pengguna">
           {navItems.map((item) => {
-            // Render sebagai Button jika tipe item adalah 'button'
             if (item.type === 'button') {
               return (
                 <button
                   key={item.label}
                   type="button"
-                  className={`${pillBaseStyle} ${inactiveStyle}`}
+                  className="nav-pill nav-pill--button"
                   onClick={() => handleInternalNav(item.state)}
                 >
-                  {item.label}
+                  <span className="nav-pill__icon" aria-hidden="true">
+                    <Icon name={item.icon} />
+                  </span>
+                  <span className="nav-pill__text">
+                    <strong>{item.label}</strong>
+                  </span>
                 </button>
-              );
+              )
             }
 
-            // Render sebagai NavLink jika tipe item adalah 'link'
             return (
               <NavLink
                 key={item.label}
                 to={item.to}
                 end={item.end}
                 state={item.state}
-                className={({ isActive }) => `${pillBaseStyle} ${isActive ? activeStyle : inactiveStyle}`}
+                className={({ isActive }) => `nav-pill ${isActive ? 'is-active' : ''}`}
               >
-                {item.label}
-                
-                {/* BADGE NOTIFIKASI ORANYE */}
-                {item.badge && (
-                  <span className="absolute -top-1.5 -right-1.5 bg-[#FF6B00] text-white text-[11px] md:text-xs font-bold w-5 h-5 md:w-6 md:h-6 flex items-center justify-center rounded-full border-2 border-[#FCF8F5]">
-                    {item.badge}
-                  </span>
-                )}
+                <span className="nav-pill__icon" aria-hidden="true">
+                  <Icon name={item.icon} />
+                </span>
+                <span className="nav-pill__text">
+                  <strong>{item.label}</strong>
+                </span>
               </NavLink>
-            );
+            )
           })}
         </nav>
 
-        {/* PROFILE ICON (Dipindah ke paling kanan menggunakan justify-between) */}
-        <Link 
-          to="/akun" 
-          className="flex items-center justify-center w-11 h-11 md:w-12 md:h-12 rounded-full bg-[#886245] text-white hover:opacity-85 transition-opacity flex-shrink-0 shadow-md" 
-          aria-label="Login / Akun"
-        >
-          <Icon name="user" className="w-6 h-6" />
+        <Link to="/akun" className="account-cta" aria-label="Login">
+          <span className="account-cta__icon" aria-hidden="true">
+            <Icon name="user" />
+          </span>
         </Link>
-
       </div>
     </header>
-  );
-};
+  )
+}
 
-export default CustomerNavbar;
+export default CustomerNavbar
