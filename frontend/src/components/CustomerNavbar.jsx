@@ -49,8 +49,6 @@ const CustomerNavbar = () => {
           <span className="brand-mark brand-mark--navbar brand-mark--placeholder" aria-hidden="true">
             <span className="brand-mark__placeholder">Logo</span>
           </span>
-          <span className="brand-copy brand-copy--navbar">
-          </span>
         </Link>
 
         <form className="customer-navbar__search" role="search" onSubmit={handleSearchSubmit}>
