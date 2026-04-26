@@ -1573,6 +1573,14 @@
   min-width: 0;
 }
 
+.customer-navbar__actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  min-width: 0;
+}
+
 .customer-navbar__pill {
   min-height: 50px;
   padding: 0 22px;
@@ -1624,12 +1632,24 @@
 .customer-navbar__pill--menu {
   cursor: pointer;
   user-select: none;
+  gap: 8px;
+}
+
+.customer-navbar__pill-icon {
+  width: 16px;
+  height: 16px;
+  display: inline-flex;
+  transition: transform 160ms ease;
 }
 
 .customer-navbar__menu-group[open] > .customer-navbar__pill--menu {
   background: var(--coffee-hover);
   color: #fff0e5;
   box-shadow: 0 10px 18px rgba(136, 98, 69, 0.26);
+}
+
+.customer-navbar__menu-group[open] .customer-navbar__pill-icon {
+  transform: rotate(180deg);
 }
 
 .customer-navbar__dropdown {
@@ -1666,15 +1686,49 @@
   color: var(--text-strong);
 }
 
+.customer-navbar__profile {
+  width: 50px;
+  height: 50px;
+  border-radius: 999px;
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  background: var(--coffee-hover);
+  color: #fff0e5;
+  border: 1px solid rgba(136, 98, 69, 0.18);
+  box-shadow: 0 8px 16px rgba(136, 98, 69, 0.22);
+  transition:
+    transform 160ms ease,
+    filter 160ms ease;
+}
+
+.customer-navbar__profile:hover {
+  transform: translateY(-1px);
+  filter: brightness(0.98);
+}
+
+.customer-navbar__profile-icon {
+  width: 20px;
+  height: 20px;
+  display: inline-flex;
+}
+
+.customer-navbar__profile-icon svg {
+  width: 100%;
+  height: 100%;
+  fill: currentColor;
+}
+
 @media (max-width: 1180px) {
   .customer-navbar__inner {
     width: min(100vw - 18px, 1860px);
     grid-template-columns: auto 1fr;
   }
 
-  .customer-navbar__nav {
+  .customer-navbar__actions {
     grid-column: 1 / -1;
     justify-content: flex-start;
+    flex-wrap: wrap;
   }
 }
 
@@ -1693,6 +1747,11 @@
 
   .customer-navbar__dropdown {
     min-width: 180px;
+  }
+
+  .customer-navbar__profile {
+    width: 46px;
+    height: 46px;
   }
 }
 
@@ -1713,6 +1772,10 @@
 
   .customer-navbar__dropdown {
     min-width: 160px;
+  }
+
+  .customer-navbar__actions {
+    gap: 10px;
   }
 }
 
