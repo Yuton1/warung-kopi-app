@@ -1,11 +1,12 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
+import { STORAGE_KEYS, readStoredValue } from '../data/customerStorage'
 
 const navItems = [
   { to: '/', end: true, label: 'Home', state: null, type: 'link' },
   { label: 'Menu', type: 'dropdown' },
-  { to: '/pesanan', label: 'Pesanan', state: null, type: 'link' },
-  { label: 'Keranjang', state: { scrollToCart: true }, type: 'button' },
+  { to: '/pesanan', label: 'Pesanan', state: null, type: 'link', badge: 'orders' },
+  { label: 'Keranjang', state: { scrollToCart: true }, type: 'button', badge: 'cart' },
 ]
 
 const menuDropdownItems = [
@@ -50,6 +51,30 @@ const Icon = ({ name }) => {
 const CustomerNavbar = () => {
   const navigate = useNavigate()
   const [searchValue, setSearchValue] = useState('')
+  const [counts, setCounts] = useState({ orders: 0, cart: 0 })
+
+  useEffect(() => {
+    const updateCounts = () => {
+      const cart = readStoredValue(STORAGE_KEYS.cart, [])
+      const history = readStoredValue(STORAGE_KEYS.history, [])
+      const preOrder = readStoredValue(STORAGE_KEYS.preorder, null)
+
+      setCounts({
+        cart: Array.isArray(cart) ? cart.reduce((total, item) => total + (Number(item.qty) || 0), 0) : 0,
+        orders: (Array.isArray(history) ? history.length : 0) + (preOrder ? 1 : 0),
+      })
+    }
+
+    updateCounts()
+
+    window.addEventListener('storage', updateCounts)
+    window.addEventListener('warungkopi-state-changed', updateCounts)
+
+    return () => {
+      window.removeEventListener('storage', updateCounts)
+      window.removeEventListener('warungkopi-state-changed', updateCounts)
+    }
+  }, [])
 
   const handleInternalNav = (state) => {
     navigate('/', { state })
@@ -84,8 +109,8 @@ const CustomerNavbar = () => {
     <header className="site-header">
       <div className="customer-navbar__inner">
         <Link to="/" className="brand-link brand-link--navbar" aria-label="Warung Kopi home">
-          <span className="brand-mark brand-mark--navbar brand-mark--placeholder" aria-hidden="true">
-            <span className="brand-mark__placeholder">Logo</span>
+          <span className="brand-mark brand-mark--navbar brand-mark--logo" aria-hidden="true">
+            <img className="brand-mark__image" src="/Logo_Warkop_Nav.png" alt="" />
           </span>
         </Link>
 
@@ -134,33 +159,43 @@ const CustomerNavbar = () => {
               }
 
               if (item.type === 'button') {
-                return (
-                  <button
-                    key={item.label}
-                    type="button"
-                    className="customer-navbar__pill customer-navbar__pill--button"
-                    onClick={() => handleInternalNav(item.state)}
-                  >
-                    {item.label}
-                  </button>
-                )
-              }
-
               return (
+                <button
+                  key={item.label}
+                  type="button"
+                  className="customer-navbar__pill customer-navbar__pill--button"
+                  onClick={() => handleInternalNav(item.state)}
+                >
+                  <span>{item.label}</span>
+                  {item.badge && counts[item.badge] > 0 ? (
+                    <span className="customer-navbar__badge" aria-label={`${counts[item.badge]} notifikasi`}>
+                      {counts[item.badge]}
+                    </span>
+                  ) : null}
+                </button>
+              )
+            }
+
+            return (
                 <NavLink
                   key={item.label}
                   to={item.to}
                   end={item.end}
-                  state={item.state}
-                  className={({ isActive }) =>
-                    `customer-navbar__pill ${isActive ? 'customer-navbar__pill--active' : ''}`
-                  }
-                >
-                  {item.label}
-                </NavLink>
-              )
-            })}
-          </nav>
+                state={item.state}
+                className={({ isActive }) =>
+                  `customer-navbar__pill ${isActive ? 'customer-navbar__pill--active' : ''}`
+                }
+              >
+                <span>{item.label}</span>
+                {item.badge && counts[item.badge] > 0 ? (
+                  <span className="customer-navbar__badge" aria-label={`${counts[item.badge]} notifikasi`}>
+                    {counts[item.badge]}
+                  </span>
+                ) : null}
+              </NavLink>
+            )
+          })}
+        </nav>
 
           <Link to="/akun" className="customer-navbar__profile" aria-label="Profile">
             <span className="customer-navbar__profile-icon" aria-hidden="true">

@@ -182,6 +182,8 @@ const MenuView = () => {
         orderNote,
       }),
     )
+
+    window.dispatchEvent(new Event('warungkopi-state-changed'))
   }, [cart, favorites, history, loyaltyPoints, subscription, preOrder, groupOrder, tableNumber, pickupTime, orderNote])
 
   const categories = useMemo(() => {

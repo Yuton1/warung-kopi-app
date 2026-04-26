@@ -1491,24 +1491,21 @@
   padding: 14px 0;
 }
 
-.brand-mark--placeholder {
-  width: 76px;
-  height: 50px;
-  border-radius: 16px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(255, 255, 255, 0.5);
-  border: 1px dashed rgba(136, 98, 69, 0.36);
+.brand-mark--logo {
+  width: 168px;
+  height: 48px;
+  padding: 0;
+  background: transparent;
   box-shadow: none;
-  color: rgba(107, 95, 84, 0.8);
+  border: 0;
+  overflow: hidden;
 }
 
-.brand-mark__placeholder {
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
+.brand-mark__image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
 }
 
 .customer-navbar__search {
@@ -1603,6 +1600,11 @@
     box-shadow 160ms ease;
 }
 
+.customer-navbar__pill > span:first-child {
+  display: inline-flex;
+  align-items: center;
+}
+
 .customer-navbar__pill:hover,
 .customer-navbar__pill--active {
   background: var(--coffee-hover);
@@ -1633,6 +1635,22 @@
   cursor: pointer;
   user-select: none;
   gap: 8px;
+}
+
+.customer-navbar__badge {
+  min-width: 18px;
+  height: 18px;
+  padding: 0 6px;
+  border-radius: 999px;
+  display: inline-grid;
+  place-items: center;
+  background: #ff6e00;
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  line-height: 1;
+  margin-left: 8px;
+  flex: none;
 }
 
 .customer-navbar__pill-icon {
@@ -1745,6 +1763,10 @@
     padding: 0 18px;
   }
 
+  .customer-navbar__badge {
+    margin-left: 6px;
+  }
+
   .customer-navbar__dropdown {
     min-width: 180px;
   }
@@ -1761,13 +1783,9 @@
     min-height: 44px;
   }
 
-  .brand-mark--placeholder {
-    width: 64px;
-    height: 44px;
-  }
-
-  .brand-mark__placeholder {
-    font-size: 0.66rem;
+  .brand-mark--logo {
+    width: 138px;
+    height: 40px;
   }
 
   .customer-navbar__dropdown {
