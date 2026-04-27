@@ -1,24 +1,24 @@
 import { formatRupiah } from '../utils/formatRupiah'
 
 const CartFloating = ({
-  cart = [],           
-  subtotal = 0,        
-  tableNumber = "",    
-  pickupTime = "",
-  orderNote = "",
-  preOrder,
-  loyaltyPoints,
-  onUpdateQuantity,
-  onRemoveItem,
-  onClearCart,
-  onTableNumberChange,
-  onPickupTimeChange,
-  onOrderNoteChange,
-  onSavePreOrder,
-  onCancelPreOrder,
-  onCheckout,
+  cart = [],        
+  subtotal = 0,     
+  tableNumber = "", 
+  pickupTime = "",  
+  orderNote = "",   
+  preOrder = null,
+  loyaltyPoints = 0,
+  onUpdateQuantity = () => {},
+  onRemoveItem = () => {},
+  onClearCart = () => {},
+  onTableNumberChange = () => {},
+  onPickupTimeChange = () => {},
+  onOrderNoteChange = () => {},
+  onSavePreOrder = () => {},
+  onCancelPreOrder = () => {},
+  onCheckout = () => {},
 }) => {
-  const cartCount = cart.reduce((total, item) => total + item.qty, 0)
+  const cartCount = cart.reduce((total, item) => total + (item.qty || 0), 0)
 
   return (
     <aside className="summary-panel" id="cart-panel">
