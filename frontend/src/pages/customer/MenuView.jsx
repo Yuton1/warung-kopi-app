@@ -16,12 +16,9 @@ const MenuView = () => {
   const [loadingMenu, setLoadingMenu] = useState(true);
   const [cart, setCart] = useState([]);
   const [favoriteIdSet, setFavoriteIdSet] = useState(new Set());
-  
-  const [preOrder, setPreOrder] = useState(null);
-  const [groupOrder, setGroupOrder] = useState(null);
-  const [subscription, setSubscription] = useState(null);
-
-  // Variabel Dummy untuk Analytics & Subscription (Wajib ada agar tidak error)
+  const [preOrder, setPreOrder] = useState({ date: "", time: "", items: [] });
+  const [groupOrder, setGroupOrder] = useState({ members: [], status: 'idle' });
+  const [subscription, setSubscription] = useState({ id: null });
   const subscriptionPlans = [
     { id: 1, name: "Bronze Plan", price: 50000 },
     { id: 2, name: "Silver Plan", price: 100000 }
