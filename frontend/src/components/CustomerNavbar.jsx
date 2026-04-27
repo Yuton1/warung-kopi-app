@@ -88,7 +88,8 @@ const CustomerNavbar = () => {
         <form 
           className="customer-navbar__search" 
           onSubmit={handleSearchSubmit}
-          style={{ flex: 1, margin: '0 30px', maxWidth: '600px' }}
+          style={{ flex: 1, marginLeft: '30px', marginRight: '10px', maxWidth: '850px'    // TINGKATKAN nilai ini (misal dari 600px ke 850px) agar lebih panjang ke kanan
+            }}
         >
           <div className="customer-navbar__search-container" style={{ position: 'relative', width: '100%' }}>
             <span style={{ position: 'absolute', left: '15px', top: '50%', transform: 'translateY(-50%)', width: '18px', height: '18px', color: '#94a3b8', pointerEvents: 'none' }}>
