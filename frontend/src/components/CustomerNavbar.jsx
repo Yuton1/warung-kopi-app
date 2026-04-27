@@ -21,7 +21,15 @@ const Icon = ({ name }) => {
     case 'search':
     default:
       return (
-        <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <svg
+          viewBox="0 0 24 24"
+          aria-hidden="true"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
           <path d="m20 20-4.2-4.2m1.2-4.8a6 6 0 1 1-12 0 6 6 0 0 1 12 0Z" />
         </svg>
       )
@@ -87,7 +95,9 @@ const CustomerNavbar = () => {
 
   const handleSearchSubmit = (event) => {
     event.preventDefault()
+
     const query = searchValue.trim()
+
     navigate('/', {
       state: {
         focusSearch: true,
@@ -97,27 +107,21 @@ const CustomerNavbar = () => {
   }
 
   return (
-    <header className="site-header sticky top-0 z-50 w-full bg-[#FCF8F5] py-4 px-4 md:px-8 shadow-sm">
-      {/* PERBAIKAN 1: Container utama disejajarkan rata ujung ke ujung (justify-between) */}
-      <div className="customer-navbar__inner max-w-[1400px] mx-auto flex items-center justify-between gap-6 md:gap-8">
-        
-        {/* PERBAIKAN 2: Wrapper logo diberi flex-shrink-0 agar tidak mengecil, lalu tag img diberi tinggi mutlak (h-12) */}
-        <Link to="/" className="brand-link brand-link--navbar flex-shrink-0" aria-label="Warung Kopi home">
+    <header className="site-header">
+      <div className="customer-navbar__inner">
+        <Link to="/" className="brand-link brand-link--navbar" aria-label="Warung Kopi home">
           <span className="brand-mark brand-mark--navbar brand-mark--logo" aria-hidden="true">
-            <img className="brand-mark__image h-10 md:h-14 w-auto object-contain block" src="/Logo_Warkop_Nav.png" alt="Logo Warung Kopi" />
+            <img className="brand-mark__image" src="/Logo_Warkop_Nav.png" alt="" />
           </span>
         </Link>
-
-        {/* PERBAIKAN 3: Form diberi flex-1 agar merentang penuh, dan max-w-2xl agar ada batas lebarnya */}
-        <form className="customer-navbar__search flex-1 max-w-2xl relative flex items-center" role="search" onSubmit={handleSearchSubmit}>
-          <button type="submit" className="customer-navbar__search-button absolute left-4 text-gray-400 hover:text-[#886245] transition-colors" aria-label="Cari menu">
-            <span className="customer-navbar__search-icon w-5 h-5 block" aria-hidden="true">
+        <form className="customer-navbar__search" role="search" onSubmit={handleSearchSubmit}>
+          <button type="submit" className="customer-navbar__search-button" aria-label="Cari menu">
+            <span className="customer-navbar__search-icon" aria-hidden="true">
               <Icon name="search" />
             </span>
           </button>
-          {/* Input diberi w-full dan padding kiri (pl-12) agar tidak menabrak icon */}
           <input
-            className="customer-navbar__search-input w-full bg-white border border-gray-200 rounded-full pl-12 pr-4 py-2.5 md:py-3 focus:ring-[#886245] focus:border-[#886245] outline-none text-gray-700 font-medium transition-all shadow-sm"
+            className="customer-navbar__search-input"
             type="search"
             placeholder="Cari menu"
             aria-label="Cari menu"
@@ -126,27 +130,24 @@ const CustomerNavbar = () => {
           />
         </form>
 
-        {/* PERBAIKAN 4: Kelompok tombol & profil ditaruh dalam flex container dengan gap */}
-        <div className="customer-navbar__actions flex items-center gap-3 shrink-0">
-          <nav className="customer-navbar__nav flex items-center gap-2" aria-label="Navigasi pengguna">
+        <div className="customer-navbar__actions">
+          <nav className="customer-navbar__nav" aria-label="Navigasi pengguna">
             {navItems.map((item) => {
-              
-              // DROPDOWN MENU
               if (item.type === 'dropdown') {
                 return (
-                  <details key={item.label} className="customer-navbar__menu-group relative">
-                    <summary className="customer-navbar__pill customer-navbar__pill--menu cursor-pointer flex items-center gap-1 list-none px-5 py-2.5 rounded-full font-semibold text-[#886245] bg-[#FFF0E5] hover:bg-[#886245] hover:text-white transition-all">
+                  <details key={item.label} className="customer-navbar__menu-group">
+                    <summary className="customer-navbar__pill customer-navbar__pill--menu">
                       <span>{item.label}</span>
-                      <span className="customer-navbar__pill-icon w-4 h-4 block" aria-hidden="true">
+                      <span className="customer-navbar__pill-icon" aria-hidden="true">
                         <Icon name="chevron-down" />
                       </span>
                     </summary>
-                    <div className="customer-navbar__dropdown absolute top-full mt-2 w-40 bg-white shadow-lg rounded-xl overflow-hidden flex flex-col z-10" role="menu" aria-label="Kategori menu">
+                    <div className="customer-navbar__dropdown" role="menu" aria-label="Kategori menu">
                       {menuDropdownItems.map((option) => (
                         <button
                           key={option.label}
                           type="button"
-                          className="customer-navbar__dropdown-item px-4 py-3 text-left hover:bg-[#FFF0E5] text-gray-700 hover:text-[#886245] transition-colors"
+                          className="customer-navbar__dropdown-item"
                           onClick={(event) => handleMenuSelect(event, option.category)}
                         >
                           {option.label}
@@ -157,18 +158,17 @@ const CustomerNavbar = () => {
                 )
               }
 
-              // BUTTON BIASA (Keranjang dll)
               if (item.type === 'button') {
                 return (
                   <button
                     key={item.label}
                     type="button"
-                    className="customer-navbar__pill customer-navbar__pill--button relative px-5 py-2.5 rounded-full font-semibold text-[#886245] bg-[#FFF0E5] hover:bg-[#886245] hover:text-white transition-all"
+                    className="customer-navbar__pill customer-navbar__pill--button"
                     onClick={() => handleInternalNav(item.state)}
                   >
                     <span>{item.label}</span>
                     {item.badge && counts[item.badge] > 0 ? (
-                      <span className="customer-navbar__badge absolute -top-1.5 -right-1.5 bg-[#FF6B00] text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full border-2 border-[#FCF8F5]" aria-label={`${counts[item.badge]} notifikasi`}>
+                      <span className="customer-navbar__badge" aria-label={`${counts[item.badge]} notifikasi`}>
                         {counts[item.badge]}
                       </span>
                     ) : null}
@@ -176,7 +176,6 @@ const CustomerNavbar = () => {
                 )
               }
 
-              // LINK (Home, Pesanan, dll)
               return (
                 <NavLink
                   key={item.label}
@@ -184,16 +183,12 @@ const CustomerNavbar = () => {
                   end={item.end}
                   state={item.state}
                   className={({ isActive }) =>
-                    `customer-navbar__pill relative px-5 py-2.5 rounded-full font-semibold transition-all ${
-                      isActive 
-                      ? 'customer-navbar__pill--active bg-[#886245] text-white shadow-md' 
-                      : 'bg-[#FFF0E5] text-[#886245] hover:bg-[#886245] hover:text-white'
-                    }`
+                    `customer-navbar__pill ${isActive ? 'customer-navbar__pill--active' : ''}`
                   }
                 >
                   <span>{item.label}</span>
                   {item.badge && counts[item.badge] > 0 ? (
-                    <span className="customer-navbar__badge absolute -top-1.5 -right-1.5 bg-[#FF6B00] text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full border-2 border-[#FCF8F5]" aria-label={`${counts[item.badge]} notifikasi`}>
+                    <span className="customer-navbar__badge" aria-label={`${counts[item.badge]} notifikasi`}>
                       {counts[item.badge]}
                     </span>
                   ) : null}
@@ -202,14 +197,12 @@ const CustomerNavbar = () => {
             })}
           </nav>
 
-          {/* PROFILE ICON */}
-          <Link to="/akun" className="customer-navbar__profile flex items-center justify-center w-11 h-11 rounded-full bg-[#886245] text-white hover:opacity-85 transition-opacity ml-2 shrink-0 shadow-md" aria-label="Profile">
-            <span className="customer-navbar__profile-icon w-6 h-6" aria-hidden="true">
+          <Link to="/akun" className="customer-navbar__profile" aria-label="Profile">
+            <span className="customer-navbar__profile-icon" aria-hidden="true">
               <Icon name="user" />
             </span>
           </Link>
         </div>
-
       </div>
     </header>
   )
