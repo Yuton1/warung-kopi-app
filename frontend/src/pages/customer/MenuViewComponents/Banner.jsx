@@ -1,6 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 // Misalkan kamu menggunakan axios atau fetch di services/api.js
 // import { getBanners } from '../../../services/api'; 
+
+const safeText = (value, fallback = '') => String(value ?? fallback);
+const shorten = (value, limit) => {
+  const text = safeText(value);
+  return text.length > limit ? `${text.slice(0, limit)}...` : text;
+};
 
 const Banner = () => {
   const [banners, setBanners] = useState([]);
@@ -41,16 +47,16 @@ const Banner = () => {
 
   // 2. Animasi Auto-Slide
   useEffect(() => {
-    if (banners.length > 0) {
+    if ((banners || []).length > 0) {
       const interval = setInterval(() => {
         setCurrentIndex((prev) => (prev + 1) % banners.length);
       }, 5000);
       return () => clearInterval(interval);
     }
-  }, [banners.length]);
+  }, [banners]);
 
   if (loading) return <div className="h-[250px] bg-gray-100 animate-pulse rounded-2xl" />;
-  if (banners.length === 0) return null;
+  if ((banners || []).length === 0) return null;
 
   return (
     <div className="relative w-full overflow-hidden rounded-2xl shadow-lg bg-[#F5F5F5]">
@@ -64,7 +70,7 @@ const Banner = () => {
             {/* Image dari Database */}
             <img 
               src={item.image_url} 
-              alt={item.title}
+              alt={safeText(item.title, 'Banner Warung Kopi')}
               className="w-full h-full object-cover"
             />
             
@@ -72,12 +78,12 @@ const Banner = () => {
             <div className="absolute inset-0 bg-gradient-to-r from-black/70 to-transparent flex flex-col justify-center px-10 text-white">
               {/* Batasan Judul 20 Huruf */}
               <h2 className="text-2xl md:text-4xl font-bold mb-2">
-                {item.title.length > 20 ? item.title.substring(0, 20) + "..." : item.title}
+                {shorten(item?.title, 20)}
               </h2>
               
               {/* Batasan Subjudul 50 Huruf */}
               <p className="text-sm md:text-lg mb-6 opacity-90 max-w-[50ch]">
-                {item.subtitle.length > 50 ? item.subtitle.substring(0, 50) + "..." : item.subtitle}
+                {shorten(item?.subtitle, 50)}
               </p>
               
               {/* Tombol Detail Dinamis */}

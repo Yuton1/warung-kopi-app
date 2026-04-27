@@ -1,4 +1,4 @@
-const Recommendations = ({ items }) => (
+const Recommendations = ({ items = [] }) => (
   <section className="panel panel--recommendation">
     <div className="section-head">
       <div>

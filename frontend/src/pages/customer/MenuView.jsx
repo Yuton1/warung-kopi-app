@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react'; // Tambahkan useRef
+import { useState, useEffect, useRef } from 'react'; // Tambahkan useRef
 import Banner from './MenuViewComponents/Banner';
 import PromoMingguan from './MenuViewComponents/PromoMingguan';
 import Recommendations from './MenuViewComponents/Recommendations';
@@ -17,7 +17,7 @@ const MenuView = () => {
   const [cart, setCart] = useState([]);
   const [favoriteIdSet, setFavoriteIdSet] = useState(new Set());
   const [preOrder, setPreOrder] = useState({ date: "", time: "", items: [] });
-  const [groupOrder, setGroupOrder] = useState({ members: [], status: 'idle' });
+  const [groupOrder, setGroupOrder] = useState({ members: 4, items: [], status: 'idle' });
   const [subscription, setSubscription] = useState({ id: null });
   const subscriptionPlans = [
     { id: 1, name: "Bronze Plan", price: 50000 },

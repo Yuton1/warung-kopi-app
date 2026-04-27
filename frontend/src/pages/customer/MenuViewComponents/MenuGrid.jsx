@@ -1,6 +1,6 @@
 import ProductCard from '../../../components/ProductCard';
 
-const MenuGrid = ({ menu, loading, favoriteIdSet, toggleFavorite, addToCart, addToGroup, menuRef }) => (
+const MenuGrid = ({ menu = [], loading, favoriteIdSet, toggleFavorite, addToCart, addToGroup, menuRef }) => (
   <section className="panel" id="menu-section" ref={menuRef}>
     <div className="section-head">
       <h2>{loading ? 'Memuat menu...' : 'Menu paling sering dipesan'}</h2>

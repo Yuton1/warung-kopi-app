@@ -1,4 +1,4 @@
-const GroupOrderSection = ({ groupOrder, hasCart, onUpdateMembers, onAddCart, onCopy, onConfirm }) => (
+const GroupOrderSection = ({ groupOrder = { members: 4, items: [] }, hasCart, onUpdateMembers, onAddCart, onConfirm }) => (
   <article className="tool-card">
     <span className="eyebrow">Group Order & Split Payment</span>
     <h3>Gabung pesanan bareng teman</h3>
@@ -14,7 +14,7 @@ const GroupOrderSection = ({ groupOrder, hasCart, onUpdateMembers, onAddCart, on
     </div>
     <div className="tool-card__actions">
       <button className="btn btn-primary" onClick={onAddCart} disabled={!hasCart}>Tambah ke Grup</button>
-      <button className="btn btn-secondary" onClick={onConfirm} disabled={!groupOrder.items.length}>Konfirmasi Pembayaran</button>
+      <button className="btn btn-secondary" onClick={onConfirm} disabled={!(groupOrder.items || []).length}>Konfirmasi Pembayaran</button>
     </div>
   </article>
 );
