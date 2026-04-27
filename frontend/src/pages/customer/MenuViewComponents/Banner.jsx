@@ -11,11 +11,6 @@ const Banner = () => {
   useEffect(() => {
     const fetchBanners = async () => {
       try {
-        // Ganti URL ini dengan endpoint API Laravel/Backend kamu
-        // const response = await getBanners(); 
-        // setBanners(response.data);
-
-        // Contoh dummy data yang strukturnya sesuai database
         const dummyData = [
           {
             id: 1,

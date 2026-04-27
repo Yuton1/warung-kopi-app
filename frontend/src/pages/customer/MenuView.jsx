@@ -7,7 +7,7 @@ import PreOrderSection from './MenuViewComponents/PreOrderSection';
 import GroupOrderSection from './MenuViewComponents/GroupOrderSection';
 import CoffeeSubscription from './MenuViewComponents/CoffeeSubscription';
 import AnalyticsDashboard from './MenuViewComponents/AnalyticsDashboard';
-import CartFloating from './MenuViewComponents/CartFloating'; // Pastikan diimport
+import CartFloating from '../../components/CartFloating';
 
 const MenuView = () => {
   // 1. State Management
