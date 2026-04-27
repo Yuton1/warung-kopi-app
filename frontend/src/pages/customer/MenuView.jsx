@@ -76,8 +76,8 @@ const MenuView = () => {
       </section>
 
       {/* 2. PROMO: Diberikan jarak atas-bawah yang luas (py-12) */}
-      <div className="w-full bg-white shadow-sm py-12 mb-10">
-        <div className="container mx-auto px-4">
+      <div className="container mx-auto px-4">
+        <div div className="py-16 mb-10 bg-white shadow-sm rounded-[2rem] px-8 mt-[-50px] relative z-10">
           <PromoMingguan />
         </div>
       </div>
@@ -106,7 +106,7 @@ const MenuView = () => {
 
           {/* FITUR SPESIAL SECTION: Dengan spacing antar card yang lega */}
           <section className="panel" id="tools">
-            <h2 className="text-3xl font-bold mb-8 text-[#4A3728] pl-2 border-l-4 border-[#FF6E00]">
+            <h2 className="text-3xl font-bold mb-10 text-[#4A3728] pl-4 border-l-4 border-[#FF6E00]">
               Fitur Spesial
             </h2>
             <div className="tools-grid grid grid-cols-1 md:grid-cols-2 gap-8"> {/* gap-8 antar card fitur */}
