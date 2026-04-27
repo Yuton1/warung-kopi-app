@@ -6,6 +6,7 @@ const navItems = [
   { to: '/', end: true, label: 'Home', state: null, type: 'link' },
   { label: 'Menu', type: 'dropdown' },
   { to: '/pesanan', label: 'Pesanan', state: null, type: 'link', badge: 'orders' },
+  { to: '/akun', label: 'Member', state: null, type: 'link' },
   { label: 'Keranjang', state: { scrollToCart: true }, type: 'button', badge: 'cart' },
 ]
 
