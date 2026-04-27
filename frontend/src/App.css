@@ -1485,15 +1485,15 @@
   width: min(1860px, calc(100vw - 22px));
   margin: 0 auto;
   display: grid;
-  grid-template-columns: auto minmax(220px, 0.72fr) auto;
+  grid-template-columns: auto minmax(360px, 1fr) auto;
   align-items: center;
   gap: 16px;
   padding: 14px 0;
 }
 
 .brand-mark--logo {
-  width: 230px;
-  height: 66px;
+  width: 150px;
+  height: 52px;
   padding: 0;
   background: transparent;
   box-shadow: none;
@@ -1510,13 +1510,13 @@
 
 .customer-navbar__search {
   min-width: 0;
-  width: min(100%, 260px);
+  width: min(100%, 460px);
   justify-self: center;
-  min-height: 44px;
+  min-height: 48px;
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 0 12px 0 8px;
+  gap: 10px;
+  padding: 0 14px 0 10px;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.96);
   border: 1px solid rgba(136, 98, 69, 0.14);
@@ -1524,8 +1524,8 @@
 }
 
 .customer-navbar__search-button {
-  width: 30px;
-  height: 30px;
+  width: 32px;
+  height: 32px;
   border: 0;
   border-radius: 999px;
   display: inline-grid;
@@ -1537,8 +1537,8 @@
 }
 
 .customer-navbar__search-icon {
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
   display: inline-flex;
 }
 
@@ -1556,7 +1556,7 @@
   background: transparent;
   color: var(--text-strong);
   font: inherit;
-  font-size: 0.95rem;
+  font-size: 1rem;
 }
 
 .customer-navbar__search-input::placeholder {
@@ -1582,8 +1582,8 @@
 }
 
 .customer-navbar__pill {
-  min-height: 44px;
-  padding: 0 18px;
+  min-height: 48px;
+  padding: 0 20px;
   border-radius: 999px;
   border: 1px solid rgba(136, 98, 69, 0.16);
   background: var(--nav-default);
@@ -1787,8 +1787,8 @@
   }
 
   .brand-mark--logo {
-    width: 170px;
-    height: 48px;
+    width: 128px;
+    height: 44px;
   }
 
   .customer-navbar__dropdown {

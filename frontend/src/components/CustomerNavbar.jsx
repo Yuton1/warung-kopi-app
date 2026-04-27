@@ -114,7 +114,6 @@ const CustomerNavbar = () => {
             <img className="brand-mark__image" src="/Logo_Warkop_Nav.png" alt="" />
           </span>
         </Link>
-
         <form className="customer-navbar__search" role="search" onSubmit={handleSearchSubmit}>
           <button type="submit" className="customer-navbar__search-button" aria-label="Cari menu">
             <span className="customer-navbar__search-icon" aria-hidden="true">
@@ -160,12 +159,32 @@ const CustomerNavbar = () => {
               }
 
               if (item.type === 'button') {
+                return (
+                  <button
+                    key={item.label}
+                    type="button"
+                    className="customer-navbar__pill customer-navbar__pill--button"
+                    onClick={() => handleInternalNav(item.state)}
+                  >
+                    <span>{item.label}</span>
+                    {item.badge && counts[item.badge] > 0 ? (
+                      <span className="customer-navbar__badge" aria-label={`${counts[item.badge]} notifikasi`}>
+                        {counts[item.badge]}
+                      </span>
+                    ) : null}
+                  </button>
+                )
+              }
+
               return (
-                <button
+                <NavLink
                   key={item.label}
-                  type="button"
-                  className="customer-navbar__pill customer-navbar__pill--button"
-                  onClick={() => handleInternalNav(item.state)}
+                  to={item.to}
+                  end={item.end}
+                  state={item.state}
+                  className={({ isActive }) =>
+                    `customer-navbar__pill ${isActive ? 'customer-navbar__pill--active' : ''}`
+                  }
                 >
                   <span>{item.label}</span>
                   {item.badge && counts[item.badge] > 0 ? (
@@ -173,30 +192,10 @@ const CustomerNavbar = () => {
                       {counts[item.badge]}
                     </span>
                   ) : null}
-                </button>
+                </NavLink>
               )
-            }
-
-            return (
-                <NavLink
-                  key={item.label}
-                  to={item.to}
-                  end={item.end}
-                state={item.state}
-                className={({ isActive }) =>
-                  `customer-navbar__pill ${isActive ? 'customer-navbar__pill--active' : ''}`
-                }
-              >
-                <span>{item.label}</span>
-                {item.badge && counts[item.badge] > 0 ? (
-                  <span className="customer-navbar__badge" aria-label={`${counts[item.badge]} notifikasi`}>
-                    {counts[item.badge]}
-                  </span>
-                ) : null}
-              </NavLink>
-            )
-          })}
-        </nav>
+            })}
+          </nav>
 
           <Link to="/akun" className="customer-navbar__profile" aria-label="Profile">
             <span className="customer-navbar__profile-icon" aria-hidden="true">
