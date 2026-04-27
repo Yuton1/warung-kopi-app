@@ -76,7 +76,7 @@ const CustomerNavbar = () => {
   }
 
   return (
-    <header className="site-header" style={{ backgroundColor: '#FFF6EB' }}>
+    <header className="site-header" style={{ backgroundColor: '#ffffff' }}>
       <div className="customer-navbar__inner">
         
         {/* LOGO */}

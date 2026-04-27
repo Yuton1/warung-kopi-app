@@ -6,6 +6,13 @@
   background-color: #ffffff;
 }
 
+.banner-floating-wrapper {
+  padding: 2px 2px 0 2px;
+  background-color: #ffffff; 
+  width: 100%;
+  box-sizing: border-box;
+}
+
 .banner-container {
   padding: 2px 2px 0 2px; /* Atas: 2px, Kanan: 2px, Bawah: 0, Kiri: 2px */
   width: 100%;
@@ -426,10 +433,9 @@
 }
 
 html, body {
-  background-color: #ffffff !important;
-  margin: 0;
-  padding: 0;
-  overflow-x: hidden;
+  max-width: 100%;
+  overflow-x: hidden; /* MEMPERBAIKI: Masalah web bergeser kanan-kiri */
+  background-color: #ffffff;
 }
 
 .product-card__meta,

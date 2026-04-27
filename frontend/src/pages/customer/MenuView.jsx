@@ -70,10 +70,11 @@ const MenuView = () => {
 
   return (
     <div className="page-shell min-h-screen pb-20">
-      <section className="relative w-full overflow-hidden rounded-2xl shadow-sm">
-        <Banner />
-      </section>
-
+      <div className="banner-floating-wrapper">
+        <section className="relative w-full overflow-hidden rounded-2xl shadow-sm">
+          <Banner />
+        </section>
+      </div>
       {/* 2. PROMO: Diberikan jarak atas-bawah yang luas (py-12) */}
       <div className="w-full bg-white shadow-sm py-12 mb-10">
         <div className="container mx-auto px-4">
