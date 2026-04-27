@@ -76,8 +76,8 @@ const MenuView = () => {
       </section>
 
       {/* 2. PROMO: Diberikan jarak atas-bawah yang luas (py-12) */}
-      <div className="container mx-auto px-4">
-        <div div className="py-16 mb-10 bg-white shadow-sm rounded-[2rem] px-8 mt-[-50px] relative z-10">
+      <div className="w-full bg-white shadow-sm py-12 mb-10">
+        <div className="container mx-auto px-4">
           <PromoMingguan />
         </div>
       </div>
