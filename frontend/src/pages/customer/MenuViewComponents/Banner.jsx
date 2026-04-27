@@ -53,18 +53,17 @@ const Banner = () => {
     }
   }, [banners]);
 
-  // UPDATE: Tinggi loading skeleton disamakan dan ditambah margin-bottom
-  if (loading) return <div className="w-full h-[300px] md:h-[450px] bg-gray-100 animate-pulse rounded-3xl mb-12" />;
+  // UPDATE: Aspect ratio disesuaikan ke 720/300
+  if (loading) return <div className="w-full aspect-[720/300] bg-gray-100 animate-pulse rounded-3xl mb-12" />;
   if ((banners || []).length === 0) return null;
 
   return (
-    // UPDATE: Menambahkan mb-12 untuk memberikan space (jarak) dengan fitur/komponen di bawahnya
     <div className="relative w-full overflow-hidden rounded-3xl shadow-lg bg-[#F5F5F5] mb-12">
       
       {/* Container Slides */}
       <div 
-        // UPDATE: Mengubah h-[250px] md:h-[350px] menjadi h-[300px] md:h-[450px] agar lebih besar ke bawah
-        className="flex transition-transform duration-700 ease-in-out h-[300px] md:h-[450px] lg:h-[500px]"
+        // UPDATE: Menggunakan aspect-[720/300] agar ukuran gambar selalu sesuai format design (720x300)
+        className="flex transition-transform duration-700 ease-in-out w-full aspect-[720/300]"
         style={{ transform: `translateX(-${currentIndex * 100}%)` }}
       >
         {banners.map((item) => (
@@ -76,17 +75,15 @@ const Banner = () => {
               className="w-full h-full object-cover"
             />
             
-            {/* Overlay Konten - Gradient dipertebal sedikit di bagian bawah agar teks tetap terbaca jika gambar terang */}
+            {/* Overlay Konten */}
             <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent flex flex-col justify-between p-8 md:p-14 text-white">
               
               {/* Teks Bagian Atas */}
               <div className="mt-4 md:mt-8">
-                {/* Subtitle sebagai Eyebrow text */}
                 <p className="text-sm md:text-base mb-2 opacity-90 font-light tracking-wider">
                   {shorten(item?.subtitle, 50)}
                 </p>
                 
-                {/* Title utama */}
                 <h2 className="text-3xl md:text-5xl lg:text-6xl font-bold tracking-wide">
                   {shorten(item?.title, 20)}
                 </h2>
@@ -115,8 +112,8 @@ const Banner = () => {
             aria-label={`Pindah ke slide ${index + 1}`}
             className={`h-2 rounded-full transition-all duration-300 ${
               currentIndex === index 
-                ? "bg-white w-12" // Garis panjang
-                : "bg-white/50 w-2.5 hover:bg-white/80" // Titik pendek
+                ? "bg-white w-12" 
+                : "bg-white/50 w-2.5 hover:bg-white/80"
             }`}
           />
         ))}
