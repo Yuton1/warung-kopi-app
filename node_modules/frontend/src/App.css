@@ -3,6 +3,9 @@
   width: 100% !important; /* Gunakan 100% agar tidak ada celah samping */
   margin: 0 !important;
   padding: 0 !important;
+  padding-top: 0 !important; /* Paksa ke 0 */
+  padding-left: 0 !important;
+  padding-right: 0 !important;
   background-color: #ffffff;
 }
 
@@ -919,8 +922,8 @@ html, body {
 
 @media (max-width: 640px) {
   .page-shell {
-    width: 100%;
-    padding-top: 0;
+    width: 100% !important;
+    padding-top: 0 !important;
   }
 
   .hero-card,
@@ -2257,10 +2260,16 @@ html, body {
   position: sticky;
   top: 0;
   z-index: 30;
-  background: rgba(255, 240, 229, 0.98);
-  border-bottom: 1px solid rgba(136, 98, 69, 0.12);
-  box-shadow: 0 8px 24px rgba(44, 27, 14, 0.08);
+  /* GANTI: Gunakan putih solid agar menyatu dengan background baru */
+  background: #ffffff !important; 
+  /* GANTI: Hapus border-bottom agar tidak ada garis pemisah yang terlihat seperti celah */
+  border-bottom: none !important; 
+  /* GANTI: Shadow diperhalus agar efek mengambang banner lebih fokus */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   backdrop-filter: blur(18px);
+  /* TETAP: Memastikan tidak ada ruang di bawah navbar */
+  margin-bottom: 0 !important;
+  padding-bottom: 0 !important;
 }
 
 .site-header__inner {
