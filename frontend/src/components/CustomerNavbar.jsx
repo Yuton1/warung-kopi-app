@@ -19,18 +19,11 @@ const menuDropdownItems = [
 const Icon = ({ name }) => {
   switch (name) {
     case 'search':
-    default:
       return (
-        <svg
-          viewBox="0 0 24 24"
-          aria-hidden="true"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <path d="m20 20-4.2-4.2m1.2-4.8a6 6 0 1 1-12 0 6 6 0 0 1 12 0Z" />
+        // Icon Search yang lebih modern dan ramping
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
         </svg>
       )
     case 'chevron-down':
@@ -46,6 +39,8 @@ const Icon = ({ name }) => {
           <circle cx="12" cy="8" r="4" />
         </svg>
       )
+    default:
+      return null
   }
 }
 
@@ -67,7 +62,6 @@ const CustomerNavbar = () => {
     }
 
     updateCounts()
-
     window.addEventListener('storage', updateCounts)
     window.addEventListener('warungkopi-state-changed', updateCounts)
 
@@ -83,88 +77,95 @@ const CustomerNavbar = () => {
 
   const handleMenuSelect = (event, category) => {
     event.currentTarget.closest('details')?.removeAttribute('open')
-
-    navigate('/', {
-      state: {
-        focusMenu: true,
-        category,
-        searchQuery: '',
-      },
-    })
+    navigate('/', { state: { focusMenu: true, category, searchQuery: '' } })
   }
 
   const handleSearchSubmit = (event) => {
     event.preventDefault()
-
     const query = searchValue.trim()
-
-    navigate('/', {
-      state: {
-        focusSearch: true,
-        searchQuery: query,
-      },
-    })
+    navigate('/', { state: { focusSearch: true, searchQuery: query } })
   }
 
   return (
     <header className="site-header">
-      <div className="customer-navbar__inner">
-        {/* PERBAIKAN: Menambahkan inline style untuk override constraint 48x48 */}
+      <div className="customer-navbar__inner" style={{ display: 'flex', alignItems: 'center', gap: '20px', padding: '0 20px' }}>
+        
+        {/* LOGO SECTION */}
         <Link 
           to="/" 
           className="brand-link brand-link--navbar" 
-          aria-label="Warung Kopi home"
-          style={{ width: 'auto', height: '48px', display: 'flex', alignItems: 'center', textDecoration: 'none' }}
+          style={{ width: 'auto', height: '50px', display: 'flex', alignItems: 'center', flexShrink: 0 }}
         >
-          <span 
-            className="brand-mark brand-mark--navbar brand-mark--logo" 
-            aria-hidden="true"
-            style={{ width: 'auto', height: '100%', display: 'flex' }}
-          >
+          <span className="brand-mark brand-mark--navbar brand-mark--logo" style={{ width: 'auto', height: '100%' }}>
             <img 
               className="brand-mark__image" 
               src="/Logo_Warkop_Nav.png" 
-              alt="Warung Kopi" 
-              style={{ height: '100%', width: 'auto', objectFit: 'contain' }}
+              alt="Logo" 
+              style={{ height: '100%', width: 'auto', objectFit: 'contain' }} 
             />
           </span>
         </Link>
-        <form className="customer-navbar__search" role="search" onSubmit={handleSearchSubmit}>
-          <button type="submit" className="customer-navbar__search-button" aria-label="Cari menu">
-            <span className="customer-navbar__search-icon" aria-hidden="true">
-              <Icon name="search" />
-            </span>
+
+        {/* SEARCH SECTION - Dibuat melebar dengan flex: 1 */}
+        <form 
+          className="customer-navbar__search" 
+          onSubmit={handleSearchSubmit}
+          style={{ 
+            flex: 1, 
+            display: 'flex', 
+            alignItems: 'center', 
+            position: 'relative',
+            maxWidth: '600px' // Kamu bisa sesuaikan batas maksimal lebarnya di sini
+          }}
+        >
+          <button 
+            type="submit" 
+            style={{ 
+              position: 'absolute', 
+              left: '15px', 
+              background: 'none', 
+              border: 'none', 
+              width: '20px', 
+              height: '20px',
+              color: '#886245',
+              cursor: 'pointer',
+              padding: 0,
+              display: 'flex',
+              alignItems: 'center'
+            }}
+          >
+            <Icon name="search" />
           </button>
           <input
             className="customer-navbar__search-input"
             type="search"
-            placeholder="Cari menu"
-            aria-label="Cari menu"
+            placeholder="Cari menu..."
             value={searchValue}
-            onChange={(event) => setSearchValue(event.target.value)}
+            onChange={(e) => setSearchValue(e.target.value)}
+            style={{ 
+              width: '100%', 
+              padding: '10px 15px 10px 45px', 
+              borderRadius: '25px', 
+              border: '1px solid #e2e8f0',
+              outline: 'none'
+            }}
           />
         </form>
 
-        <div className="customer-navbar__actions">
-          <nav className="customer-navbar__nav" aria-label="Navigasi pengguna">
+        {/* ACTIONS SECTION */}
+        <div className="customer-navbar__actions" style={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
+          <nav className="customer-navbar__nav" style={{ display: 'flex', gap: '10px' }}>
             {navItems.map((item) => {
               if (item.type === 'dropdown') {
                 return (
                   <details key={item.label} className="customer-navbar__menu-group">
                     <summary className="customer-navbar__pill customer-navbar__pill--menu">
                       <span>{item.label}</span>
-                      <span className="customer-navbar__pill-icon" aria-hidden="true">
-                        <Icon name="chevron-down" />
-                      </span>
+                      <span className="customer-navbar__pill-icon"><Icon name="chevron-down" /></span>
                     </summary>
-                    <div className="customer-navbar__dropdown" role="menu" aria-label="Kategori menu">
+                    <div className="customer-navbar__dropdown">
                       {menuDropdownItems.map((option) => (
-                        <button
-                          key={option.label}
-                          type="button"
-                          className="customer-navbar__dropdown-item"
-                          onClick={(event) => handleMenuSelect(event, option.category)}
-                        >
+                        <button key={option.label} onClick={(e) => handleMenuSelect(e, option.category)}>
                           {option.label}
                         </button>
                       ))}
@@ -175,47 +176,24 @@ const CustomerNavbar = () => {
 
               if (item.type === 'button') {
                 return (
-                  <button
-                    key={item.label}
-                    type="button"
-                    className="customer-navbar__pill customer-navbar__pill--button"
-                    onClick={() => handleInternalNav(item.state)}
-                  >
+                  <button key={item.label} className="customer-navbar__pill customer-navbar__pill--button" onClick={() => handleInternalNav(item.state)}>
                     <span>{item.label}</span>
-                    {item.badge && counts[item.badge] > 0 ? (
-                      <span className="customer-navbar__badge" aria-label={`${counts[item.badge]} notifikasi`}>
-                        {counts[item.badge]}
-                      </span>
-                    ) : null}
+                    {item.badge && counts[item.badge] > 0 && <span className="customer-navbar__badge">{counts[item.badge]}</span>}
                   </button>
                 )
               }
 
               return (
-                <NavLink
-                  key={item.label}
-                  to={item.to}
-                  end={item.end}
-                  state={item.state}
-                  className={({ isActive }) =>
-                    `customer-navbar__pill ${isActive ? 'customer-navbar__pill--active' : ''}`
-                  }
-                >
+                <NavLink key={item.label} to={item.to} end={item.end} className={({ isActive }) => `customer-navbar__pill ${isActive ? 'customer-navbar__pill--active' : ''}`}>
                   <span>{item.label}</span>
-                  {item.badge && counts[item.badge] > 0 ? (
-                    <span className="customer-navbar__badge" aria-label={`${counts[item.badge]} notifikasi`}>
-                      {counts[item.badge]}
-                    </span>
-                  ) : null}
+                  {item.badge && counts[item.badge] > 0 && <span className="customer-navbar__badge">{counts[item.badge]}</span>}
                 </NavLink>
               )
             })}
           </nav>
 
-          <Link to="/akun" className="customer-navbar__profile" aria-label="Profile">
-            <span className="customer-navbar__profile-icon" aria-hidden="true">
-              <Icon name="user" />
-            </span>
+          <Link to="/akun" className="customer-navbar__profile" style={{ marginLeft: '15px' }}>
+            <span className="customer-navbar__profile-icon"><Icon name="user" /></span>
           </Link>
         </div>
       </div>
