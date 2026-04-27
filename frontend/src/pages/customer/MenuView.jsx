@@ -119,9 +119,17 @@ const MenuView = () => {
             </div>
           </section>
         </main>
-        
         <aside className="sidebar-column w-full lg:w-80">
-             <CartFloating items={cart} />
+            <CartFloating 
+                cart={cart || []} 
+                subtotal={cart.reduce((acc, item) => acc + (item.price * (item.qty || 1)), 0)}
+                preOrder={preOrder}
+                // Tambahkan handler kosong agar input tidak error saat diketik
+                onTableNumberChange={(val) => console.log(val)} 
+                onPickupTimeChange={(val) => console.log(val)}
+                onOrderNoteChange={(val) => console.log(val)}
+                onClearCart={() => setCart([])}
+            />
         </aside>
       </section>
     </div>

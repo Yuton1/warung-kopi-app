@@ -1,6 +1,11 @@
 import { formatRupiah } from '../utils/formatRupiah'
 
 const CartFloating = ({
+  cart = [],           
+  subtotal = 0,        
+  tableNumber = "",    
+  pickupTime = "",
+  orderNote = "",
   cart,
   subtotal,
   tableNumber,
