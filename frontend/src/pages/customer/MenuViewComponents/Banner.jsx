@@ -1,6 +1,4 @@
 import { useState, useEffect } from 'react';
-// Misalkan kamu menggunakan axios atau fetch di services/api.js
-// import { getBanners } from '../../../services/api'; 
 
 const safeText = (value, fallback = '') => String(value ?? fallback);
 const shorten = (value, limit) => {
@@ -13,22 +11,22 @@ const Banner = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(true);
 
-  // 1. Fetch Data dari Database/API
+  // 1. Fetch Data
   useEffect(() => {
     const fetchBanners = async () => {
       try {
         const dummyData = [
           {
             id: 1,
-            title: "Promo Kopi Susu",
-            subtitle: "Beli 1 gratis 1 khusus hari Senin pagi.",
+            title: "Promo Mingguan",
+            subtitle: "Jangan Sampai Kelewatan", // Diubah menjadi teks kecil di atas
             image_url: "https://images.unsplash.com/photo-1509042239860-f550ce710b93",
             target_url: "/menu"
           },
           {
             id: 2,
             title: "Voucher Member",
-            subtitle: "Kumpulkan 10 poin untuk diskon 50%.",
+            subtitle: "Kumpulkan Poin Sekarang",
             image_url: "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085",
             target_url: "/akun"
           }
@@ -55,18 +53,18 @@ const Banner = () => {
     }
   }, [banners]);
 
-  if (loading) return <div className="h-[250px] bg-gray-100 animate-pulse rounded-2xl" />;
+  if (loading) return <div className="h-[250px] md:h-[350px] bg-gray-100 animate-pulse rounded-3xl" />;
   if ((banners || []).length === 0) return null;
 
   return (
-    <div className="relative w-full overflow-hidden rounded-2xl shadow-lg bg-[#F5F5F5]">
+    <div className="relative w-full overflow-hidden rounded-3xl shadow-lg bg-[#F5F5F5]">
       {/* Container Slides */}
       <div 
-        className="flex transition-transform duration-700 ease-in-out"
+        className="flex transition-transform duration-700 ease-in-out h-[250px] md:h-[350px]"
         style={{ transform: `translateX(-${currentIndex * 100}%)` }}
       >
         {banners.map((item) => (
-          <div key={item.id} className="min-w-full relative h-[250px] md:h-[350px]">
+          <div key={item.id} className="min-w-full relative h-full">
             {/* Image dari Database */}
             <img 
               src={item.image_url} 
@@ -74,38 +72,47 @@ const Banner = () => {
               className="w-full h-full object-cover"
             />
             
-            {/* Overlay Konten */}
-            <div className="absolute inset-0 bg-gradient-to-r from-black/70 to-transparent flex flex-col justify-center px-10 text-white">
-              {/* Batasan Judul 20 Huruf */}
-              <h2 className="text-2xl md:text-4xl font-bold mb-2">
-                {shorten(item?.title, 20)}
-              </h2>
+            {/* Overlay Konten - Menggunakan gradient yang lebih soft */}
+            <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/30 to-transparent flex flex-col justify-between p-6 md:p-10 text-white">
               
-              {/* Batasan Subjudul 50 Huruf */}
-              <p className="text-sm md:text-lg mb-6 opacity-90 max-w-[50ch]">
-                {shorten(item?.subtitle, 50)}
-              </p>
+              {/* Teks Bagian Atas */}
+              <div className="mt-2 md:mt-4">
+                {/* Subtitle sebagai Eyebrow text */}
+                <p className="text-xs md:text-sm mb-1 opacity-90 font-light tracking-wide">
+                  {shorten(item?.subtitle, 50)}
+                </p>
+                
+                {/* Title utama */}
+                <h2 className="text-2xl md:text-4xl font-bold tracking-wide">
+                  {shorten(item?.title, 20)}
+                </h2>
+              </div>
               
-              {/* Tombol Detail Dinamis */}
-              <a 
-                href={item.target_url}
-                className="bg-[#D17842] hover:bg-[#B65E2D] text-white font-semibold py-2 px-6 rounded-lg w-fit transition-all"
-              >
-                Detail
-              </a>
+              {/* Tombol Detail di Kiri Bawah */}
+              <div className="mb-6 md:mb-2">
+                <a 
+                  href={item.target_url}
+                  className="bg-[#FF6E00] hover:bg-[#e66300] text-white text-sm md:text-base font-medium py-2 px-8 rounded-full w-fit transition-all shadow-md inline-block"
+                >
+                  Detail
+                </a>
+              </div>
             </div>
           </div>
         ))}
       </div>
 
-      {/* Indikator Dots */}
-      <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
+      {/* Indikator Garis & Titik di Bawah Tengah */}
+      <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex items-center space-x-2">
         {banners.map((_, index) => (
           <button
             key={index}
             onClick={() => setCurrentIndex(index)}
-            className={`w-2 h-2 rounded-full transition-all ${
-              currentIndex === index ? "bg-white w-4" : "bg-white/40"
+            aria-label={`Pindah ke slide ${index + 1}`}
+            className={`h-1.5 rounded-full transition-all duration-300 ${
+              currentIndex === index 
+                ? "bg-white w-10" // Garis panjang untuk yang aktif
+                : "bg-white/50 w-2 hover:bg-white/80" // Titik pendek untuk yang tidak aktif
             }`}
           />
         ))}
