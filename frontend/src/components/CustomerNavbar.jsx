@@ -109,9 +109,24 @@ const CustomerNavbar = () => {
   return (
     <header className="site-header">
       <div className="customer-navbar__inner">
-        <Link to="/" className="brand-link brand-link--navbar" aria-label="Warung Kopi home">
-          <span className="brand-mark brand-mark--navbar brand-mark--logo" aria-hidden="true">
-            <img className="brand-mark__image" src="/Logo_Warkop_Nav.png" alt="" />
+        {/* PERBAIKAN: Menambahkan inline style untuk override constraint 48x48 */}
+        <Link 
+          to="/" 
+          className="brand-link brand-link--navbar" 
+          aria-label="Warung Kopi home"
+          style={{ width: 'auto', height: '48px', display: 'flex', alignItems: 'center', textDecoration: 'none' }}
+        >
+          <span 
+            className="brand-mark brand-mark--navbar brand-mark--logo" 
+            aria-hidden="true"
+            style={{ width: 'auto', height: '100%', display: 'flex' }}
+          >
+            <img 
+              className="brand-mark__image" 
+              src="/Logo_Warkop_Nav.png" 
+              alt="Warung Kopi" 
+              style={{ height: '100%', width: 'auto', objectFit: 'contain' }}
+            />
           </span>
         </Link>
         <form className="customer-navbar__search" role="search" onSubmit={handleSearchSubmit}>
