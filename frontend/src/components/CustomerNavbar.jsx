@@ -88,7 +88,7 @@ const CustomerNavbar = () => {
         <form 
           className="customer-navbar__search" 
           onSubmit={handleSearchSubmit}
-          style={{ flex: 1, marginLeft: '30px', marginRight: '5px', maxWidth: '900px'
+          style={{ flex: 1, marginLeft: '80px', marginRight: '80px', maxWidth: '900px'
             }}
         >
           <div className="customer-navbar__search-container" style={{ position: 'relative', width: '100%' }}>
