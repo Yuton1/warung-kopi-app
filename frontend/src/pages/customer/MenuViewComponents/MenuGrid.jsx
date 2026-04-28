@@ -11,8 +11,8 @@ const MenuGrid = ({
   menuRef 
 }) => {
   return (
-    <section className="w-full bg-[#f8f5f2] py-12 px-6" id="menu-section" ref={menuRef}>
-      <div className="max-w-7xl mx-auto">
+    <section className="w-full py-12 px-4 md:px-8 lg:px-12" id="menu-section" ref={menuRef}>
+      <div className="w-full">
         {/* Header Section */}
         <div className="mb-10 text-center md:text-left">
           <span className="text-[12px] font-medium text-gray-400 uppercase tracking-[0.2em] block mb-2">
@@ -24,7 +24,7 @@ const MenuGrid = ({
         </div>
 
         {/* Grid Layout - 3 Kolom sesuai referensi gambar */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
           {!loading && menu.map((product) => (
             <ProductCard
               key={product.id}

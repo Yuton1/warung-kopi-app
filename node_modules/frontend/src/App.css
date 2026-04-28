@@ -2263,14 +2263,10 @@ html, body {
   position: sticky;
   top: 0;
   z-index: 30;
-  /* GANTI: Gunakan putih solid agar menyatu dengan background baru */
   background: #ffffff !important; 
-  /* GANTI: Hapus border-bottom agar tidak ada garis pemisah yang terlihat seperti celah */
   border-bottom: none !important; 
-  /* GANTI: Shadow diperhalus agar efek mengambang banner lebih fokus */
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   backdrop-filter: blur(18px);
-  /* TETAP: Memastikan tidak ada ruang di bawah navbar */
   margin-bottom: 0 !important;
   padding-bottom: 0 !important;
 }
