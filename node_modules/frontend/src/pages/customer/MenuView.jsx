@@ -41,7 +41,12 @@ const MenuView = () => {
         setDisplayedMenu([
            { id: 1, name: "Espresso", price: 15000, category: "Coffee" },
            { id: 2, name: "Latte", price: 25000, category: "Coffee" },
-           { id: 3, name: "Cappuccino", price: 30000, category: "Coffee" }
+           { id: 3, name: "Cappuccino", price: 30000, category: "Coffee" },
+           { id: 4, name: "Americano", price: 20000, category: "Coffee", initials: "AM", points: 12 },
+           { id: 5, name: "Mocha", price: 32000, category: "Coffee", initials: "MC", points: 22 },
+           { id: 6, name: "Flat White", price: 28000, category: "Coffee", initials: "FW", points: 18 },
+           { id: 7, name: "Macchiato", price: 22000, category: "Coffee", initials: "MA", points: 14 },
+           { id: 8, name: "Affogato", price: 35000, category: "Coffee", initials: "AF", points: 25 }
         ]);
         setLoadingMenu(false);
       } catch (error) {

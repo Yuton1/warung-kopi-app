@@ -44,7 +44,7 @@ const PromoMingguan = () => {
     <section className="promo-banner">
       {heroPromo && (
         <div className="promo-banner__copy">
-          <span className="eyebrow">Promo Minggu Ini</span>
+          <span className="eyebrow text-4xl">Promo Minggu Ini</span>
           <h2>{heroPromo.title}</h2>
           <p>{heroPromo.description}</p>
           <div className="promo-banner__actions">
