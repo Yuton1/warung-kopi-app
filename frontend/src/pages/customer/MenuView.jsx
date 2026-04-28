@@ -73,24 +73,21 @@ const MenuView = () => {
       <div className="banner-wrapper-floating">
         <Banner />
       </div>
-      {/* 2. PROMO: Diberikan jarak atas-bawah yang luas (py-12) */}
       <div className="w-full bg-white shadow-sm py-12 mb-10">
-        <div className="container mx-auto px-4">
+        <div className="w-full px-6 lg:px-12">
           <PromoMingguan />
         </div>
       </div>
 
       {/* 3. MAIN CONTENT: Layout Grid Utama */}
-      <section className="w-full px-6 lg:px-12 flex flex-col gap-10">
+      <section className="w-full flex flex-col gap-10">
         <main className="w-full flex flex-col gap-16">
-          
-          {/* Recommendations Section */}
-          <section>
+          <section className="px-6 lg:px-12">
             <Recommendations items={recommendations} />
           </section>
           
           {/* Menu Grid Section */}
-          <section className="bg-white p-6 rounded-3xl shadow-sm">
+          <section className="w-full px-6 lg:px-12">
             <MenuGrid 
               menu={displayedMenu} 
               loading={loadingMenu}
@@ -103,11 +100,11 @@ const MenuView = () => {
           </section>
 
           {/* FITUR SPESIAL SECTION: Dengan spacing antar card yang lega */}
-          <section className="panel" id="tools">
+          <section className="panel px-6 lg:px-12 pb-20" id="tools">
             <h2 className="text-3xl font-bold mb-10 text-[#4A3728] pl-4 border-l-4 border-[#FF6E00]">
               Fitur Spesial
             </h2>
-            <div className="tools-grid grid grid-cols-1 md:grid-cols-2 gap-8"> {/* gap-8 antar card fitur */}
+            <div className="tools-grid grid grid-cols-1 md:grid-cols-2 gap-8">
                <div className="transition-transform hover:scale-[1.02]">
                 <PreOrderSection 
                    hasCart={cart.length > 0} 
