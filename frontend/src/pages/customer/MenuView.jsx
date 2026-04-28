@@ -145,21 +145,6 @@ const MenuView = () => {
             </div>
           </section>
         </main>
-
-        {/* SIDEBAR: Sticky agar tetap terlihat saat scroll */}
-        <aside className="sidebar-column w-full lg:w-96">
-          <div className="sticky top-10">
-            <CartFloating 
-                cart={cart || []} 
-                subtotal={cart.reduce((acc, item) => acc + (item.price * (item.qty || 1)), 0)}
-                preOrder={preOrder}
-                onTableNumberChange={(val) => console.log(val)} 
-                onPickupTimeChange={(val) => console.log(val)}
-                onOrderNoteChange={(val) => console.log(val)}
-                onClearCart={() => setCart([])}
-            />
-          </div>
-        </aside>
       </section>
     </div>
   );
