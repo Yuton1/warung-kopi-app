@@ -67,9 +67,9 @@ const Banner = () => {
           <div key={item.id} className="min-w-full relative h-full">
             {/* Image dari Database */}
             <img 
-              src={src} 
+              src={item?.image_url} 
               className="w-full h-full object-cover" 
-              alt="Banner" 
+              alt={shorten(item?.title, 30)} 
             />
             
             {/* Overlay Konten */}
