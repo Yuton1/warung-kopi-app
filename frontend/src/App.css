@@ -438,7 +438,7 @@
 html, body {
   max-width: 100%;
   overflow-x: hidden; /* MEMPERBAIKI: Masalah web bergeser kanan-kiri */
-  background-color: #ffffff;
+  background-color: #ffffff !important;
 }
 
 .product-card__meta,
@@ -953,16 +953,21 @@ html, body {
 
 .app-main {
   position: relative;
+  padding-top: 0 !important;
+  margin-top: 0 !important;
   z-index: 1;
-  width: 100%;
+  width: 100% !important;
   margin: 0 auto;
   padding: 0;
+  max-width: 100% !important;
 }
 
 .content-container {
-  width: min(1440px, calc(100vw - 32px));
+  width: 100% !important;
   margin: 0 auto;
-  padding: 24px 0 72px;
+  padding-top: 0 !important;
+  margin-top: 0 !important;
+  max-width: 100% !important;
 }
 
 @media (max-width: 1180px) {
@@ -971,13 +976,11 @@ html, body {
   }
 }
 
-.site-header {
-  position: sticky;
-  top: 0;
-  z-index: 20;
-  backdrop-filter: blur(20px);
-  background: rgba(255, 248, 240, 0.78);
-  border-bottom: 1px solid rgba(84, 56, 35, 0.12);
+.banner-wrapper-floating {
+  padding: 2px 2px 0 2px !important;
+  background-color: #ffffff;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .site-header__inner {
@@ -2470,4 +2473,20 @@ html, body {
   .nav-pill--button {
     white-space: nowrap;
   }
+}
+
+/* Menghilangkan semua potensi jarak antara Navbar dan Banner */
+.app-main, 
+.content-container, 
+.page-shell {
+  padding-top: 0 !important;
+  margin-top: 0 !important;
+}
+
+/* Memastikan banner menempel (dengan jarak 2px yang Anda inginkan) */
+.banner-floating-wrapper, 
+.banner-container, 
+.floating-banner-wrapper {
+  margin-top: 0 !important;
+  padding-top: 2px !important; /* Jarak 2px dari navbar */
 }

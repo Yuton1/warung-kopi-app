@@ -54,15 +54,12 @@ const Banner = () => {
   }, [banners]);
 
   // UPDATE: Aspect ratio disesuaikan ke 720/300
-  if (loading) return <div className="w-full aspect-[720/300] bg-gray-100 animate-pulse rounded-3xl mb-12" />;
+  if (loading) return <div className="w-full aspect-[720/300] bg-gray-100 animate-pulse rounded-2xl" />;
   if ((banners || []).length === 0) return null;
 
   return (
-    <div className="relative w-full overflow-hidden rounded-3xl shadow-lg bg-[#F5F5F5] mb-12">
-      
-      {/* Container Slides */}
+    <div className="relative w-full overflow-hidden rounded-2xl shadow-sm bg-[#F5F5F5]">
       <div 
-        // UPDATE: Menggunakan aspect-[720/300] agar ukuran gambar selalu sesuai format design (720x300)
         className="flex transition-transform duration-700 ease-in-out w-full aspect-[720/300]"
         style={{ transform: `translateX(-${currentIndex * 100}%)` }}
       >

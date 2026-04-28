@@ -69,11 +69,9 @@ const MenuView = () => {
   const activatePlan = (planId) => setSubscription({ id: planId });
 
   return (
-    <div className="page-shell min-h-screen pb-20">
-      <div className="banner-floating-wrapper">
-        <section className="relative w-full overflow-hidden rounded-2xl shadow-sm">
-          <Banner />
-        </section>
+    <div className="page-shell min-h-screen bg-white">
+      <div className="banner-wrapper-floating">
+        <Banner />
       </div>
       {/* 2. PROMO: Diberikan jarak atas-bawah yang luas (py-12) */}
       <div className="w-full bg-white shadow-sm py-12 mb-10">
