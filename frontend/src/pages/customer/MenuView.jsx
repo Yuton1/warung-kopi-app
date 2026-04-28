@@ -81,8 +81,8 @@ const MenuView = () => {
       </div>
 
       {/* 3. MAIN CONTENT: Layout Grid Utama */}
-      <section className="container mx-auto px-4 flex flex-col lg:flex-row gap-10">
-        <main className="content-column flex-1 flex flex-col gap-16"> {/* gap-16 antar komponen utama */}
+      <section className="w-full px-6 lg:px-12 flex flex-col gap-10">
+        <main className="w-full flex flex-col gap-16">
           
           {/* Recommendations Section */}
           <section>
