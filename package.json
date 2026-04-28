@@ -12,5 +12,8 @@
     "dev": "npm --prefix frontend run dev",
     "preview": "npm --prefix frontend run preview",
     "start:backend": "npm --prefix backend run start"
+  },
+  "optionalDependencies": {
+    "@rollup/rollup-linux-x64-gnu": "^4.60.2"
   }
 }
