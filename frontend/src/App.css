@@ -984,7 +984,7 @@ html, body {
 }
 
 .site-header__inner {
-  width: min(1440px, calc(100vw - 32px));
+  width: 100%;
   margin: 0 auto;
   display: flex;
   align-items: center;
@@ -1787,7 +1787,6 @@ html, body {
 
 @media (max-width: 1180px) {
   .customer-navbar__inner {
-    width: min(100vw - 18px, 1860px);
     grid-template-columns: auto 1fr;
   }
 
