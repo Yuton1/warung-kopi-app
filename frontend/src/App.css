@@ -16,12 +16,6 @@
   box-sizing: border-box;
 }
 
-.banner-container {
-  padding: 2px 2px 0 2px; /* Atas: 2px, Kanan: 2px, Bawah: 0, Kiri: 2px */
-  width: 100%;
-  box-sizing: border-box;
-}
-
 .page-glow {
   position: fixed;
   inset: auto;
@@ -1783,6 +1777,12 @@ html, body {
   width: 100%;
   height: 100%;
   fill: currentColor;
+}
+
+.banner-container {
+  padding: 0 !important;
+  box-sizing: border-box;
+  width: 100%;
 }
 
 @media (max-width: 1180px) {
