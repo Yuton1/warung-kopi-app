@@ -16,6 +16,8 @@ import MenuManagement from './pages/admin/MenuManagement'
 import UserManagement from './pages/admin/UserManagement';
 import LoyaltyRewards from './pages/admin/LoyaltyRewards';
 import SalesReports from './pages/admin/SalesReports';
+import OrderQueue from './pages/barista/OrderQueue';
+import Inventory from './pages/barista/Inventory';
 
 function App() {
   return (
@@ -33,7 +35,8 @@ function App() {
         <Route path="/admin/reports" element={<SalesReports />} />
         
         {/* BARISTA ROUTES - Operational System */}
-        {/* <Route path="barista" element={<BaristaDashboard />} /> */}
+        <Route path="/barista" element={<OrderQueue />} />
+        <Route path="/barista/inventory" element={<Inventory />} />
 
         {/* CUSTOMER ROUTES - Mobile/User View */}
         <Route element={<CustomerLayout />}>
