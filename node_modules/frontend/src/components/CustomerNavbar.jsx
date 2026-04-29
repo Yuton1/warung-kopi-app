@@ -2,7 +2,46 @@ import { useEffect, useState } from 'react'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { STORAGE_KEYS, readStoredValue } from '../data/customerStorage'
 
-// ... (navItems, menuDropdownItems, dan Icon tetap sama seperti kode kamu)
+const navItems = [
+  { to: '/', end: true, label: 'Home', state: null, type: 'link' },
+  { label: 'Menu', type: 'dropdown' },
+  { to: '/pesanan', label: 'Pesanan', state: null, type: 'link', badge: 'orders' },
+  { to: '/akun', label: 'Member', state: null, type: 'link' },
+  { label: 'Keranjang', state: { scrollToCart: true }, type: 'button', badge: 'cart' },
+]
+
+const menuDropdownItems = [
+  { label: 'Minuman', category: 'Minuman' },
+  { label: 'Makanan', category: 'Makanan' },
+  { label: 'Cemilan', category: 'Makanan' },
+]
+
+const Icon = ({ name }) => {
+  switch (name) {
+    case 'search':
+      return (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: '100%', height: '100%' }}>
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+      )
+    case 'chevron-down':
+      return (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: '16px' }}>
+          <path d="m6 9 6 6 6-6" />
+        </svg>
+      )
+    case 'user':
+      return (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: '20px' }}>
+          <path d="M20 21a8 8 0 0 0-16 0" />
+          <circle cx="12" cy="8" r="4" />
+        </svg>
+      )
+    default:
+      return null
+  }
+}
 
 const CustomerNavbar = () => {
   const navigate = useNavigate()
