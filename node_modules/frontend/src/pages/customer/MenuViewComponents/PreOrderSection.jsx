@@ -1,84 +1,94 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
-const GroupOrderSection = ({ groupOrder, hasCart, onUpdateMembers, onAddCart, onConfirm }) => {
-  const [groupCode] = useState(groupOrder?.code || "GRP-D64J");
+const PreOrderSection = ({ hasCart, preOrder, onSave, onCancel }) => {
+  const [time, setTime] = useState(preOrder?.time || "");
+  const [note, setNote] = useState(preOrder?.note || "");
 
-  const handleCopyCode = () => {
-    navigator.clipboard.writeText(groupCode);
-    alert("Kode grup berhasil disalin!");
-  };
+  // Update state lokal jika prop preOrder berubah (misal saat load data)
+  useEffect(() => {
+    if (preOrder) {
+      setTime(preOrder.time || "");
+      setNote(preOrder.note || "");
+    }
+  }, [preOrder]);
 
   return (
-    <article className="relative overflow-hidden bg-white rounded-[2.5rem] p-8 md:p-12 shadow-xl border border-gray-100 transition-all duration-500">
+    <article className="relative overflow-hidden bg-gradient-to-br from-[#4A3728] via-[#2B1B17] to-[#1A120B] rounded-[2.5rem] p-8 md:p-12 text-white shadow-2xl transition-all duration-500">
       
-      <div className="relative z-10 flex flex-col lg:flex-row justify-between items-start gap-10">
-        
-        {/* --- SISI KIRI: HEADER --- */}
-        <div className="flex-1">
-          <h2 className="text-4xl font-extrabold text-[#1A120B] tracking-tight mb-2">
-            Group Order & Split Payment
-          </h2>
-          <p className="text-[#1A120B] font-bold text-lg mb-1">Gabung pesanan bareng teman</p>
-          <p className="text-gray-500 text-sm leading-relaxed max-w-md">
-            Tambahkan semua isi keranjang ke grup, bagikan kode undangan, dan bagi tagihan per orang secara otomatis.
-          </p>
+      {/* Background Texture / Cahaya (Opsional untuk estetika image_b47d39.jpg) */}
+      <div className="absolute top-0 right-0 w-full h-full opacity-20 pointer-events-none">
+        <div className="absolute -top-24 -right-24 w-96 h-96 bg-[#8D6E63] rounded-full blur-[100px]" />
+      </div>
 
-          {/* INPUT AREA */}
-          <div className="flex flex-wrap gap-6 mt-10">
+      <div className="relative z-10 flex flex-col lg:flex-row justify-between items-center gap-10">
+        
+        {/* --- SISI KIRI: INFORMASI & INPUT --- */}
+        <div className="flex-1 space-y-6">
+          <div>
+            <h2 className="text-4xl font-extrabold tracking-tight mb-2">Pre-order</h2>
+            <span className="text-orange-400 font-bold text-sm uppercase tracking-widest block mb-4">
+              Fitur Pre-order Scheduling
+            </span>
+            <p className="text-gray-300 text-sm leading-relaxed max-w-md">
+              Atur jam ambil dan simpan pre-order. Pilih jam ambil, tulis catatan, 
+              lalu simpan order agar bisa diubah atau dibatalkan sebelum checkout.
+            </p>
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-4">
+            {/* Input Jam */}
             <div className="flex flex-col gap-2">
-              <label className="text-sm font-semibold text-gray-400 ml-1">Anggota</label>
+              <label className="text-[10px] font-black uppercase text-gray-400">Jam Ambil</label>
               <input 
-                type="number"
-                min="1"
-                value={groupOrder?.members || 1}
-                onChange={(e) => onUpdateMembers(parseInt(e.target.value))}
-                className="w-32 bg-white border-2 border-orange-100 rounded-2xl px-4 py-3 text-[#1A120B] font-bold focus:outline-none focus:border-orange-500 transition-all"
+                type="time"
+                value={time}
+                onChange={(e) => setTime(e.target.value)}
+                className="bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-orange-500 transition-all font-bold"
               />
             </div>
-
-            <div className="flex flex-col gap-2">
-              <label className="text-sm font-semibold text-gray-400 ml-1">Kode Grup</label>
+            {/* Input Catatan */}
+            <div className="flex flex-col gap-2 flex-1">
+              <label className="text-[10px] font-black uppercase text-gray-400">Catatan Pengambilan</label>
               <input 
                 type="text"
-                readOnly
-                value={groupCode}
-                className="w-48 bg-gray-50 border-2 border-transparent rounded-2xl px-4 py-3 text-gray-500 font-mono font-bold focus:outline-none"
+                placeholder="Contoh: Ambil di parkiran depan"
+                value={note}
+                onChange={(e) => setNote(e.target.value)}
+                className="bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500 transition-all text-sm"
               />
             </div>
           </div>
-
-          <button 
-            onClick={handleCopyCode}
-            className="mt-6 bg-[#1A120B] text-white px-8 py-4 rounded-2xl font-bold text-sm shadow-lg hover:bg-black transition-all active:scale-95 flex items-center gap-2"
-          >
-            Salin Undangan
-          </button>
         </div>
 
-        {/* --- SISI KANAN: ACTIONS --- */}
-        <div className="flex flex-col gap-4 w-full lg:w-80 lg:mt-20">
+        {/* --- SISI KANAN: TOMBOL AKSI --- */}
+        <div className="flex flex-col gap-3 w-full lg:w-72">
           <button 
-            disabled={!hasCart}
-            onClick={onAddCart}
-            className={`w-full py-5 rounded-2xl font-bold text-sm transition-all shadow-md active:scale-95 ${
+            className={`w-full py-4 rounded-2xl font-bold text-sm transition-all shadow-lg active:scale-95 ${
               !hasCart 
-              ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
-              : 'bg-[#1A120B] text-white hover:shadow-xl'
+              ? 'bg-gray-700 text-gray-400 cursor-not-allowed' 
+              : 'bg-[#1A120B] text-white hover:bg-black border border-white/10'
             }`}
+            onClick={() => onSave({ time, note })}
+            disabled={!hasCart}
           >
-            Tambah ke Keranjang Grup
+            Simpan Pre-order
           </button>
           
           <button 
-            onClick={onConfirm}
-            className="w-full py-5 bg-white border-2 border-gray-100 text-[#1A120B] rounded-2xl font-bold text-sm shadow-sm hover:shadow-md hover:bg-gray-50 transition-all active:scale-95"
+            className={`w-full py-4 rounded-2xl font-bold text-sm transition-all active:scale-95 ${
+              !preOrder 
+              ? 'bg-white/5 text-gray-500 cursor-not-allowed' 
+              : 'bg-white text-[#1A120B] hover:bg-gray-100 shadow-xl'
+            }`}
+            onClick={onCancel}
+            disabled={!preOrder}
           >
-            Konfirmasi Pembayaran Grup
+            Batalkan
           </button>
 
           {!hasCart && (
-            <p className="text-[11px] text-center text-gray-400 mt-2 italic">
-              * Isi keranjangmu dulu sebelum menggabungkan pesanan
+            <p className="text-[10px] text-center text-orange-300 mt-2 italic">
+              * Tambahkan menu ke keranjang untuk mengatur jadwal
             </p>
           )}
         </div>
@@ -87,4 +97,4 @@ const GroupOrderSection = ({ groupOrder, hasCart, onUpdateMembers, onAddCart, on
   );
 };
 
-export default GroupOrderSection;
+export default PreOrderSection;
