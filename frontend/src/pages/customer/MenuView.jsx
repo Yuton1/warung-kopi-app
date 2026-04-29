@@ -78,21 +78,21 @@ const MenuView = () => {
       <div className="banner-wrapper-floating">
         <Banner />
       </div>
-      <div className="w-full bg-white shadow-sm py-2 mb-0">
-        <div className="w-full px-6 lg:px-12">
+      <div className="w-full bg-white shadow-sm py-2">
+        <div className="px-2">
           <PromoMingguan />
         </div>
       </div>
 
       {/* 3. MAIN CONTENT: Layout Grid Utama */}
-      <section className="w-full px-6 lg:px-12 flex flex-col gap-4">
-        <main className="w-full flex flex-col gap-8">
-          <section className="px-6 lg:px-12">
+      <section className="w-full flex flex-col gap-4">
+        <main className="w-full flex flex-col">
+          <div className="px-2">
             <Recommendations items={recommendations} />
-          </section>
+          </div>
           
           {/* Menu Grid Section */}
-          <section className="w-full px-6 lg:px-12">
+          <section>
             <MenuGrid 
               menu={displayedMenu} 
               loading={loadingMenu}
