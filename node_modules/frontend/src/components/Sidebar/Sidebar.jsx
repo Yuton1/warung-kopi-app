@@ -40,7 +40,6 @@ const Sidebar = ({ role }) => {
             <SidebarItem icon={Coffee} label="Menu Management" path="/admin/menu" />
             <SidebarItem icon={Ticket} label="Loyalty Rewards" path="/admin/rewards" />
             <SidebarItem icon={PieChart} label="Sales Reports" path="/admin/reports" />
-            <SidebarItem icon={Ticket} label="Loyalty Rewards" path="/admin/rewards" />
           </>
         )}
 

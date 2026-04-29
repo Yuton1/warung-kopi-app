@@ -15,6 +15,7 @@ import AdminDashboard from './pages/admin/AdminDashboard'
 import MenuManagement from './pages/admin/MenuManagement'
 import UserManagement from './pages/admin/UserManagement';
 import LoyaltyRewards from './pages/admin/LoyaltyRewards';
+import SalesReports from './pages/admin/SalesReports';
 
 function App() {
   return (
@@ -29,6 +30,7 @@ function App() {
         <Route path="admin/menu" element={<MenuManagement />} />
         <Route path="/admin/users" element={<UserManagement />} />
         <Route path="/admin/rewards" element={<LoyaltyRewards />} />
+        <Route path="/admin/reports" element={<SalesReports />} />
         
         {/* BARISTA ROUTES - Operational System */}
         {/* <Route path="barista" element={<BaristaDashboard />} /> */}
