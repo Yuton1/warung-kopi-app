@@ -35,16 +35,24 @@ const MenuView = () => {
           fetch('/api/subscriptions')
         ]);
 
+        if (!prodRes.ok || !subRes.ok) {
+          throw new Error(`Server Error: ${prodRes.status}`);
+        }
+
         const products = await prodRes.json();
         const subs = await subRes.json();
 
-        setDisplayedMenu(products);
-        setRecommendations(products.slice(0, 2));
-        setSubscriptionPlans(subs);
+        setDisplayedMenu(Array.isArray(products) ? products : []);
+        setRecommendations(Array.isArray(products) ? products.slice(0, 2) : []);
+        setSubscriptionPlans(Array.isArray(subs) ? subs : []);
         setLoadingMenu(false);
       } catch (error) {
         console.error("Gagal ambil data:", error);
         setLoadingMenu(false);
+        // Set ke array kosong jika error agar .map() tidak pecah
+        setDisplayedMenu([]);
+        setRecommendations([]);
+        setSubscriptionPlans([]);
       }
     };
     fetchData();
