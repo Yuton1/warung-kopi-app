@@ -59,16 +59,20 @@ const MenuManagement = () => {
     }
   };
 
-  const filteredMenu = menus.filter(item => {
-      // Logika agar tab 'coffee' juga menampilkan data 'minuman'
-      const isCoffee = activeTab === 'coffee' && (item.category === 'coffee' || item.category === 'minuman');
-      const isMeal = activeTab === 'meal' && (item.category === 'meal' || item.category === 'makanan');
-      const isSnack = activeTab === 'snack' && (item.category === 'snack' || item.category === 'cemilan');
-      const isNonCoffee = activeTab === 'non-coffee' && item.category === 'non-coffee';
+    const filteredMenu = menus.filter(item => {
+        if (!item || !item.category) return false; // Proteksi jika data corrupt
 
-      return (isCoffee || isMeal || isSnack || isNonCoffee) && 
-             item.name.toLowerCase().includes(searchTerm.toLowerCase());
-  });
+        const categoryLower = item.category.toLowerCase();
+
+        const isCoffee = activeTab === 'coffee' && (categoryLower === 'coffee' || categoryLower === 'minuman');
+        const isMeal = activeTab === 'meal' && (categoryLower === 'meal' || categoryLower === 'makanan');
+        const isSnack = activeTab === 'snack' && (categoryLower === 'snack' || categoryLower === 'cemilan');
+        const isNonCoffee = activeTab === 'non-coffee' && categoryLower === 'non-coffee';
+
+        const matchSearch = (item.name || "").toLowerCase().includes(searchTerm.toLowerCase());
+
+        return (isCoffee || isMeal || isSnack || isNonCoffee) && matchSearch;
+    });
 
   return (
     <div className="flex min-h-screen bg-[#F8F9FA]">
@@ -92,10 +96,30 @@ const MenuManagement = () => {
         {/* Filter & Search Bar - Menggunakan Kategori Database (ENUM) */}
         <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 mb-6 flex flex-col md:flex-row gap-4 items-center justify-between">
           <div className="flex bg-gray-100 p-1 rounded-xl">
-            <TabButton active={activeTab === 'coffee'} onClick={() => setActiveTab('coffee')}/>
-            <TabButton active={activeTab === 'non-coffee'} onClick={() => setActiveTab('non-coffee')}/>
-            <TabButton active={activeTab === 'meal'} onClick={() => setActiveTab('meal')}/>
-            <TabButton active={activeTab === 'snack'} onClick={() => setActiveTab('snack')}/>
+            <TabButton 
+              active={activeTab === 'coffee'} 
+              onClick={() => setActiveTab('coffee')}
+              icon={<Coffee size={18} />}
+              label="Coffee"
+            />
+            <TabButton 
+              active={activeTab === 'non-coffee'} 
+              onClick={() => setActiveTab('non-coffee')}
+              icon={<Coffee size={18} className="opacity-50" />} // Bisa ganti ikon lain
+              label="Non-Coffee"
+            />
+            <TabButton 
+              active={activeTab === 'meal'} 
+              onClick={() => setActiveTab('meal')}
+              icon={<Utensils size={18} />}
+              label="Makanan"
+            />
+            <TabButton 
+              active={activeTab === 'snack'} 
+              onClick={() => setActiveTab('snack')}
+              icon={<Cookie size={18} />}
+              label="Cemilan"
+            />
           </div>
 
           <div className="relative w-full md:w-80">
