@@ -2485,3 +2485,38 @@ html, body {
   margin-top: 0 !important;
   padding-top: 2px !important; /* Jarak 2px dari navbar */
 }
+
+/* Fallback visual guards untuk kartu fitur utama */
+.feature-preorder-card,
+.feature-subscription-card {
+  color: #fff;
+}
+
+.feature-preorder-card :is(h1, h2, h3, h4, p, span, label, small),
+.feature-subscription-card :is(h1, h2, h3, h4, p, span, label, small) {
+  color: inherit;
+}
+
+.feature-analytics-card__dark {
+  color: #fff;
+}
+
+.feature-analytics-card__dark :is(h1, h2, h3, h4, p, span, small) {
+  color: inherit;
+}
+
+.feature-group-order-card {
+  color: #1a120b;
+}
+
+.feature-group-order-card :is(h1, h2, h3, h4, p, span, label, small) {
+  color: inherit;
+}
+
+.feature-group-order-card input {
+  color: #1a120b;
+}
+
+.feature-group-order-card button {
+  color: inherit;
+}

@@ -9,7 +9,7 @@ const GroupOrderSection = ({ groupOrder, hasCart, onUpdateMembers, onAddCart, on
   };
 
   return (
-    <article className="relative overflow-hidden bg-white rounded-[2.5rem] p-8 md:p-12 shadow-xl border border-gray-100 transition-all duration-500">
+    <article className="feature-group-order-card relative overflow-hidden bg-white rounded-[2.5rem] p-8 md:p-12 shadow-xl border border-gray-100 transition-all duration-500">
       <div className="relative z-10 flex flex-col lg:flex-row justify-between items-start gap-8">
         
         {/* INFO & INPUT */}

@@ -5,7 +5,7 @@ const AnalyticsDashboard = ({ monthlySpend, favoriteCoffee, planStatus, subscrip
   const percentage = (subscriptionData.remaining / subscriptionData.total) * 100;
 
   return (
-    <article className="w-full bg-white rounded-[2.5rem] p-8 md:p-12 shadow-xl border border-gray-100 relative overflow-hidden">
+    <article className="feature-analytics-card w-full bg-white rounded-[2.5rem] p-8 md:p-12 shadow-xl border border-gray-100 relative overflow-hidden">
       {/* Background Element */}
       <div className="absolute top-0 right-0 w-40 h-40 bg-orange-50 rounded-full -mr-20 -mt-20 opacity-50"></div>
 
@@ -37,7 +37,7 @@ const AnalyticsDashboard = ({ monthlySpend, favoriteCoffee, planStatus, subscrip
           </div>
 
           {/* Stat 3: Subscription Status & Quota */}
-          <div className="bg-[#1A120B] p-6 rounded-3xl shadow-2xl relative overflow-hidden group">
+          <div className="feature-analytics-card__dark bg-[#1A120B] p-6 rounded-3xl shadow-2xl relative overflow-hidden group">
             <div className="relative z-10">
               <span className="text-[10px] font-black text-orange-400 uppercase tracking-widest block mb-2">Status: {planStatus}</span>
               <div className="flex justify-between items-end mb-2">
