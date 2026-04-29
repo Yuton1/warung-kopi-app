@@ -1,10 +1,8 @@
 import React from 'react';
 
 const Recommendations = ({ items = [] }) => {
-  const safeItems = Array.isArray(items) ? items : [];
-
   // Sesuai permintaan Anda: Jika menu kurang dari 6, jangan tampilkan apa pun
-  if (safeItems.length < 6) return null;
+  if (items.length < 6) return null;
 
   return (
     <section className="w-full bg-white px-6 py-10">
@@ -21,7 +19,7 @@ const Recommendations = ({ items = [] }) => {
 
         {/* Grid Display - Full Width & Responsive */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {safeItems.slice(0, 6).map((item) => (
+          {items.slice(0, 6).map((item) => (
             <div 
               key={item.id} 
               className="flex items-center p-5 bg-[#fdf5ed] rounded-3xl border border-orange-50 transition-all hover:shadow-md group cursor-pointer"

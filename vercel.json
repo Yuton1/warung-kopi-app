@@ -5,10 +5,37 @@
   "buildCommand": "npm run build",
   "outputDirectory": "frontend/dist",
   "rewrites": [
+<<<<<<< HEAD
     { "source": "/akun", "destination": "/index.html" },
     { "source": "/pesanan", "destination": "/index.html" },
     { "source": "/promo", "destination": "/index.html" },
     { "source": "/lokasi", "destination": "/index.html" },
     { "source": "/((?!api/).*)", "destination": "/index.html" }
+=======
+    {
+      "source": "/api/(.*)",
+      "destination": "/backend/index.js"
+    },
+    {
+      "source": "/akun",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/pesanan",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/promo",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/lokasi",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+>>>>>>> parent of 30c8677 (connect db)
   ]
 }

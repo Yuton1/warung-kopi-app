@@ -6,9 +6,6 @@ export const promoSeed = [
     code: 'BOOST2KOPI',
     badge: 'Hemat pagi',
     accent: 'promo-amber',
-    remaining_quota: 12,
-    is_claimed: false,
-    unique_code: null,
   },
   {
     id: 'bundle-couple',
@@ -17,9 +14,6 @@ export const promoSeed = [
     code: 'NGOPI15',
     badge: 'Bundling',
     accent: 'promo-brown',
-    remaining_quota: 8,
-    is_claimed: false,
-    unique_code: null,
   },
   {
     id: 'loyalty-week',
@@ -28,8 +22,5 @@ export const promoSeed = [
     code: '2XPOINT',
     badge: 'Points',
     accent: 'promo-cream',
-    remaining_quota: 15,
-    is_claimed: false,
-    unique_code: null,
   },
 ]

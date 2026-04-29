@@ -1,10 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios'; // Pastikan axios sudah terinstal
-import { promoSeed } from '../../../data/promoSeed';
 
 const PromoMingguan = () => {
-  const [promos, setPromos] = useState(promoSeed);
+  const [promos, setPromos] = useState([]);
   const [loading, setLoading] = useState(true);
 
   // Ambil data promo dari database (via Backend)
@@ -16,11 +15,10 @@ const PromoMingguan = () => {
     try {
       // Endpoint ini nantinya akan melakukan JOIN antara weekly_promos & user_promo_claims
       const response = await axios.get('/api/promos/weekly');
-      setPromos(Array.isArray(response.data) ? response.data : promoSeed);
+      setPromos(response.data);
       setLoading(false);
     } catch (error) {
       console.error("Gagal mengambil promo:", error);
-      setPromos(promoSeed);
       setLoading(false);
     }
   };
@@ -40,8 +38,7 @@ const PromoMingguan = () => {
   if (loading) return <div className="p-10 text-center">Memuat promo...</div>;
 
   // Gunakan promo pertama sebagai Hero (yang besar di kiri)
-  const safePromos = Array.isArray(promos) ? promos : promoSeed;
-  const heroPromo = safePromos[0] || null;
+  const heroPromo = promos || null;
 
   return (
     <section className="promo-banner">
@@ -71,7 +68,7 @@ const PromoMingguan = () => {
       )}
 
       <div className="promo-banner__rail">
-        {safePromos.slice(1).map((promo) => (
+        {promos.slice(1).map((promo) => (
           <article key={promo.id} className={`promo-rail-card ${promo.accent || 'promo-brown'}`}>
             <strong>{promo.title}</strong>
             {promo.is_claimed ? (

@@ -8,17 +8,16 @@ import GroupOrderSection from './MenuViewComponents/GroupOrderSection';
 import CoffeeSubscription from './MenuViewComponents/CoffeeSubscription';
 import AnalyticsDashboard from './MenuViewComponents/AnalyticsDashboard';
 import CartFloating from '../../components/CartFloating';
-import { coffeeSeed, subscriptionPlans as subscriptionSeed } from '../../data/menuSeed';
 
 const MenuView = () => {
-  const [recommendations, setRecommendations] = useState(coffeeSeed.slice(0, 6));
-  const [displayedMenu, setDisplayedMenu] = useState(coffeeSeed);
+  const [recommendations, setRecommendations] = useState([]);
+  const [displayedMenu, setDisplayedMenu] = useState([]);
   const [loadingMenu, setLoadingMenu] = useState(true);
   const [cart, setCart] = useState([]);
   const [favoriteIdSet, setFavoriteIdSet] = useState(new Set());
   const [preOrder, setPreOrder] = useState({ date: "", time: "" });
   const [groupOrder, setGroupOrder] = useState({ members: 4, items: [], status: 'idle' });
-  const [subscriptionPlans, setSubscriptionPlans] = useState(subscriptionSeed);
+  const [subscriptionPlans, setSubscriptionPlans] = useState([]);
   const [activeSub, setActiveSub] = useState({ id: null });
 
   const monthlySpend = 150000;
@@ -43,19 +42,17 @@ const MenuView = () => {
         const products = await prodRes.json();
         const subs = await subRes.json();
 
-        const safeProducts = Array.isArray(products) && products.length ? products : coffeeSeed;
-        const safeSubscriptions = Array.isArray(subs) && subs.length ? subs : subscriptionSeed;
-
-        setDisplayedMenu(safeProducts);
-        setRecommendations(safeProducts.slice(0, 6));
-        setSubscriptionPlans(safeSubscriptions);
+        setDisplayedMenu(Array.isArray(products) ? products : []);
+        setRecommendations(Array.isArray(products) ? products.slice(0, 2) : []);
+        setSubscriptionPlans(Array.isArray(subs) ? subs : []);
         setLoadingMenu(false);
       } catch (error) {
         console.error("Gagal ambil data:", error);
         setLoadingMenu(false);
-        setDisplayedMenu(coffeeSeed);
-        setRecommendations(coffeeSeed.slice(0, 6));
-        setSubscriptionPlans(subscriptionSeed);
+        // Set ke array kosong jika error agar .map() tidak pecah
+        setDisplayedMenu([]);
+        setRecommendations([]);
+        setSubscriptionPlans([]);
       }
     };
     fetchData();

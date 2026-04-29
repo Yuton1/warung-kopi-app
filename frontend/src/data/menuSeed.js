@@ -2,7 +2,6 @@ export const subscriptionPlans = [
   {
     id: 'daily-boost',
     name: 'Daily Boost',
-    quota: '5 Cup / Minggu',
     price: 99000,
     description: '5 cup kopi pilihan per minggu untuk pelanggan yang selalu on the go.',
     perks: ['Gratis upgrade size 2x', 'Reminder pickup', 'Diskon refill 10%'],
@@ -11,7 +10,6 @@ export const subscriptionPlans = [
   {
     id: 'office-flow',
     name: 'Office Flow',
-    quota: '10 Cup / Bulan',
     price: 179000,
     description: '10 cup campuran kopi dan non-kopi untuk kerja santai atau tim kecil.',
     perks: ['Bisa di-skip 1 minggu', 'Priority pickup', 'Poin ekstra 2x'],
@@ -20,7 +18,6 @@ export const subscriptionPlans = [
   {
     id: 'shared-table',
     name: 'Shared Table',
-    quota: '20 Cup / Bulan',
     price: 329000,
     description: 'Paket langganan bulanan untuk tim, komunitas, atau grup nongkrong.',
     perks: ['Bisa dibagi 4 orang', 'Bonus menu favorit', 'Split payment ready'],
