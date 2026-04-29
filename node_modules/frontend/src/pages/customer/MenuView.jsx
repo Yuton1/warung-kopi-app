@@ -160,7 +160,7 @@ const MenuView = () => {
                 />
                </div>
 
-               <div className="transition-transform hover:scale-[1.02]">
+               <div className="md:col-span-2 transition-transform hover:scale-[1.01]">
                 <AnalyticsDashboard 
                    monthlySpend={monthlySpend} 
                    favoriteCoffee={favoriteCoffee} 
