@@ -2,15 +2,12 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "version": 2,
   "installCommand": "cd frontend && npm install --workspaces=false",
-  "buildCommand": "npm run build",
+  "buildCommand": "cd frontend && npm run build",
   "outputDirectory": "frontend/dist",
   "rewrites": [
-    { "source": "/login", "destination": "/index.html" },
-    { "source": "/register", "destination": "/index.html" },
-    { "source": "/akun", "destination": "/index.html" },
-    { "source": "/pesanan", "destination": "/index.html" },
-    { "source": "/promo", "destination": "/index.html" },
-    { "source": "/lokasi", "destination": "/index.html" },
-    { "source": "/:path((?!api/).*)", "destination": "/index.html" }
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
   ]
 }
