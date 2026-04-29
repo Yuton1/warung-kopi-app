@@ -62,6 +62,15 @@ a {
   text-decoration: none;
 }
 
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+
+.no-scrollbar {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+}
+
 img {
   max-width: 100%;
   display: block;
