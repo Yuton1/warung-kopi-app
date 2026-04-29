@@ -17,7 +17,8 @@
     "@rollup/rollup-linux-x64-gnu": "^4.60.2"
   },
   "dependencies": {
-    "lucide-react": "^1.14.0"
+    "lucide-react": "^1.14.0",
+    "recharts": "^3.8.1"
   },
   "devDependencies": {
     "autoprefixer": "^10.5.0",
