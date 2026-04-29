@@ -4,7 +4,7 @@ require('dotenv').config();
 
 // 1. Import Routes
 const productRoutes = require('./src/routes/productRoutes');
-
+const authRoutes = require('./src/routes/authRoutes');
 const app = express();
 
 // 2. Middleware
@@ -14,6 +14,7 @@ app.use(express.json());
 // 3. Gunakan Routes
 // Gunakan prefix /api agar sinkron dengan vercel.json
 app.use('/api/products', productRoutes);
+app.use('/api/auth', authRoutes);
 
 // Endpoint status
 app.get('/api', (req, res) => {
