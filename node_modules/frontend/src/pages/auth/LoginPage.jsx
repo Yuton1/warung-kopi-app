@@ -46,7 +46,7 @@ const LoginPage = () => {
 
         <div className="mb-10">
           <h1 className="text-4xl font-extrabold text-[#1b120d] leading-tight">
-            Holla, <br /> Welcome Back
+            Halo, <br /> Welcome Back
           </h1>
           <p className="mt-3 text-sm text-gray-500">
             Hey, welcome back to your favorite coffee place.
@@ -60,7 +60,7 @@ const LoginPage = () => {
               type="email"
               value={email}
               onChange={(event) => setEmail(event.target.value)}
-              placeholder="stanley@gmail.com"
+              placeholder="Email"
               autoComplete="email"
               name="email"
               className="rounded-xl border-gray-200 py-3 focus:border-[#e39b4f] focus:ring-[#e39b4f]"
@@ -70,7 +70,7 @@ const LoginPage = () => {
               type="password"
               value={password}
               onChange={(event) => setPassword(event.target.value)}
-              placeholder="••••••••••••"
+              placeholder="Password"
               autoComplete="current-password"
               name="password"
               className="rounded-xl border-gray-200 py-3 focus:border-[#e39b4f] focus:ring-[#e39b4f]"
