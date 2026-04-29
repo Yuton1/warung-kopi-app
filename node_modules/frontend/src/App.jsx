@@ -12,12 +12,25 @@ import OrdersPage from './pages/customer/OrdersPage'
 import ProfilePage from './pages/customer/ProfilePage'
 import PromoPage from './pages/customer/PromoPage'
 
+// IMPORT HALAMAN BARU
+import AdminDashboard from './pages/admin/AdminDashboard'
+// import BaristaDashboard from './pages/barista/BaristaDashboard' // Aktifkan jika file sudah ada
+
 function App() {
   return (
     <BrowserRouter>
       <Routes>
+        {/* AUTH ROUTES */}
         <Route path="login" element={<LoginPage />} />
         <Route path="register" element={<RegisterPage />} />
+
+        {/* ADMIN ROUTES - Management System */}
+        <Route path="admin" element={<AdminDashboard />} />
+        
+        {/* BARISTA ROUTES - Operational System */}
+        {/* <Route path="barista" element={<BaristaDashboard />} /> */}
+
+        {/* CUSTOMER ROUTES - Mobile/User View */}
         <Route element={<CustomerLayout />}>
           <Route index element={<MenuView />} />
           <Route path="menu" element={<Navigate to="/menu/minuman" replace />} />
