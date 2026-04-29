@@ -12,9 +12,16 @@ const LoginPage = () => {
   const handleSubmit = (event) => {
     event.preventDefault()
 
+    let userRole = 'customer';
+    if (email === 'mohahsanmalik1@gmail.com') {
+      userRole = 'admin';
+    } else if (email.includes('barista')) { // Contoh logika untuk barista
+      userRole = 'barista';
+    }
+
     const authUser = {
-      email,
-      name: email.split('@')[0] || 'Pelanggan',
+      name: email.split('@')[0] || 'User',
+      role: userRole, // TAMBAHKAN INI: Agar sistem tahu kamu admin
       mode: 'login',
       loggedInAt: new Date().toISOString(),
     }
@@ -24,13 +31,20 @@ const LoginPage = () => {
       mode: 'login',
       name: authUser.name,
       email: authUser.email,
+      role: userRole, // Pastikan role juga tersimpan di data akun
       phone: '',
       address: '',
-      city: 'Bandung',
+      city: 'Malang', // Saya sesuaikan dengan lokasi universitasmu (UMM)
     })
 
     window.dispatchEvent(new Event('warungkopi-state-changed'))
-    navigate('/', { replace: true })
+    if (userRole === 'admin') {
+      navigate('/admin', { replace: true });
+    } else if (userRole === 'barista') {
+      navigate('/barista', { replace: true });
+    } else {
+      navigate('/', { replace: true });
+    }
   }
 
   return (
