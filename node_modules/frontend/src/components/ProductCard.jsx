@@ -65,7 +65,7 @@ const ProductCard = ({
         {/* Meta: Kategori & Badge Status */}
         <div className="flex justify-between items-center">
           <span className="text-[11px] font-black text-[#5D4037] uppercase tracking-[0.2em]">
-            {product.category || 'KOPI'}
+            {product.category_label || product.category || 'KOPI'}
           </span>
           <span className="text-[11px] font-black text-[#5D4037] uppercase tracking-[0.2em]">
             {product.badge || 'FRESH'}

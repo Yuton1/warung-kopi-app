@@ -11,9 +11,9 @@ const navItems = [
 ]
 
 const menuDropdownItems = [
-  { label: 'Minuman', category: 'Minuman' },
-  { label: 'Makanan', category: 'Makanan' },
-  { label: 'Cemilan', category: 'Makanan' },
+  { label: 'Minuman', to: '/menu/minuman' },
+  { label: 'Makanan', to: '/menu/makanan' },
+  { label: 'Cemilan', to: '/menu/cemilan' },
 ]
 
 // Icon modern sesuai desain Group 50
@@ -121,7 +121,7 @@ const CustomerNavbar = () => {
                     </summary>
                     <div className="customer-navbar__dropdown">
                       {menuDropdownItems.map((opt) => (
-                        <button key={opt.label} type="button" onClick={() => navigate('/', { state: { category: opt.category } })}>
+                        <button key={opt.label} type="button" onClick={() => navigate(opt.to)}>
                           {opt.label}
                         </button>
                       ))}

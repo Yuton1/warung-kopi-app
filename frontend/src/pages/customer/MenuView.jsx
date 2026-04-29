@@ -12,7 +12,7 @@ import { coffeeSeed, subscriptionPlans as subscriptionSeed } from '../../data/me
 
 const MenuView = () => {
   const [recommendations, setRecommendations] = useState(coffeeSeed.slice(0, 6));
-  const [displayedMenu, setDisplayedMenu] = useState(coffeeSeed);
+  const [displayedMenu, setDisplayedMenu] = useState(coffeeSeed.slice(0, 12));
   const [loadingMenu, setLoadingMenu] = useState(true);
   const [cart, setCart] = useState([]);
   const [favoriteIdSet, setFavoriteIdSet] = useState(new Set());
@@ -46,16 +46,16 @@ const MenuView = () => {
         const safeProducts = Array.isArray(products) && products.length ? products : coffeeSeed;
         const safeSubscriptions = Array.isArray(subs) && subs.length ? subs : subscriptionSeed;
 
-        setDisplayedMenu(safeProducts);
+        setDisplayedMenu(safeProducts.slice(0, 12));
         setRecommendations(safeProducts.slice(0, 6));
         setSubscriptionPlans(safeSubscriptions);
-        setLoadingMenu(false);
       } catch (error) {
         console.error("Gagal ambil data:", error);
-        setLoadingMenu(false);
-        setDisplayedMenu(coffeeSeed);
+        setDisplayedMenu(coffeeSeed.slice(0, 12));
         setRecommendations(coffeeSeed.slice(0, 6));
         setSubscriptionPlans(subscriptionSeed);
+      } finally {
+        setLoadingMenu(false);
       }
     };
     fetchData();

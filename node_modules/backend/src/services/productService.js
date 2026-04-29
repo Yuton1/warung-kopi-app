@@ -1,11 +1,19 @@
 const db = require('../config/db');
 
+const categoryLabelMap = {
+  coffee: 'Kopi',
+  'non-coffee': 'Minuman',
+  meal: 'Makanan',
+  snack: 'Cemilan',
+};
+
 const normalizeProduct = (row) => ({
   ...row,
   points: Number(row.base_points ?? row.points ?? 0),
   stock: Number(row.stock ?? 0),
   is_available: Boolean(row.is_available),
   image_url: row.image_url || '',
+  category_label: categoryLabelMap[String(row.category || '').toLowerCase()] || String(row.category || '').toUpperCase(),
 });
 
 const listProducts = async () => {
