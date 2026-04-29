@@ -17,6 +17,7 @@ const ProductCard = ({
 }) => {
   // Mengambil data size dari produk atau fallback
   const sizes = product.sizes?.length ? product.sizes : FALLBACK_SIZES
+  const isAvailable = product.is_available !== false && Number(product.stock ?? 0) > 0
   
   // Default selection (Grande jika ada, atau index ke-1)
   const [selectedSize, setSelectedSize] = useState(sizes[Math.min(1, sizes.length - 1)])
@@ -35,11 +36,21 @@ const ProductCard = ({
       
       {/* --- BAGIAN ATAS: Gradient & Initials --- */}
       <div className="relative h-36 bg-gradient-to-br from-[#5D4037] to-[#2B1B17] p-6 flex items-start justify-between">
+        {product.image_url ? (
+          <img
+            src={product.image_url}
+            alt={product.name}
+            className="absolute inset-0 w-full h-full object-cover"
+          />
+        ) : null}
+
+        <div className="absolute inset-0 bg-black/35" />
+        
         {/* Lingkaran Cahaya Dekat Favorit (Opsional untuk estetika) */}
         <div className="absolute top-[-20%] right-[-10%] w-40 h-40 bg-white/10 rounded-full blur-3xl" />
         
         {/* Chip Inisial */}
-        <div className="w-16 h-16 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/30 shadow-inner">
+        <div className="relative z-10 w-16 h-16 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/30 shadow-inner">
           <span className="text-white text-2xl font-serif font-bold tracking-tighter">
             {product.initials || 'WK'}
           </span>
@@ -49,7 +60,7 @@ const ProductCard = ({
         <button
           type="button"
           onClick={() => onToggleFavorite(product.id)}
-          className={`px-4 py-1.5 rounded-full text-xs font-semibold backdrop-blur-md border transition-all shadow-sm ${
+          className={`relative z-10 px-4 py-1.5 rounded-full text-xs font-semibold backdrop-blur-md border transition-all shadow-sm ${
             isFavorite 
             ? 'bg-orange-500 text-white border-orange-400' 
             : 'bg-white/20 text-white border-white/20 hover:bg-white/30'
@@ -57,6 +68,14 @@ const ProductCard = ({
         >
           Favorit
         </button>
+
+        <span
+          className={`absolute bottom-4 left-4 z-10 rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-[0.25em] ${
+            isAvailable ? 'bg-emerald-500/90 text-white' : 'bg-red-500/90 text-white'
+          }`}
+        >
+          {isAvailable ? 'Tersedia' : 'Habis'}
+        </span>
       </div>
 
       {/* --- BAGIAN BODY --- */}
@@ -126,15 +145,21 @@ const ProductCard = ({
         <div className="grid grid-cols-5 gap-3 mt-2">
           <button 
             type="button" 
-            className="col-span-3 bg-[#1A120B] text-white py-4 rounded-2xl font-bold text-sm shadow-lg shadow-black/20 hover:bg-black transition-transform active:scale-95"
+            className={`col-span-3 bg-[#1A120B] text-white py-4 rounded-2xl font-bold text-sm shadow-lg shadow-black/20 hover:bg-black transition-transform active:scale-95 ${
+              !isAvailable ? 'opacity-50 cursor-not-allowed hover:bg-[#1A120B]' : ''
+            }`}
             onClick={() => onAddToCart(product, activeSize, price)}
+            disabled={!isAvailable}
           >
             Tambah ke Keranjang
           </button>
           <button 
             type="button" 
-            className="col-span-2 bg-gray-100 text-[#1A120B] py-4 rounded-2xl font-bold text-sm hover:bg-gray-200 transition-transform active:scale-95"
+            className={`col-span-2 bg-gray-100 text-[#1A120B] py-4 rounded-2xl font-bold text-sm hover:bg-gray-200 transition-transform active:scale-95 ${
+              !isAvailable ? 'opacity-50 cursor-not-allowed hover:bg-gray-100' : ''
+            }`}
             onClick={() => onAddToGroup(product, activeSize, price)}
+            disabled={!isAvailable}
           >
             Tambah ke Grup
           </button>

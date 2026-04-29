@@ -1,5 +1,5 @@
-const { products } = require('./catalog-data');
+const { getProducts } = require('../backend/src/controllers/productController');
 
-module.exports = (req, res) => {
-  res.status(200).json(products);
+module.exports = async (req, res) => {
+  return getProducts(req, res);
 };

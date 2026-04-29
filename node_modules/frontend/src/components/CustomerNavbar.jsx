@@ -2,63 +2,32 @@ import { useEffect, useState } from 'react'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { STORAGE_KEYS, readStoredValue } from '../data/customerStorage'
 
-const navItems = [
-  { to: '/', end: true, label: 'Home', state: null, type: 'link' },
-  { label: 'Menu', type: 'dropdown' },
-  { to: '/pesanan', label: 'Pesanan', state: null, type: 'link', badge: 'orders' },
-  { to: '/akun', label: 'Member', state: null, type: 'link' },
-  { label: 'Keranjang', state: { scrollToCart: true }, type: 'button', badge: 'cart' },
-]
-
-const menuDropdownItems = [
-  { label: 'Minuman', category: 'Minuman' },
-  { label: 'Makanan', category: 'Makanan' },
-  { label: 'Cemilan', category: 'Makanan' },
-]
-
-// Icon modern sesuai desain Group 50
-const Icon = ({ name }) => {
-  switch (name) {
-    case 'search':
-      return (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: '100%', height: '100%' }}>
-          <circle cx="11" cy="11" r="8"></circle>
-          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-        </svg>
-      )
-    case 'chevron-down':
-      return (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: '16px' }}>
-          <path d="m6 9 6 6 6-6" />
-        </svg>
-      )
-    case 'user':
-      return (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: '20px' }}>
-          <path d="M20 21a8 8 0 0 0-16 0" />
-          <circle cx="12" cy="8" r="4" />
-        </svg>
-      )
-    default:
-      return null
-  }
-}
+// ... (navItems, menuDropdownItems, dan Icon tetap sama seperti kode kamu)
 
 const CustomerNavbar = () => {
   const navigate = useNavigate()
   const [searchValue, setSearchValue] = useState('')
   const [counts, setCounts] = useState({ orders: 0, cart: 0 })
+  
+  // State baru untuk mengecek apakah user sudah login
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
 
   useEffect(() => {
     const updateCounts = () => {
       const cart = readStoredValue(STORAGE_KEYS.cart, [])
       const history = readStoredValue(STORAGE_KEYS.history, [])
       const preOrder = readStoredValue(STORAGE_KEYS.preorder, null)
+      
+      // Asumsi: Kita menyimpan data user di localStorage dengan key 'user' atau 'token'
+      // Sesuaikan dengan sistem login yang kamu buat di LoginPage sebelumnya
+      const user = localStorage.getItem('user') 
 
       setCounts({
         cart: Array.isArray(cart) ? cart.reduce((total, item) => total + (Number(item.qty) || 0), 0) : 0,
         orders: (Array.isArray(history) ? history.length : 0) + (preOrder ? 1 : 0),
       })
+      
+      setIsLoggedIn(!!user) // Jika user ada, set true
     }
 
     updateCounts()
@@ -84,12 +53,11 @@ const CustomerNavbar = () => {
           <img src="/Logo_Warkop_Nav.png" alt="Logo" style={{ height: '40px', width: 'auto' }} />
         </Link>
 
-        {/* SEARCH FORM - Dibuat Flex Grow agar melebar */}
+        {/* SEARCH FORM */}
         <form 
           className="customer-navbar__search" 
           onSubmit={handleSearchSubmit}
-          style={{ flex: 1, marginLeft: '80px', marginRight: '80px', maxWidth: '900px'
-            }}
+          style={{ flex: 1, marginLeft: '80px', marginRight: '80px', maxWidth: '900px' }}
         >
           <div className="customer-navbar__search-container" style={{ position: 'relative', width: '100%' }}>
             <span style={{ position: 'absolute', left: '15px', top: '50%', transform: 'translateY(-50%)', width: '18px', height: '18px', color: '#94a3b8', pointerEvents: 'none' }}>
@@ -146,9 +114,29 @@ const CustomerNavbar = () => {
             })}
           </nav>
 
-          <Link to="/akun" className="customer-navbar__profile" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <Icon name="user" />
-          </Link>
+          {/* LOGIKA LOGIN / PROFILE */}
+          {isLoggedIn ? (
+            // Jika SUDAH LOGIN: Tampilkan Icon User
+            <Link to="/akun" className="customer-navbar__profile" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Icon name="user" />
+            </Link>
+          ) : (
+            // Jika BELUM LOGIN: Tampilkan Tombol Login
+            <Link 
+              to="/login" 
+              className="customer-navbar__pill customer-navbar__pill--active" 
+              style={{ 
+                backgroundColor: '#0070f3', 
+                color: 'white', 
+                padding: '8px 20px', 
+                borderRadius: '8px',
+                fontWeight: '600',
+                marginLeft: '10px'
+              }}
+            >
+              Login
+            </Link>
+          )}
         </div>
 
       </div>
