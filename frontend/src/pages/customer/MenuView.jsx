@@ -20,9 +20,32 @@ const MenuView = () => {
   const [groupOrder, setGroupOrder] = useState({ members: 4, items: [], status: 'idle' });
   const [subscription, setSubscription] = useState({ id: null });
   
+  // Ganti bagian state subscriptionPlans di MenuView.jsx
   const subscriptionPlans = [
-    { id: 1, name: "Bronze Plan", price: 50000 },
-    { id: 2, name: "Silver Plan", price: 100000 }
+    { 
+      id: 1, 
+      name: "Daily Boost", 
+      price: 99000, 
+      description: "5 Cup Kopi pilihan per minggu untuk pelanggan yang selalu on the go.",
+      accent: "bg-[#D36B1F]", // Warna Oranye sesuai gambar
+      quota: "5 Cup / Minggu"
+    },
+    { 
+      id: 2, 
+      name: "Office Flow", 
+      price: 179000, 
+      description: "10 cup campuran kopi dan non-kopi untuk kerja santai atau tim kecil.",
+      accent: "bg-[#7C4724]", // Warna Cokelat Medium
+      quota: "10 Cup / Bulan"
+    },
+    { 
+      id: 3, 
+      name: "Shared Table", 
+      price: 329000, 
+      description: "Paket langganan bulanan untuk tim, komunitas, atau grup nongkrong.",
+      accent: "bg-[#2D1B0F]", // Warna Cokelat Tua
+      quota: "25 Cup / Bulan"
+    }
   ];
   const monthlySpend = 150000;
   const favoriteCoffee = "Latte";
@@ -129,7 +152,7 @@ const MenuView = () => {
                 />
                </div>
 
-               <div className="transition-transform hover:scale-[1.02]">
+               <div className="md:col-span-2 transition-transform hover:scale-[1.01]">
                 <CoffeeSubscription 
                    plans={subscriptionPlans} 
                    activeId={subscription?.id} 
