@@ -10,6 +10,8 @@ const MenuGrid = ({
   addToGroup, 
   menuRef 
 }) => {
+  const safeMenu = Array.isArray(menu) ? menu : [];
+
   return (
     <section className="w-full py-8 px-2" id="menu-section" ref={menuRef}>
       <div className="w-full">
@@ -23,7 +25,7 @@ const MenuGrid = ({
           </h2>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {!loading && menu.map((product) => (
+          {!loading && safeMenu.map((product) => (
             <ProductCard
               key={product.id}
               product={product}

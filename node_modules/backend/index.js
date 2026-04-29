@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
+const { subscriptions, weeklyPromos } = require('../api/catalog-data');
 
 // 1. Import Routes
 const productRoutes = require('./src/routes/productRoutes');
@@ -14,6 +15,14 @@ app.use(express.json());
 // 3. Gunakan Routes
 // Gunakan prefix /api agar sinkron dengan vercel.json
 app.use('/api/products', productRoutes);
+
+app.get('/api/subscriptions', (req, res) => {
+    res.json(subscriptions);
+});
+
+app.get('/api/promos/weekly', (req, res) => {
+    res.json(weeklyPromos);
+});
 
 // Endpoint status
 app.get('/api', (req, res) => {

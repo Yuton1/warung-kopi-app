@@ -4,30 +4,12 @@
   "installCommand": "cd frontend && npm install --workspaces=false",
   "buildCommand": "npm run build",
   "outputDirectory": "frontend/dist",
-  "rewrites": [
-    {
-      "source": "/api/(.*)",
-      "destination": "/backend/index.js"
-    },
-    {
-      "source": "/akun",
-      "destination": "/index.html"
-    },
-    {
-      "source": "/pesanan",
-      "destination": "/index.html"
-    },
-    {
-      "source": "/promo",
-      "destination": "/index.html"
-    },
-    {
-      "source": "/lokasi",
-      "destination": "/index.html"
-    },
-    {
-      "source": "/(.*)",
-      "destination": "/index.html"
-    }
+  "routes": [
+    { "handle": "filesystem" },
+    { "src": "/akun", "dest": "/index.html" },
+    { "src": "/pesanan", "dest": "/index.html" },
+    { "src": "/promo", "dest": "/index.html" },
+    { "src": "/lokasi", "dest": "/index.html" },
+    { "src": "/(.*)", "dest": "/index.html" }
   ]
 }
