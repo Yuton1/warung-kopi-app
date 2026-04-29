@@ -119,7 +119,7 @@ const MenuView = () => {
                 />
                </div>
                
-               <div className="transition-transform hover:scale-[1.02]">
+               <div className="md:col-span-2 transition-transform hover:scale-[1.01]">
                 <GroupOrderSection 
                    groupOrder={groupOrder} 
                    hasCart={cart.length > 0}
@@ -137,7 +137,7 @@ const MenuView = () => {
                 />
                </div>
 
-               <div className="md:col-span-2 lg:col-span-1 transition-transform hover:scale-[1.02]">
+               <div className="transition-transform hover:scale-[1.02]">
                 <AnalyticsDashboard 
                    monthlySpend={monthlySpend} 
                    favoriteCoffee={favoriteCoffee} 
