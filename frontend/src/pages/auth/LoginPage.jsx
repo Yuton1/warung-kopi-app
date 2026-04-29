@@ -10,19 +10,26 @@ const LoginPage = () => {
   const [password, setPassword] = useState('')
   const [rememberMe, setRememberMe] = useState(false)
 
+  // --- TAMBAHAN LOGIKA DINAMIS ---
+  // Jika dibuka di localhost, arahkan ke port 3000. 
+  // Jika di Vercel, arahkan ke URL backend kamu (silakan ganti link di bawah nanti).
+  const API_BASE_URL = window.location.hostname === 'localhost' 
+    ? "http://localhost:3000" 
+    : "https://your-backend-url.vercel.app"; 
+
   const handleSubmit = async (event) => {
     event.preventDefault()
 
     try {
-      // 1. Kirim data login ke backend yang terhubung ke TiDB
-      const response = await axios.post("http://localhost:3000/api/auth/login", { 
+      // 1. Menggunakan API_BASE_URL agar tidak error saat di-deploy
+      const response = await axios.post(`${API_BASE_URL}/api/auth/login`, { 
         email, 
         password 
       });
 
       // 2. Ambil data user asli dari database (seperti yang terlihat di image_7048d1.png)
       const { user, token } = response.data;
-      const userRole = user.role; // Ini akan mengambil nilai 'barista' atau 'admin' dari kolom role
+      const userRole = user.role; // Mengambil 'barista' atau 'admin' dari kolom role
 
       const authUser = {
         name: user.username,
@@ -53,7 +60,8 @@ const LoginPage = () => {
 
     } catch (err) {
       console.error("Login Error:", err);
-      alert(err.response?.data?.message || "Gagal terhubung ke server");
+      // Menampilkan pesan error yang lebih jelas dari backend jika ada
+      alert(err.response?.data?.message || "Gagal terhubung ke server. Pastikan Backend sudah jalan.");
     }
   }
 
@@ -64,7 +72,7 @@ const LoginPage = () => {
       <div className="flex w-full flex-col justify-center px-8 md:w-1/2 md:px-20 lg:px-32">
         {/* Brand/Logo Section */}
         <div className="mb-12 flex items-center gap-2">
-          <div className="h-6 w-6 rounded bg-[#1b120d]" /> {/* Pengganti Icon Logo */}
+          <div className="h-6 w-6 rounded bg-[#1b120d]" />
           <span className="text-xl font-bold tracking-tight text-[#1b120d]">WarungKopi</span>
         </div>
 
@@ -137,11 +145,9 @@ const LoginPage = () => {
       <div className="hidden h-full w-1/2 p-4 md:block">
         <div className="relative h-full w-full overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-[#4A3728] via-[#2B1B17] to-[#1b120d] flex items-center justify-center">
           
-          {/* Efek Cahaya / Dekorasi */}
           <div className="absolute top-[-10%] right-[-10%] h-80 w-80 rounded-full bg-[#e39b4f] opacity-20 blur-[100px]" />
           <div className="absolute bottom-[-10%] left-[-10%] h-80 w-80 rounded-full bg-[#e39b4f] opacity-10 blur-[100px]" />
 
-          {/* Konten Ilustrasi (Ganti src dengan ilustrasi kopimu sendiri) */}
           <div className="relative z-10 flex flex-col items-center text-center px-12">
             <img 
               src="/coffee-illustration.png" 
@@ -152,7 +158,6 @@ const LoginPage = () => {
             <p className="mt-4 text-sm text-gray-300 max-w-xs">Nikmati kemudahan memesan kopi favoritmu kapan saja dan di mana saja.</p>
           </div>
 
-          {/* Watermark Logo Putih di Pojok */}
           <div className="absolute bottom-10 right-10 opacity-30">
              <span className="text-white font-black tracking-widest text-2xl">WARUNGKOPI</span>
           </div>
