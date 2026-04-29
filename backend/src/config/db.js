@@ -1,33 +1,27 @@
-const fs = require('fs');
-const path = require('path');
 const mysql = require('mysql2/promise');
 require('dotenv').config();
 
-const localEnvPath = path.resolve(__dirname, '../../.env');
-if (fs.existsSync(localEnvPath)) {
-    require('dotenv').config({ path: localEnvPath });
-}
-
 const loadSslCa = () => {
-    const caValue = process.env.DB_SSL_CA || process.env.DB_CA;
+    const caValue = process.env.DB_CA || process.env.DB_SSL_CA;
 
-    if (!caValue) {
-        return undefined;
-    }
+    if (!caValue) return null;
 
+    // Jika teks mengandung header sertifikat, gunakan langsung
     if (caValue.includes('BEGIN CERTIFICATE')) {
         return caValue;
     }
 
-    if (fs.existsSync(caValue)) {
-        return fs.readFileSync(caValue, 'utf8');
+    // Cek apakah file fisik ada (berfungsi di lokal/Laragon)
+    try {
+        const fs = require('fs');
+        if (fs.existsSync(caValue)) {
+            return fs.readFileSync(caValue, 'utf8');
+        }
+    } catch (e) {
+        // Abaikan error jika fs tidak tersedia atau file tidak ada
     }
 
-    try {
-        return Buffer.from(caValue, 'base64').toString('utf8');
-    } catch {
-        return caValue;
-    }
+    return caValue; // Kembalikan nilai asli jika cara lain gagal
 };
 
 const sslCa = loadSslCa();
@@ -37,28 +31,25 @@ const pool = mysql.createPool({
     user: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME,
-    port: process.env.DB_PORT,
+    port: process.env.DB_PORT || 4000,
     waitForConnections: true,
     connectionLimit: 10,
     queueLimit: 0,
-    // TiDB Cloud butuh SSL; CA bisa dikirim via env sebagai isi PEM, base64, atau path file.
-    ssl: sslCa
-        ? {
-            minVersion: 'TLSv1.2',
-            ca: sslCa,
-            rejectUnauthorized: true
-        }
-        : {
-            minVersion: 'TLSv1.2',
-            rejectUnauthorized: true
-        }
+    ssl: sslCa ? {
+        minVersion: 'TLSv1.2',
+        ca: sslCa,
+        rejectUnauthorized: true
+    } : {
+        minVersion: 'TLSv1.2',
+        rejectUnauthorized: false // Fallback jika CA benar-benar tidak ada
+    }
 });
 
-// Verifikasi koneksi saat server startup
+// Verifikasi koneksi (hanya muncul di log server)
 (async () => {
     try {
         const connection = await pool.getConnection();
-        console.log('✅ Koneksi TiDB Berhasil: Terhubung ke database "' + process.env.DB_NAME + '"');
+        console.log('✅ Koneksi TiDB Berhasil ke database: ' + process.env.DB_NAME);
         connection.release();
     } catch (err) {
         console.error('❌ Koneksi TiDB Gagal:', err.message);
