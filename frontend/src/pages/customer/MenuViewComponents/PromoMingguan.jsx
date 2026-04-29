@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import axios from 'axios'; // Pastikan axios sudah terinstal
+import axios from 'axios';
 import { promoSeed } from '../../../data/promoSeed';
+import { STORAGE_KEYS, readStoredValue } from '../../../data/customerStorage';
 
 const PromoMingguan = () => {
   const [promos, setPromos] = useState(promoSeed);
   const [loading, setLoading] = useState(true);
+  const [authUser] = useState(() => readStoredValue(STORAGE_KEYS.auth, null));
 
   // Ambil data promo dari database (via Backend)
   useEffect(() => {
@@ -15,25 +17,30 @@ const PromoMingguan = () => {
   const fetchPromos = async () => {
     try {
       // Endpoint ini nantinya akan melakukan JOIN antara weekly_promos & user_promo_claims
-      const response = await axios.get('/api/promos/weekly');
+      const response = await axios.get('/api/promos/weekly', {
+        params: authUser?.email ? { userEmail: authUser.email } : {},
+      });
       setPromos(Array.isArray(response.data) ? response.data : promoSeed);
-      setLoading(false);
     } catch (error) {
       console.error("Gagal mengambil promo:", error);
       setPromos(promoSeed);
+    } finally {
       setLoading(false);
     }
   };
 
   const handleClaim = async (promoId) => {
     try {
-      const response = await axios.post('/api/promos/claim', { promoId });
+      const response = await axios.post('/api/promos/claim', {
+        promoId,
+        userEmail: authUser?.email || null,
+      });
       if (response.data.success) {
         alert(`Berhasil! Kode unik Anda: ${response.data.unique_code}`);
         fetchPromos(); // Refresh data agar status tombol berubah
       }
     } catch (error) {
-      alert(error.response?.data?.message || "Gagal klaim promo");
+      alert(error.response?.data?.error || error.response?.data?.message || "Gagal klaim promo");
     }
   };
 
