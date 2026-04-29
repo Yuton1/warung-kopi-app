@@ -15,7 +15,7 @@ const LoginPage = () => {
   // Jika di Vercel, arahkan ke URL backend kamu (silakan ganti link di bawah nanti).
   const API_BASE_URL = window.location.hostname === 'localhost' 
     ? "http://localhost:3000" 
-    : "https://your-backend-url.vercel.app"; 
+    : "https://warung-kopi-app.vercel.app"; 
 
   const handleSubmit = async (event) => {
     event.preventDefault()
