@@ -18,7 +18,10 @@ const MenuView = () => {
   const [favoriteIdSet, setFavoriteIdSet] = useState(new Set());
   const [preOrder, setPreOrder] = useState({ date: "", time: "", items: [] });
   const [groupOrder, setGroupOrder] = useState({ members: 4, items: [], status: 'idle' });
-  const [subscription, setSubscription] = useState({ id: null });
+  const [subscriptionPlans, setSubscriptionPlans] = useState([]);
+  const subResponse = await fetch('http://localhost:5000/api/subscriptions');
+  const subData = await subResponse.json();
+  setSubscriptionPlans(subData);
   
   // Ganti bagian state subscriptionPlans di MenuView.jsx
   const subscriptionPlans = [
@@ -53,27 +56,18 @@ const MenuView = () => {
 
   const menuSectionRef = useRef(null);
 
-  // 2. Fetch Data Dummy
   useEffect(() => {
     const fetchData = async () => {
       try {
-        setRecommendations([
-          { id: 1, name: "Caramel Macchiato", price: 35000 },
-          { id: 2, name: "Es Kopi Susu", price: 20000 }
-        ]);
-        setDisplayedMenu([
-           { id: 1, name: "Espresso", price: 15000, category: "Coffee" },
-           { id: 2, name: "Latte", price: 25000, category: "Coffee" },
-           { id: 3, name: "Cappuccino", price: 30000, category: "Coffee" },
-           { id: 4, name: "Americano", price: 20000, category: "Coffee", initials: "AM", points: 12 },
-           { id: 5, name: "Mocha", price: 32000, category: "Coffee", initials: "MC", points: 22 },
-           { id: 6, name: "Flat White", price: 28000, category: "Coffee", initials: "FW", points: 18 },
-           { id: 7, name: "Macchiato", price: 22000, category: "Coffee", initials: "MA", points: 14 },
-           { id: 8, name: "Affogato", price: 35000, category: "Coffee", initials: "AF", points: 25 }
-        ]);
+        setLoadingMenu(true);
+        const response = await fetch('http://localhost:5000/api/products'); 
+        const data = await response.json();
+        setRecommendations(data.slice(0, 2));
+        setDisplayedMenu(data);
         setLoadingMenu(false);
       } catch (error) {
-        console.error("Gagal ambil data:", error);
+        console.error("Gagal ambil data dari database:", error);
+        setLoadingMenu(false);
       }
     };
     fetchData();
