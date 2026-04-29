@@ -76,13 +76,13 @@ const AddMenuModal = ({ isOpen, onClose, onAdd }) => {
           <div>
             <label className="block text-sm font-bold text-gray-700 mb-1">Kategori</label>
             <select
-              className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-[#e39b4f] outline-none appearance-none"
               value={formData.category}
               onChange={(e) => setFormData({...formData, category: e.target.value})}
             >
-              <option value="minuman">Minuman</option>
-              <option value="makanan">Makanan</option>
-              <option value="cemilan">Cemilan</option>
+              <option value="coffee">Coffee</option>
+              <option value="non-coffee">Non-Coffee</option>
+              <option value="meal">Makanan</option>
+              <option value="snack">Cemilan</option>
             </select>
           </div>
 

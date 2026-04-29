@@ -59,10 +59,16 @@ const MenuManagement = () => {
     }
   };
 
-  const filteredMenu = menus.filter(item => 
-    item.category === activeTab && 
-    item.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredMenu = menus.filter(item => {
+      // Logika agar tab 'coffee' juga menampilkan data 'minuman'
+      const isCoffee = activeTab === 'coffee' && (item.category === 'coffee' || item.category === 'minuman');
+      const isMeal = activeTab === 'meal' && (item.category === 'meal' || item.category === 'makanan');
+      const isSnack = activeTab === 'snack' && (item.category === 'snack' || item.category === 'cemilan');
+      const isNonCoffee = activeTab === 'non-coffee' && item.category === 'non-coffee';
+
+      return (isCoffee || isMeal || isSnack || isNonCoffee) && 
+             item.name.toLowerCase().includes(searchTerm.toLowerCase());
+  });
 
   return (
     <div className="flex min-h-screen bg-[#F8F9FA]">
@@ -86,10 +92,10 @@ const MenuManagement = () => {
         {/* Filter & Search Bar - Menggunakan Kategori Database (ENUM) */}
         <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 mb-6 flex flex-col md:flex-row gap-4 items-center justify-between">
           <div className="flex bg-gray-100 p-1 rounded-xl">
-            <TabButton active={activeTab === 'coffee'} onClick={() => setActiveTab('coffee')} icon={<Coffee size={18}/>} label="Coffee" />
-            <TabButton active={activeTab === 'non-coffee'} onClick={() => setActiveTab('non-coffee')} icon={<Coffee size={18}/>} label="Non-Coffee" />
-            <TabButton active={activeTab === 'meal'} onClick={() => setActiveTab('meal')} icon={<Utensils size={18}/>} label="Makanan" />
-            <TabButton active={activeTab === 'snack'} onClick={() => setActiveTab('snack')} icon={<Cookie size={18}/>} label="Cemilan" />
+            <TabButton active={activeTab === 'coffee'} onClick={() => setActiveTab('coffee')}/>
+            <TabButton active={activeTab === 'non-coffee'} onClick={() => setActiveTab('non-coffee')}/>
+            <TabButton active={activeTab === 'meal'} onClick={() => setActiveTab('meal')}/>
+            <TabButton active={activeTab === 'snack'} onClick={() => setActiveTab('snack')}/>
           </div>
 
           <div className="relative w-full md:w-80">
