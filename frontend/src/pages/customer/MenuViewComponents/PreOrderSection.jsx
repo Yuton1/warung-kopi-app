@@ -13,16 +13,13 @@ const PreOrderSection = ({ hasCart, preOrder, onSave, onCancel }) => {
   }, [preOrder]);
 
   return (
-    <article className="feature-preorder-card relative overflow-hidden bg-gradient-to-br from-[#4A3728] via-[#2B1B17] to-[#1A120B] rounded-[2.5rem] p-8 md:p-12 text-white shadow-2xl transition-all duration-500">
+    <article className="relative overflow-hidden bg-gradient-to-br from-[#4A3728] via-[#2B1B17] to-[#1A120B] rounded-[2.5rem] p-8 md:p-12 text-white shadow-2xl transition-all duration-500">
       
       {/* Background Texture / Cahaya (Opsional untuk estetika image_b47d39.jpg) */}
       <div className="absolute top-0 right-0 w-full h-full opacity-20 pointer-events-none">
         <div className="absolute -top-24 -right-24 w-96 h-96 bg-[#8D6E63] rounded-full blur-[100px]" />
       </div>
-
       <div className="relative z-10 flex flex-col lg:flex-row justify-between items-center gap-10">
-        
-        {/* --- SISI KIRI: INFORMASI & INPUT --- */}
         <div className="flex-1 space-y-6">
           <div>
             <h2 className="text-4xl font-extrabold tracking-tight mb-2">Pre-order</h2>

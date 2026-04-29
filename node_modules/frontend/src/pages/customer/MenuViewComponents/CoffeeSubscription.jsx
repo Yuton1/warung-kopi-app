@@ -2,8 +2,10 @@ import React from 'react';
 import { formatRupiah } from '../../../utils/formatRupiah';
 
 const CoffeeSubscription = ({ plans, activeId, onActivate }) => {
+  const safePlans = Array.isArray(plans) ? plans : [];
+
   return (
-    <article className="feature-subscription-card w-full bg-[#1A120B] rounded-[2.5rem] p-8 md:p-12 shadow-2xl relative overflow-hidden">
+    <article className="w-full bg-[#1A120B] rounded-[2.5rem] p-8 md:p-12 shadow-2xl relative overflow-hidden">
       {/* Background Decor */}
       <div className="absolute top-0 right-0 w-64 h-64 bg-white opacity-[0.03] rounded-full -mr-20 -mt-20"></div>
       
@@ -16,7 +18,7 @@ const CoffeeSubscription = ({ plans, activeId, onActivate }) => {
       </header>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative z-10">
-        {plans.map((plan) => (
+        {safePlans.map((plan) => (
           <div 
             key={plan.id}
             onClick={() => onActivate(plan.id)}

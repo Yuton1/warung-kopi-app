@@ -30,8 +30,6 @@ const ProductCard = ({
     return Math.round(basePrice * factor)
   }, [activeSize, product.price])
 
-  const points = product.points ?? product.base_points ?? '0'
-
   return (
     <article className="bg-white rounded-[2.5rem] shadow-xl overflow-hidden flex flex-col w-full border border-gray-100">
       
@@ -119,7 +117,7 @@ const ProductCard = ({
           <div className="text-right">
             <p className="text-[10px] text-gray-400 font-bold uppercase mb-0.5">Poin</p>
             <strong className="text-xl font-extrabold text-black">
-              {points}
+              {product.points || '0'}
             </strong>
           </div>
         </div>
