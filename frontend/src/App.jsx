@@ -26,6 +26,7 @@ function App() {
 
         {/* ADMIN ROUTES - Management System */}
         <Route path="admin" element={<AdminDashboard />} />
+        <Route path="admin/menu" element={<MenuManagement />} />
         
         {/* BARISTA ROUTES - Operational System */}
         {/* <Route path="barista" element={<BaristaDashboard />} /> */}
