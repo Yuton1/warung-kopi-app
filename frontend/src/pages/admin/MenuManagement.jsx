@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import Sidebar from '../../components/Sidebar/Sidebar';
 import { Plus, Edit3, Trash2, Search, Coffee, Utensils, Cookie } from 'lucide-react';
+import AddMenuModal from '../../components/Modals/AddMenuModal';
 
 const MenuManagement = () => {
   const [activeTab, setActiveTab] = useState('minuman');
   const [searchTerm, setSearchTerm] = useState('');
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Data dummy (Nanti akan ditarik dari Database SQL Laragon)
   const [menus, setMenus] = useState([
@@ -18,6 +20,10 @@ const MenuManagement = () => {
     item.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const handleAddMenu = (newMenu) => {
+    setMenus([...menus, newMenu]); // Tambah data ke tabel secara real-time
+  };
+
   return (
     <div className="flex min-h-screen bg-[#F8F9FA]">
       <Sidebar role="admin" />
@@ -28,7 +34,11 @@ const MenuManagement = () => {
             <h1 className="text-3xl font-extrabold text-[#2c1b0e]">Menu Management</h1>
             <p className="text-gray-500">Atur ketersediaan produk dan harga di sini.</p>
           </div>
-          <button className="flex items-center gap-2 bg-[#e39b4f] text-white px-6 py-3 rounded-xl font-bold shadow-lg hover:bg-[#c9863e] transition">
+          {/* Tambahkan onClick disini */}
+          <button 
+            onClick={() => setIsModalOpen(true)}
+            className="flex items-center gap-2 bg-[#e39b4f] text-white px-6 py-3 rounded-xl font-bold shadow-lg hover:bg-[#c9863e] transition"
+          >
             <Plus size={20} />
             Tambah Menu Baru
           </button>
@@ -80,7 +90,7 @@ const MenuManagement = () => {
                   <td className="px-6 py-4">
                     <div className="flex justify-center gap-2">
                       <button className="p-2 text-blue-500 hover:bg-blue-50 rounded-lg transition"><Edit3 size={18}/></button>
-                      <button className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition"><Trash2 size={18}/></button>
+                      <button onClick={() => handleDeleteMenu(item.id)}className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition"><Trash2 size={18}/></button>
                     </div>
                   </td>
                 </tr>
@@ -88,9 +98,20 @@ const MenuManagement = () => {
             </tbody>
           </table>
         </div>
+        <AddMenuModal 
+          isOpen={isModalOpen} 
+          onClose={() => setIsModalOpen(false)} 
+          onAdd={handleAddMenu} 
+        />
       </main>
     </div>
   );
+};
+
+const handleDeleteMenu = (id) => {
+  if (window.confirm('Apakah Anda yakin ingin menghapus menu ini?')) {
+    setMenus(menus.filter(item => item.id !== id));
+  }
 };
 
 const TabButton = ({ active, onClick, icon, label }) => (
