@@ -75,10 +75,10 @@ const MenuManagement = () => {
     });
 
   return (
-    <div className="flex min-h-screen bg-[#F8F9FA]">
+    <div className="flex h-screen bg-[#F8F9FA] overflow-hidden">
       <Sidebar role="admin" />
 
-      <main className="flex-1 p-8">
+      <main className="flex-1 p-8 overflow-y-auto">
         <header className="flex justify-between items-center mb-8">
           <div>
             <h1 className="text-3xl font-extrabold text-[#2c1b0e]">Menu Management</h1>

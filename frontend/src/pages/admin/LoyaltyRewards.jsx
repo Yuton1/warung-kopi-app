@@ -6,10 +6,10 @@ const LoyaltyRewards = () => {
   const [searchTerm, setSearchTerm] = useState('');
 
   return (
-    <div className="flex min-h-screen bg-[#F8F9FA]">
+    <div className="flex h-screen bg-[#F8F9FA] overflow-hidden">
       <Sidebar role="admin" />
       
-      <main className="flex-1 p-8">
+      <main className="flex-1 p-8 overflow-y-auto">
         {/* Header Section */}
         <header className="flex justify-between items-end mb-8">
           <div>
