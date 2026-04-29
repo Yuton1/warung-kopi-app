@@ -14,12 +14,17 @@ const defaultAccount = {
 const ProfilePage = () => {
   const [mode, setMode] = useState('login')
   const [account, setAccount] = useState(() => readStoredValue(STORAGE_KEYS.account, defaultAccount))
+  const [authUser, setAuthUser] = useState(() => readStoredValue(STORAGE_KEYS.auth, null))
   const [password, setPassword] = useState('')
   const [status, setStatus] = useState('')
 
   useEffect(() => {
     writeStoredValue(STORAGE_KEYS.account, account)
   }, [account])
+
+  useEffect(() => {
+    setAuthUser(readStoredValue(STORAGE_KEYS.auth, null))
+  }, [account?.email, mode])
 
   useEffect(() => {
     if (account?.mode) {
@@ -46,6 +51,15 @@ const ProfilePage = () => {
     setPassword('')
   }
 
+  const handleLogout = () => {
+    if (typeof window !== 'undefined') {
+      window.localStorage.removeItem(STORAGE_KEYS.auth)
+      window.dispatchEvent(new Event('warungkopi-state-changed'))
+    }
+    setAuthUser(null)
+    setStatus('Kamu sudah logout')
+  }
+
   return (
     <div className="screen-shell">
       <section className="screen-hero">
@@ -60,11 +74,16 @@ const ProfilePage = () => {
 
         <div className="screen-hero__card">
           <span className="eyebrow">Akses cepat</span>
-          <strong>{account.name || 'Tamu Warung Kopi'}</strong>
-          <p>{account.email || 'Belum login'}</p>
+          <strong>{authUser?.name || account.name || 'Tamu Warung Kopi'}</strong>
+          <p>{authUser?.email || account.email || 'Belum login'}</p>
           <Link to="/" className="btn btn-secondary">
             Kembali ke menu
           </Link>
+          {authUser ? (
+            <button type="button" className="btn btn-primary" onClick={handleLogout}>
+              Logout
+            </button>
+          ) : null}
         </div>
       </section>
 
@@ -183,4 +202,3 @@ const ProfilePage = () => {
 }
 
 export default ProfilePage
-

@@ -3,10 +3,10 @@ import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { STORAGE_KEYS, readStoredValue } from '../data/customerStorage'
 
 const navItems = [
-  { to: '/', end: true, label: 'Home', state: null, type: 'link' },
+  { to: '/', end: true, label: 'Home', type: 'link' },
   { label: 'Menu', type: 'dropdown' },
-  { to: '/pesanan', label: 'Pesanan', state: null, type: 'link', badge: 'orders' },
-  { to: '/akun', label: 'Member', state: null, type: 'link' },
+  { to: '/pesanan', label: 'Pesanan', type: 'link', badge: 'orders' },
+  { to: '/akun', label: 'Member', type: 'link' },
   { label: 'Keranjang', state: { scrollToCart: true }, type: 'button', badge: 'cart' },
 ]
 
@@ -21,8 +21,8 @@ const Icon = ({ name }) => {
     case 'search':
       return (
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: '100%', height: '100%' }}>
-          <circle cx="11" cy="11" r="8"></circle>
-          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          <circle cx="11" cy="11" r="8" />
+          <line x1="21" y1="21" x2="16.65" y2="16.65" />
         </svg>
       )
     case 'chevron-down':
@@ -47,57 +47,44 @@ const CustomerNavbar = () => {
   const navigate = useNavigate()
   const [searchValue, setSearchValue] = useState('')
   const [counts, setCounts] = useState({ orders: 0, cart: 0 })
-  
-  // State baru untuk mengecek apakah user sudah login
   const [isLoggedIn, setIsLoggedIn] = useState(false)
 
   useEffect(() => {
-    const updateCounts = () => {
+    const updateState = () => {
       const cart = readStoredValue(STORAGE_KEYS.cart, [])
       const history = readStoredValue(STORAGE_KEYS.history, [])
       const preOrder = readStoredValue(STORAGE_KEYS.preorder, null)
-      
-      // Asumsi: Kita menyimpan data user di localStorage dengan key 'user' atau 'token'
-      // Sesuaikan dengan sistem login yang kamu buat di LoginPage sebelumnya
-      const user = localStorage.getItem('user') 
+      const auth = readStoredValue(STORAGE_KEYS.auth, null)
 
       setCounts({
         cart: Array.isArray(cart) ? cart.reduce((total, item) => total + (Number(item.qty) || 0), 0) : 0,
         orders: (Array.isArray(history) ? history.length : 0) + (preOrder ? 1 : 0),
       })
-      
-      setIsLoggedIn(!!user) // Jika user ada, set true
+      setIsLoggedIn(Boolean(auth?.email))
     }
 
-    updateCounts()
-    window.addEventListener('storage', updateCounts)
-    window.addEventListener('warungkopi-state-changed', updateCounts)
+    updateState()
+    window.addEventListener('storage', updateState)
+    window.addEventListener('warungkopi-state-changed', updateState)
     return () => {
-      window.removeEventListener('storage', updateCounts)
-      window.removeEventListener('warungkopi-state-changed', updateCounts)
+      window.removeEventListener('storage', updateState)
+      window.removeEventListener('warungkopi-state-changed', updateState)
     }
   }, [])
 
-  const handleSearchSubmit = (e) => {
-    e.preventDefault()
+  const handleSearchSubmit = (event) => {
+    event.preventDefault()
     navigate('/', { state: { focusSearch: true, searchQuery: searchValue.trim() } })
   }
 
   return (
     <header className="site-header" style={{ backgroundColor: '#ffffff' }}>
       <div className="customer-navbar__inner">
-        
-        {/* LOGO */}
         <Link to="/" className="brand-link brand-link--navbar">
           <img src="/Logo_Warkop_Nav.png" alt="Logo" style={{ height: '40px', width: 'auto' }} />
         </Link>
 
-        {/* SEARCH FORM */}
-        <form 
-          className="customer-navbar__search" 
-          onSubmit={handleSearchSubmit}
-          style={{ flex: 1, marginLeft: '80px', marginRight: '80px', maxWidth: '900px' }}
-        >
+        <form className="customer-navbar__search" onSubmit={handleSearchSubmit}>
           <div className="customer-navbar__search-container" style={{ position: 'relative', width: '100%' }}>
             <span style={{ position: 'absolute', left: '15px', top: '50%', transform: 'translateY(-50%)', width: '18px', height: '18px', color: '#94a3b8', pointerEvents: 'none' }}>
               <Icon name="search" />
@@ -107,13 +94,12 @@ const CustomerNavbar = () => {
               type="search"
               placeholder="Cari menu..."
               value={searchValue}
-              onChange={(e) => setSearchValue(e.target.value)}
-              style={{ width: '100%', paddingLeft: '45px' }} 
+              onChange={(event) => setSearchValue(event.target.value)}
+              style={{ width: '100%', paddingLeft: '45px' }}
             />
           </div>
         </form>
 
-        {/* NAV ACTIONS */}
         <div className="customer-navbar__actions">
           <nav className="customer-navbar__nav">
             {navItems.map((item) => {
@@ -125,9 +111,14 @@ const CustomerNavbar = () => {
                       <Icon name="chevron-down" />
                     </summary>
                     <div className="customer-navbar__dropdown">
-                      {menuDropdownItems.map((opt) => (
-                        <button key={opt.label} onClick={() => navigate('/', { state: { category: opt.category } })}>
-                          {opt.label}
+                      {menuDropdownItems.map((option) => (
+                        <button
+                          key={option.label}
+                          type="button"
+                          className="customer-navbar__dropdown-item"
+                          onClick={() => navigate('/', { state: { category: option.category } })}
+                        >
+                          {option.label}
                         </button>
                       ))}
                     </div>
@@ -137,47 +128,42 @@ const CustomerNavbar = () => {
 
               if (item.type === 'button') {
                 return (
-                  <button key={item.label} className="customer-navbar__pill" onClick={() => navigate('/', { state: item.state })}>
+                  <button
+                    key={item.label}
+                    type="button"
+                    className="customer-navbar__pill customer-navbar__pill--button"
+                    onClick={() => navigate('/', { state: item.state })}
+                  >
                     <span>{item.label}</span>
-                    {item.badge && counts[item.badge] > 0 && <span className="customer-navbar__badge">{counts[item.badge]}</span>}
+                    {item.badge && counts[item.badge] > 0 ? <span className="customer-navbar__badge">{counts[item.badge]}</span> : null}
                   </button>
                 )
               }
 
               return (
-                <NavLink key={item.label} to={item.to} end={item.end} className={({ isActive }) => `customer-navbar__pill ${isActive ? 'customer-navbar__pill--active' : ''}`}>
+                <NavLink
+                  key={item.label}
+                  to={item.to}
+                  end={item.end}
+                  className={({ isActive }) => `customer-navbar__pill ${isActive ? 'customer-navbar__pill--active' : ''}`}
+                >
                   <span>{item.label}</span>
-                  {item.badge && counts[item.badge] > 0 && <span className="customer-navbar__badge">{counts[item.badge]}</span>}
+                  {item.badge && counts[item.badge] > 0 ? <span className="customer-navbar__badge">{counts[item.badge]}</span> : null}
                 </NavLink>
               )
             })}
           </nav>
 
-          {/* LOGIKA LOGIN / PROFILE */}
           {isLoggedIn ? (
-            // Jika SUDAH LOGIN: Tampilkan Icon User
-            <Link to="/akun" className="customer-navbar__profile" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Link to="/akun" className="customer-navbar__profile" aria-label="Buka profil">
               <Icon name="user" />
             </Link>
           ) : (
-            // Jika BELUM LOGIN: Tampilkan Tombol Login
-            <Link 
-              to="/login" 
-              className="customer-navbar__pill customer-navbar__pill--active" 
-              style={{ 
-                backgroundColor: '#0070f3', 
-                color: 'white', 
-                padding: '8px 20px', 
-                borderRadius: '8px',
-                fontWeight: '600',
-                marginLeft: '10px'
-              }}
-            >
+            <Link to="/login" className="customer-navbar__pill customer-navbar__pill--active">
               Login
             </Link>
           )}
         </div>
-
       </div>
     </header>
   )

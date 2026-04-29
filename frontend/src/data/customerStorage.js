@@ -1,5 +1,6 @@
 export const STORAGE_KEYS = {
   account: 'warungkopi.account',
+  auth: 'warungkopi.auth',
   cart: 'warungkopi.cart',
   favorites: 'warungkopi.favorites',
   groupOrder: 'warungkopi.groupOrder',
@@ -33,4 +34,3 @@ export const writeStoredValue = (key, value) => {
 
   window.localStorage.setItem(key, JSON.stringify(value))
 }
-
