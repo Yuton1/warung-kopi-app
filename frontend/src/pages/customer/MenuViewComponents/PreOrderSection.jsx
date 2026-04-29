@@ -1,73 +1,99 @@
-// src/pages/customer/MenuViewComponents/PreOrderSection.jsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
-const PreOrderSection = ({ onSave, onCancel, preOrder }) => {
-  const [selectedTime, setSelectedTime] = useState(preOrder?.time || "");
+const PreOrderSection = ({ hasCart, preOrder, onSave, onCancel }) => {
+  const [time, setTime] = useState(preOrder?.time || "");
   const [note, setNote] = useState(preOrder?.note || "");
 
-  // List waktu cepat (Quick Pick)
-  const quickTimes = ["08:30", "09:00", "12:30", "15:00", "17:00"];
+  // Update state lokal jika prop preOrder berubah (misal saat load data)
+  useEffect(() => {
+    if (preOrder) {
+      setTime(preOrder.time || "");
+      setNote(preOrder.note || "");
+    }
+  }, [preOrder]);
 
   return (
-    <div className="relative overflow-hidden bg-gradient-to-r from-[#2B1B17] to-[#4A3728] rounded-[2.5rem] p-8 text-white shadow-2xl">
-      {/* Dekorasi Background */}
-      <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -mr-20 -mt-20 blur-3xl"></div>
+    <article className="relative overflow-hidden bg-gradient-to-br from-[#4A3728] via-[#2B1B17] to-[#1A120B] rounded-[2.5rem] p-8 md:p-12 text-white shadow-2xl transition-all duration-500">
       
-      <div className="relative z-10 flex flex-col lg:flex-row justify-between items-center gap-8">
-        <div className="max-w-md">
-          <h2 className="text-3xl font-bold mb-2">Pre-order Scheduling</h2>
-          <p className="text-gray-300 text-sm leading-relaxed">
-            Pesan sekarang, ambil nanti. Hindari antrean panjang dan pastikan kopi Anda siap saat Anda tiba.
-          </p>
-          
-          {/* Input Waktu */}
-          <div className="mt-6">
-            <label className="text-[10px] uppercase tracking-widest font-bold text-orange-400">Pilih Jam Ambil</label>
-            <div className="flex gap-2 mt-2 overflow-x-auto pb-2 scrollbar-hide">
-              {quickTimes.map(t => (
-                <button 
-                  key={t}
-                  onClick={() => setSelectedTime(t)}
-                  className={`px-4 py-2 rounded-xl border text-xs font-bold transition-all ${
-                    selectedSize === t ? 'bg-orange-500 border-orange-500' : 'bg-white/10 border-white/20'
-                  }`}
-                >
-                  {t}
-                </button>
-              ))}
+      {/* Background Texture / Cahaya (Opsional untuk estetika image_b47d39.jpg) */}
+      <div className="absolute top-0 right-0 w-full h-full opacity-20 pointer-events-none">
+        <div className="absolute -top-24 -right-24 w-96 h-96 bg-[#8D6E63] rounded-full blur-[100px]" />
+      </div>
+
+      <div className="relative z-10 flex flex-col lg:flex-row justify-between items-center gap-10">
+        
+        {/* --- SISI KIRI: INFORMASI & INPUT --- */}
+        <div className="flex-1 space-y-6">
+          <div>
+            <h2 className="text-4xl font-extrabold tracking-tight mb-2">Pre-order</h2>
+            <span className="text-orange-400 font-bold text-sm uppercase tracking-widest block mb-4">
+              Fitur Pre-order Scheduling
+            </span>
+            <p className="text-gray-300 text-sm leading-relaxed max-w-md">
+              Atur jam ambil dan simpan pre-order. Pilih jam ambil, tulis catatan, 
+              lalu simpan order agar bisa diubah atau dibatalkan sebelum checkout.
+            </p>
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-4">
+            {/* Input Jam */}
+            <div className="flex flex-col gap-2">
+              <label className="text-[10px] font-black uppercase text-gray-400">Jam Ambil</label>
               <input 
-                type="time" 
-                value={selectedTime}
-                onChange={(e) => setSelectedTime(e.target.value)}
-                className="bg-white/10 border border-white/20 rounded-xl px-3 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-orange-500"
+                type="time"
+                value={time}
+                onChange={(e) => setTime(e.target.value)}
+                className="bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-orange-500 transition-all font-bold"
+              />
+            </div>
+            {/* Input Catatan */}
+            <div className="flex flex-col gap-2 flex-1">
+              <label className="text-[10px] font-black uppercase text-gray-400">Catatan Pengambilan</label>
+              <input 
+                type="text"
+                placeholder="Contoh: Ambil di parkiran depan"
+                value={note}
+                onChange={(e) => setNote(e.target.value)}
+                className="bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500 transition-all text-sm"
               />
             </div>
           </div>
         </div>
 
-        {/* Action Buttons */}
-        <div className="flex flex-col gap-3 w-full lg:w-64">
-          <textarea 
-            placeholder="Catatan pengambilan (misal: Parkir depan)"
-            className="bg-white/10 border border-white/20 rounded-2xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 h-20"
-            value={note}
-            onChange={(e) => setNote(e.target.value)}
-          />
+        {/* --- SISI KANAN: TOMBOL AKSI --- */}
+        <div className="flex flex-col gap-3 w-full lg:w-72">
           <button 
-            onClick={() => onSave({ time: selectedTime, note })}
-            className="bg-orange-500 hover:bg-orange-600 text-white font-bold py-4 rounded-2xl transition-all shadow-lg active:scale-95"
+            className={`w-full py-4 rounded-2xl font-bold text-sm transition-all shadow-lg active:scale-95 ${
+              !hasCart 
+              ? 'bg-gray-700 text-gray-400 cursor-not-allowed' 
+              : 'bg-[#1A120B] text-white hover:bg-black border border-white/10'
+            }`}
+            onClick={() => onSave({ time, note })}
+            disabled={!hasCart}
           >
-            Simpan Jadwal
+            Simpan Pre-order
           </button>
+          
           <button 
+            className={`w-full py-4 rounded-2xl font-bold text-sm transition-all active:scale-95 ${
+              !preOrder 
+              ? 'bg-white/5 text-gray-500 cursor-not-allowed' 
+              : 'bg-white text-[#1A120B] hover:bg-gray-100 shadow-xl'
+            }`}
             onClick={onCancel}
-            className="bg-white text-[#2B1B17] font-bold py-4 rounded-2xl hover:bg-gray-100 transition-all active:scale-95"
+            disabled={!preOrder}
           >
             Batalkan
           </button>
+
+          {!hasCart && (
+            <p className="text-[10px] text-center text-orange-300 mt-2 italic">
+              * Tambahkan menu ke keranjang untuk mengatur jadwal
+            </p>
+          )}
         </div>
       </div>
-    </div>
+    </article>
   );
 };
 
