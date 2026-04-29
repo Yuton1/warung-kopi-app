@@ -11,10 +11,8 @@ import MinumanPage from './pages/customer/MinumanPage'
 import OrdersPage from './pages/customer/OrdersPage'
 import ProfilePage from './pages/customer/ProfilePage'
 import PromoPage from './pages/customer/PromoPage'
-
-// IMPORT HALAMAN BARU
 import AdminDashboard from './pages/admin/AdminDashboard'
-// import BaristaDashboard from './pages/barista/BaristaDashboard' // Aktifkan jika file sudah ada
+import MenuManagement from './pages/admin/MenuManagement'
 
 function App() {
   return (
