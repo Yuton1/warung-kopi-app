@@ -1,43 +1,26 @@
 const db = require('../config/db');
 
-const categoryLabelMap = {
-  coffee: 'Kopi',
-  'non-coffee': 'Minuman',
-  meal: 'Makanan',
-  snack: 'Cemilan',
-};
-
-const normalizeProduct = (row) => ({
-  ...row,
-  points: Number(row.base_points ?? row.points ?? 0),
-  stock: Number(row.stock ?? 0),
-  is_available: Boolean(row.is_available),
-  image_url: row.image_url || '',
-  category_label: categoryLabelMap[String(row.category || '').toLowerCase()] || String(row.category || '').toUpperCase(),
-});
-
 const listProducts = async () => {
-  const [rows] = await db.query(`
-    SELECT
-      id,
-      name,
-      initials,
-      description,
-      price,
-      base_points,
-      category,
-      badge,
-      image_url,
-      stock,
-      is_available,
-      created_at
-    FROM products
-    ORDER BY created_at DESC, id DESC
-  `);
-
-  return rows.map(normalizeProduct);
+    const [rows] = await db.execute('SELECT * FROM products ORDER BY id DESC');
+    return rows;
 };
 
-module.exports = {
-  listProducts,
+const createProduct = async (data) => {
+    const { name, initials, description, price, base_points, category, badge, image_url, stock } = data;
+    const query = `
+        INSERT INTO products 
+        (name, initials, description, price, base_points, category, badge, image_url, stock) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `;
+    const [result] = await db.execute(query, [
+        name, initials, description, price, base_points, category, badge, image_url, stock
+    ]);
+    return { id: result.insertId, ...data };
 };
+
+const removeProduct = async (id) => {
+    await db.execute('DELETE FROM products WHERE id = ?', [id]);
+    return true;
+};
+
+module.exports = { listProducts, createProduct, removeProduct };

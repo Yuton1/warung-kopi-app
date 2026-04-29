@@ -20,9 +20,22 @@ const MenuManagement = () => {
     item.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleAddMenu = (newMenu) => {
-    setMenus([...menus, newMenu]); // Tambah data ke tabel secara real-time
-  };
+  const handleAddMenu = async (formData) => {
+      const payload = {
+        ...formData,
+        initials: formData.name.substring(0, 2).toUpperCase(),
+        base_points: Math.floor(formData.price / 1000), // Poin loyalitas otomatis
+        is_available: true
+      };
+  
+      try {
+        const res = await axios.post("http://localhost:3000/api/products", payload);
+        setMenus([res.data, ...menus]);
+        setIsModalOpen(false);
+      } catch (err) {
+        alert("Cek koneksi backend atau kategori ENUM database!");
+      }
+    };
 
   return (
     <div className="flex min-h-screen bg-[#F8F9FA]">
