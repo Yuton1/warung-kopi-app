@@ -13,6 +13,7 @@ import ProfilePage from './pages/customer/ProfilePage'
 import PromoPage from './pages/customer/PromoPage'
 import AdminDashboard from './pages/admin/AdminDashboard'
 import MenuManagement from './pages/admin/MenuManagement'
+import UserManagement from './pages/admin/UserManagement';
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
         {/* ADMIN ROUTES - Management System */}
         <Route path="admin" element={<AdminDashboard />} />
         <Route path="admin/menu" element={<MenuManagement />} />
+        <Route path="/admin/users" element={<UserManagement />} />
         
         {/* BARISTA ROUTES - Operational System */}
         {/* <Route path="barista" element={<BaristaDashboard />} /> */}
