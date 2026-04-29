@@ -43,7 +43,7 @@ const MenuView = () => {
         const subs = await subRes.json();
 
         setDisplayedMenu(Array.isArray(products) ? products : []);
-        setRecommendations(Array.isArray(products) ? products.slice(0, 2) : []);
+        setRecommendations(Array.isArray(products) ? products.slice(0, 6) : []);
         setSubscriptionPlans(Array.isArray(subs) ? subs : []);
         setLoadingMenu(false);
       } catch (error) {
