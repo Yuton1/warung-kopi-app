@@ -14,7 +14,7 @@ import PromoPage from './pages/customer/PromoPage'
 import AdminDashboard from './pages/admin/AdminDashboard'
 import MenuManagement from './pages/admin/MenuManagement'
 import UserManagement from './pages/admin/UserManagement';
-import UserManagement from './pages/admin/LoyaltyRewards';
+import LoyaltyRewards from './pages/admin/LoyaltyRewards';
 
 function App() {
   return (
