@@ -17,11 +17,11 @@ const AdminDashboard = () => {
   }, [auth, navigate]);
 
   return (
-    <div className="flex min-h-screen bg-[#F8F9FA]">
+    <div className="flex h-screen bg-[#F8F9FA] overflow-hidden">
       {/* Sidebar - Pastikan Sidebar.jsx sudah ada di folder components */}
       <Sidebar role="admin" /> 
 
-      <main className="flex-1 p-8">
+      <main className="flex-1 p-8 overflow-y-auto">
         {/* Header Section */}
         <header className="flex justify-between items-center mb-10">
           <div>

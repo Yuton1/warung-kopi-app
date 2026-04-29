@@ -17,7 +17,7 @@ const Sidebar = ({ role }) => {
   };
 
   return (
-    <aside className="w-72 bg-[#2c1b0e] h-screen sticky top-0 flex flex-col p-6 text-white shadow-2xl overflow-y-auto shrink-0">
+    <aside className="w-72 bg-[#2c1b0e] h-screen sticky top-0 flex flex-col p-6 text-white shadow-2xl shrink-0">
       {/* Brand Logo */}
       <div className="flex items-center gap-3 mb-10 px-2">
         <div className="h-8 w-8 bg-[#e39b4f] rounded-lg rotate-12 flex items-center justify-center shadow-lg">
