@@ -11,18 +11,18 @@ const MenuGrid = ({
   menuRef 
 }) => {
   return (
-    <section className="w-full py-8" id="menu-section" ref={menuRef}>
+    <section className="w-full py-8 px-2" id="menu-section" ref={menuRef}>
       <div className="w-full">
         {/* Header Section */}
-        <div className="mb-10 text-center md:text-left">
-          <span className="text-[12px] font-medium text-gray-400 uppercase tracking-[0.2em] block mb-2">
+        <div className="mb-8 text-left">
+          <span className="text-[15px] font-medium text-gray-400 uppercase tracking-widest block mb-1">
             Personal Suggestions
           </span>
-          <h2 className="text-4xl font-extrabold text-gray-900 tracking-tight">
+          <h2 className="text-4xl font-extrabold text-gray-900">
             {loading ? 'Memuat Menu...' : 'Menu Sering di Pesan'}
           </h2>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {!loading && menu.map((product) => (
             <ProductCard
               key={product.id}
