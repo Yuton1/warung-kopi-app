@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import Sidebar from '../../components/Sidebar/Sidebar';
 import { Search, Trash2, UserPlus, X, Shield, UserCheck } from 'lucide-react';
+import { getApiBaseUrl } from '../../utils/apiBaseUrl';
 
 const UserManagement = () => {
   const [users, setUsers] = useState([]);
@@ -16,8 +17,9 @@ const UserManagement = () => {
     role: 'customer' 
   });
 
-  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? "http://localhost:3000" : "");
-  const API_URL = `${API_BASE_URL}/api/users`;
+  const API_BASE_URL = getApiBaseUrl();
+  const API_URL = API_BASE_URL ? `${API_BASE_URL}/api/users` : '/api/users';
+  const REGISTER_URL = API_BASE_URL ? `${API_BASE_URL}/api/auth/register` : '/api/auth/register';
 
   useEffect(() => {
     fetchUsers();
@@ -36,7 +38,7 @@ const UserManagement = () => {
     e.preventDefault();
     try {
       // Endpoint register biasanya bisa digunakan untuk pembuatan akun manual
-      await axios.post(`${API_BASE_URL}/api/auth/register`, newUser);
+      await axios.post(REGISTER_URL, newUser);
       setIsModalOpen(false);
       setNewUser({ username: '', email: '', password: '', role: 'customer' });
       fetchUsers(); // Refresh daftar tabel
