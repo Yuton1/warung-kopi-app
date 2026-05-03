@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom'
 import axios from 'axios' // Gunakan axios untuk koneksi ke backend/TiDB
 import { AuthField } from './AuthShell'
 import { STORAGE_KEYS, writeStoredValue } from '../../data/customerStorage'
+import { getApiBaseUrl } from '../../utils/apiBaseUrl'
 
 const LoginPage = () => {
   const navigate = useNavigate()
@@ -10,17 +11,15 @@ const LoginPage = () => {
   const [password, setPassword] = useState('')
   const [rememberMe, setRememberMe] = useState(false)
 
-  // --- TAMBAHAN LOGIKA DINAMIS ---
-  // Jika dibuka di localhost, arahkan ke port 3000. 
-  // Jika di Vercel, arahkan ke URL backend kamu (silakan ganti link di bawah nanti).
-  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? "http://localhost:3000" : "");
+  const API_BASE_URL = getApiBaseUrl()
+  const loginUrl = API_BASE_URL ? `${API_BASE_URL}/api/auth/login` : '/api/auth/login'
 
   const handleSubmit = async (event) => {
     event.preventDefault()
 
     try {
       // 1. Menggunakan API_BASE_URL agar tidak error saat di-deploy
-      const response = await axios.post(`${API_BASE_URL}/api/auth/login`, { 
+      const response = await axios.post(loginUrl, { 
         email, 
         password 
       });
@@ -57,9 +56,14 @@ const LoginPage = () => {
       }
 
     } catch (err) {
-      console.error("Login Error:", err);
-      // Menampilkan pesan error yang lebih jelas dari backend jika ada
-      alert(err.response?.data?.message || "Gagal terhubung ke server. Pastikan Backend sudah jalan.");
+      console.error("Login Error:", err)
+
+      const serverMessage = err.response?.data?.message || err.response?.data?.error
+      const isNetworkError = err.code === 'ERR_NETWORK'
+
+      alert(serverMessage || (isNetworkError
+        ? 'Tidak bisa menghubungi API login. Cek deploy backend, rewrite /api, dan env TiDB.'
+        : 'Login gagal. Periksa email/password atau log backend.'))
     }
   }
 

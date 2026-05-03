@@ -3,6 +3,7 @@ import axios from 'axios'; // Pastikan axios sudah di-import
 import Sidebar from '../../components/Sidebar/Sidebar';
 import { Plus, Edit3, Trash2, Search, Coffee, Utensils, Cookie } from 'lucide-react';
 import AddMenuModal from '../../components/Modals/AddMenuModal';
+import { getApiBaseUrl } from '../../utils/apiBaseUrl';
 
 const MenuManagement = () => {
   // 1. Ubah default state ke kategori database agar sinkron
@@ -11,7 +12,8 @@ const MenuManagement = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [menus, setMenus] = useState([]); // State sekarang kosong (nanti diisi dari DB)
 
-  const API_URL = "http://localhost:3000/api/products";
+  const API_BASE_URL = getApiBaseUrl();
+  const API_URL = API_BASE_URL ? `${API_BASE_URL}/api/products` : '/api/products';
 
   // 2. Ambil data asli dari TiDB saat komponen pertama kali dimuat
   useEffect(() => {
