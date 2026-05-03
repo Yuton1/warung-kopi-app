@@ -86,7 +86,7 @@ const UserManagement = () => {
         </div>
 
         {/* Tabel User */}
-        <div className="bg-white rounded-[2rem] shadow-sm border border-gray-100 overflow-hidden">
+        <div className="bg-white shadow-sm border border-gray-100 overflow-hidden">
           <table className="w-full text-left">
             <thead className="bg-gray-50 text-gray-400 text-xs uppercase tracking-widest font-bold">
               <tr>

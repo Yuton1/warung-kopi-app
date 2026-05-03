@@ -43,7 +43,7 @@ const LoyaltyRewards = () => {
         </div>
 
         {/* Reward Table */}
-        <div className="bg-white rounded-[2rem] shadow-sm border border-gray-100 overflow-hidden">
+        <div className="bg-white shadow-sm border border-gray-100 overflow-hidden">
           <table className="w-full text-left border-collapse">
             <thead className="bg-gray-50 text-gray-400 text-xs uppercase tracking-widest font-bold">
               <tr>
@@ -67,7 +67,7 @@ const LoyaltyRewards = () => {
 
 // Helper Components
 const StatCard = ({ title, value, icon, color }) => (
-  <div className={`${color} p-6 rounded-[2rem] border border-white shadow-sm`}>
+  <div className={`${color} p-6 border border-white shadow-sm`}>
     <div className="flex justify-between items-start mb-4">
       <div className="p-3 bg-white rounded-2xl shadow-sm">{icon}</div>
     </div>
