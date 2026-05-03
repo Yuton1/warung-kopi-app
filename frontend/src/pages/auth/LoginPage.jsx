@@ -13,9 +13,7 @@ const LoginPage = () => {
   // --- TAMBAHAN LOGIKA DINAMIS ---
   // Jika dibuka di localhost, arahkan ke port 3000. 
   // Jika di Vercel, arahkan ke URL backend kamu (silakan ganti link di bawah nanti).
-  const API_BASE_URL = window.location.hostname === 'localhost' 
-    ? "http://localhost:3000" 
-    : "https://warung-kopi-app.vercel.app"; 
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? "http://localhost:3000" : "");
 
   const handleSubmit = async (event) => {
     event.preventDefault()

@@ -13,10 +13,11 @@ const UserManagement = () => {
     username: '', 
     email: '', 
     password: '', 
-    role: 'user' 
+    role: 'customer' 
   });
 
-  const API_URL = "http://localhost:3000/api/users";
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? "http://localhost:3000" : "");
+  const API_URL = `${API_BASE_URL}/api/users`;
 
   useEffect(() => {
     fetchUsers();
@@ -35,9 +36,9 @@ const UserManagement = () => {
     e.preventDefault();
     try {
       // Endpoint register biasanya bisa digunakan untuk pembuatan akun manual
-      await axios.post("http://localhost:3000/api/auth/register", newUser);
+      await axios.post(`${API_BASE_URL}/api/auth/register`, newUser);
       setIsModalOpen(false);
-      setNewUser({ username: '', email: '', password: '', role: 'user' });
+      setNewUser({ username: '', email: '', password: '', role: 'customer' });
       fetchUsers(); // Refresh daftar tabel
     } catch (err) {
       alert("Gagal menambah user: " + (err.response?.data?.message || err.message));
@@ -169,7 +170,7 @@ const UserManagement = () => {
                     onChange={(e) => setNewUser({...newUser, role: e.target.value})}
                     value={newUser.role}
                   >
-                    <option value="user">User (Pelanggan)</option>
+                    <option value="customer">Customer (Pelanggan)</option>
                     <option value="barista">Barista (Staf)</option>
                     <option value="admin">Admin</option>
                   </select>
