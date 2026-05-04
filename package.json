@@ -10,8 +10,7 @@
   "scripts": {
     "build": "npm --prefix frontend run build",
     "dev": "npm --prefix frontend run dev",
-    "preview": "npm --prefix frontend run preview",
-    "start:backend": "npm --prefix backend run start"
+    "start:backend": "node backend/index.js"
   },
   "optionalDependencies": {
     "@rollup/rollup-linux-x64-gnu": "^4.60.2"
