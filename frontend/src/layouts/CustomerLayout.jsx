@@ -4,10 +4,10 @@ import CustomerNavbar from '../components/CustomerNavbar'
 
 const CustomerLayout = () => {
   return (
-    <div className="app-shell flex flex-col min-h-screen">
+    <div className="app-shell flex flex-col min-h-screen bg-[#F5EBE0]">
       <CustomerNavbar />
       <main className="flex-grow w-full">
-        <div className="mx-auto w-full max-w-[1860px]">
+        <div className="mmx-auto w-full max-w-[1860px] px-6 py-8">
           <Outlet />
         </div>
       </main>
