@@ -168,11 +168,6 @@ const LoginPage = () => {
           <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px]" />
           <div className="absolute top-[-10%] right-[-10%] h-80 w-80 rounded-full bg-[#e39b4f] opacity-20 blur-[100px]" />
           <div className="relative z-10 flex flex-col items-center text-center px-12">
-            <img 
-              src="/Logo_Warkop_Nav.png" 
-              alt="Logo Warung Kopi" 
-              className="w-4/5 drop-shadow-2xl transition-transform duration-700 hover:scale-105"
-            />
             <h2 className="mt-8 text-3xl font- text-white leading-tight tracking-tighter">
               The best beans, <br />the best brew.
             </h2>
