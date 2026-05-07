@@ -24,7 +24,7 @@ const CartPage = () => {
   const total = subtotal + tax;
 
   return (
-    <div className="min-h-screen bg-[#F5EBE0] pb-20">
+    <div className="min-h-screen pb-20">
       <main className="max-w-6xl mx-auto px-6 py-12">
         <header className="flex items-center gap-4 mb-10">
           <button className="p-2 bg-white rounded-full shadow-sm text-[#4A3728] hover:bg-[#B08968] hover:text-white transition-all">
