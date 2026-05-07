@@ -91,10 +91,6 @@ const LoginPage = () => {
             alt="Logo Warung Kopi" 
             className="h-10 w-auto object-contain" 
           />
-          {/* Opsional: Jika logomu sudah ada teksnya, span di bawah ini bisa dihapus saja */}
-          <span className="text-2xl font- tracking-tighter text-[#4A3728]">
-            Warung<span className="text-[#6F4E37]">Kopi</span>
-          </span>
         </div>
 
         <div className="mb-10">
@@ -162,28 +158,44 @@ const LoginPage = () => {
         </p>
       </div>
 
-      {/* SISI KANAN: ILUSTRASI DENGAN GRADIENT KOPI */}
+      {/* SISI KANAN: BACKGROUND GAMBAR DENGAN OVERLAY */}
       <div className="hidden h-full w-1/2 p-4 md:block">
-        <div className="relative h-full w-full overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-[#4A3728] via-[#2B1B17] to-[#1b120d] flex items-center justify-center">
+        <div className="relative h-full w-full overflow-hidden rounded-[2.5rem] flex items-center justify-center">
           
+          {/* Background Image */}
+          <img 
+            src="/Gambar_Login.jpg" 
+            alt="Background Login" 
+            className="absolute inset-0 h-full w-full object-cover"
+          />
+          
+          {/* Overlay Gelap (Agar Teks Tetap Terbaca) */}
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px]" />
+        
+          {/* Efek Cahaya Dekoratif (Opsional, tetap dipertahankan agar estetik) */}
           <div className="absolute top-[-10%] right-[-10%] h-80 w-80 rounded-full bg-[#e39b4f] opacity-20 blur-[100px]" />
-          <div className="absolute bottom-[-10%] left-[-10%] h-80 w-80 rounded-full bg-[#e39b4f] opacity-10 blur-[100px]" />
-
+          
+          {/* Konten Utama */}
           <div className="relative z-10 flex flex-col items-center text-center px-12">
             <img 
               src="/Logo_Warkop_Nav.png" 
               alt="Logo Warung Kopi" 
               className="w-4/5 drop-shadow-2xl transition-transform duration-700 hover:scale-105"
             />
-            <h2 className="mt-8 text-3xl font-bold text-white">The best beans, <br />the best brew.</h2>
-            <p className="mt-4 text-sm text-gray-300 max-w-xs">Nikmati kemudahan memesan kopi favoritmu kapan saja dan di mana saja.</p>
+            <h2 className="mt-8 text-3xl font- text-white leading-tight tracking-tighter">
+              The best beans, <br />the best brew.
+            </h2>
+            <p className="mt-4 text-sm text-gray-200 max-w-xs font-medium">
+              Nikmati kemudahan memesan kopi favoritmu kapan saja dan di mana saja.
+            </p>
           </div>
-
-          <div className="absolute bottom-10 right-10 opacity-10"> {/* Opacity diturunkan jadi 10 agar tidak mengganggu konten */}
+        
+          {/* Watermark Logo di Pojok */}
+          <div className="absolute bottom-10 right-10 opacity-20">
             <img 
               src="/Logo_Warkop_Nav.png" 
               alt="Watermark Logo" 
-              className="h-16 w-auto object-contain"
+              className="h-16 w-auto object-contain brightness-0 invert" 
             />
           </div>
         </div>
