@@ -24,9 +24,8 @@ const LoginPage = () => {
         password 
       });
 
-      // 2. Ambil data user asli dari database (seperti yang terlihat di image_7048d1.png)
       const { user, token } = response.data;
-      const userRole = user.role; // Mengambil 'barista' atau 'admin' dari kolom role
+      const userRole = user.role;
 
       const authUser = {
         name: user.username,
@@ -46,7 +45,6 @@ const LoginPage = () => {
 
       window.dispatchEvent(new Event('warungkopi-state-changed'))
 
-      // 4. Navigasi otomatis sesuai role di database
       if (userRole === 'admin') {
         navigate('/admin', { replace: true });
       } else if (userRole === 'barista') {
@@ -161,21 +159,14 @@ const LoginPage = () => {
       {/* SISI KANAN: BACKGROUND GAMBAR DENGAN OVERLAY */}
       <div className="hidden h-full w-1/2 p-4 md:block">
         <div className="relative h-full w-full overflow-hidden rounded-[2.5rem] flex items-center justify-center">
-          
-          {/* Background Image */}
+
           <img 
             src="/Gambar_Login.jpg" 
             alt="Background Login" 
             className="absolute inset-0 h-full w-full object-cover"
           />
-          
-          {/* Overlay Gelap (Agar Teks Tetap Terbaca) */}
           <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px]" />
-        
-          {/* Efek Cahaya Dekoratif (Opsional, tetap dipertahankan agar estetik) */}
           <div className="absolute top-[-10%] right-[-10%] h-80 w-80 rounded-full bg-[#e39b4f] opacity-20 blur-[100px]" />
-          
-          {/* Konten Utama */}
           <div className="relative z-10 flex flex-col items-center text-center px-12">
             <img 
               src="/Logo_Warkop_Nav.png" 
@@ -189,7 +180,7 @@ const LoginPage = () => {
               Nikmati kemudahan memesan kopi favoritmu kapan saja dan di mana saja.
             </p>
           </div>
-        
+
           {/* Watermark Logo di Pojok */}
           <div className="absolute bottom-10 right-10 opacity-20">
             <img 
