@@ -19,6 +19,7 @@ import LoyaltyRewards from './pages/admin/LoyaltyRewards';
 import SalesReports from './pages/admin/SalesReports';
 import OrderQueue from './pages/barista/OrderQueue';
 import Inventory from './pages/barista/Inventory';
+import CartPage from './pages/customer/CartPage';
 
 function App() {
   return (
@@ -52,6 +53,7 @@ function App() {
           <Route path="promo" element={<PromoPage />} />
           <Route path="lokasi" element={<LocationPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
+          <Route path="/cart" element={<CartPage />} />
         </Route>
       </Routes>
     </BrowserRouter>

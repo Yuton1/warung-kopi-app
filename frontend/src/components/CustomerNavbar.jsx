@@ -7,7 +7,7 @@ const navItems = [
   { label: 'Menu', type: 'dropdown' },
   { to: '/pesanan', label: 'Pesanan', state: null, type: 'link', badge: 'orders' },
   { to: '/member', label: 'Member', state: null, type: 'link' },
-  { label: 'Keranjang', state: { scrollToCart: true }, type: 'button', badge: 'cart' },
+  { to: '/cart', label: 'Keranjang', state: null, type: 'link', badge: 'cart' },
 ]
 
 const menuDropdownItems = [
