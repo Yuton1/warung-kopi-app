@@ -58,12 +58,24 @@ const LoginPage = () => {
     } catch (err) {
       console.error("Login Error:", err)
 
-      const serverMessage = err.response?.data?.message || err.response?.data?.error
+      const serverData = err.response?.data
+      const serverMessage =
+        typeof serverData === 'string'
+          ? serverData
+          : serverData?.message || serverData?.error || serverData?.title || null
       const isNetworkError = err.code === 'ERR_NETWORK'
-
-      alert(serverMessage || (isNetworkError
+      const fallbackMessage = isNetworkError
         ? 'Tidak bisa menghubungi API login. Cek deploy backend, rewrite /api, dan env TiDB.'
-        : 'Login gagal. Periksa email/password atau log backend.'))
+        : 'Login gagal. Periksa email/password atau log backend.'
+      const normalizedMessage = serverMessage ? String(serverMessage).trim() : ''
+      const looksLikeHtml = normalizedMessage.startsWith('<')
+      const looksLikeObject = normalizedMessage === '[object Object]'
+
+      alert(
+        normalizedMessage && !looksLikeHtml && !looksLikeObject
+          ? String(serverMessage)
+          : fallbackMessage
+      )
     }
   }
 
@@ -152,8 +164,8 @@ const LoginPage = () => {
 
           <div className="relative z-10 flex flex-col items-center text-center px-12">
             <img 
-              src="/coffee-illustration.png" 
-              alt="Coffee Illustration" 
+              src="/Logo_Warkop_Nav.png" 
+              alt="Logo Warung Kopi" 
               className="w-4/5 drop-shadow-2xl transition-transform duration-700 hover:scale-105"
             />
             <h2 className="mt-8 text-3xl font-bold text-white">The best beans, <br />the best brew.</h2>
