@@ -11,6 +11,7 @@ const navItems = [
 ]
 
 const menuDropdownItems = [
+  { label: 'Tracking Pesanan', to: '/pesanan' },
   { label: 'Minuman', to: '/menu/minuman' },
   { label: 'Makanan', to: '/menu/makanan' },
   { label: 'Cemilan', to: '/menu/cemilan' },

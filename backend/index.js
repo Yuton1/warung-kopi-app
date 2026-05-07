@@ -9,6 +9,7 @@ const authRoutes = require('./src/routes/authRoutes');
 const promoRoutes = require('./src/routes/promoRoutes');
 const subscriptionRoutes = require('./src/routes/subscriptionRoutes');
 const userRoutes = require('./src/routes/userRoutes');
+const orderRoutes = require('./src/routes/orderRoutes');
 
 // Import database pool
 require('./src/config/db');
@@ -25,6 +26,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/promos', promoRoutes);
 app.use('/api/subscriptions', subscriptionRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/orders', orderRoutes);
 
 app.get('/api', (req, res) => {
     res.json({
