@@ -1,11 +1,21 @@
 const { listProducts, createProduct, removeProduct } = require('../services/productService');
 
+const withTimeout = (operation, timeoutMs = 2500) => {
+    let timer;
+
+    const timeout = new Promise((_, reject) => {
+        timer = setTimeout(() => reject(new Error('Request timeout')), timeoutMs);
+    });
+
+    return Promise.race([operation, timeout]).finally(() => clearTimeout(timer));
+};
+
 const getProducts = async (req, res) => {
     try {
-        const rows = await listProducts();
+        const rows = await withTimeout(listProducts());
         res.json(rows);
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        res.json([]);
     }
 };
 

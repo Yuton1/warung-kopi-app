@@ -1,11 +1,21 @@
 const { claimPromo, listWeeklyPromos } = require('../services/promoService');
-const { weeklyPromos: fallbackWeeklyPromos } = require('../../../api/catalog-data');
+const { weeklyPromos: fallbackWeeklyPromos } = require('../data/catalog-data');
 const crypto = require('crypto');
+
+const withTimeout = (operation, timeoutMs = 2500) => {
+  let timer;
+
+  const timeout = new Promise((_, reject) => {
+    timer = setTimeout(() => reject(new Error('Request timeout')), timeoutMs);
+  });
+
+  return Promise.race([operation, timeout]).finally(() => clearTimeout(timer));
+};
 
 const getWeeklyPromos = async (req, res) => {
   try {
     const userEmail = req.query?.userEmail || req.body?.userEmail || null;
-    const rows = await listWeeklyPromos(userEmail);
+    const rows = await withTimeout(listWeeklyPromos(userEmail));
     return res.json(rows);
   } catch (error) {
     console.error('Gagal ambil weekly promos dari TiDB:', error.message);
@@ -16,7 +26,9 @@ const getWeeklyPromos = async (req, res) => {
 const claimWeeklyPromo = async (req, res) => {
   try {
     const { promoId, userEmail } = req.body || {};
-    const result = await claimPromo({ promoId, userEmail: userEmail || req.query?.userEmail || null });
+    const result = await withTimeout(
+      claimPromo({ promoId, userEmail: userEmail || req.query?.userEmail || null })
+    );
     return res.json(result);
   } catch (error) {
     if (error.statusCode) {

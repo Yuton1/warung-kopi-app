@@ -5,6 +5,8 @@ require('dotenv').config();
 // Import Routes
 const productRoutes = require('./src/routes/productRoutes');
 const authRoutes = require('./src/routes/authRoutes');
+const promoRoutes = require('./src/routes/promoRoutes');
+const subscriptionRoutes = require('./src/routes/subscriptionRoutes');
 
 // Import database pool
 require('./src/config/db');
@@ -18,6 +20,8 @@ app.use(express.json());
 // Routes
 app.use('/api/products', productRoutes);
 app.use('/api/auth', authRoutes);
+app.use('/api/promos', promoRoutes);
+app.use('/api/subscriptions', subscriptionRoutes);
 
 app.get('/api', (req, res) => {
     res.json({

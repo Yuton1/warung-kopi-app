@@ -84,7 +84,7 @@ const CustomerNavbar = () => {
         
         {/* LOGO */}
         <Link to="/" className="brand-link brand-link--navbar">
-          <img src="/Logo_Warkop_Nav.png" alt="Logo" style={{ height: '40px', width: 'auto' }} />
+          <img src="/Logo_Warkop_Nav.png" alt="Logo Warung Kopi" style={{ height: '40px', width: 'auto' }} />
         </Link>
 
         {/* SEARCH FORM - Dibuat Flex Grow agar melebar */}

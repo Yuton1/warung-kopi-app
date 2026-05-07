@@ -36,12 +36,8 @@ const MenuView = () => {
           fetch('/api/subscriptions')
         ]);
 
-        if (!prodRes.ok || !subRes.ok) {
-          throw new Error(`Server Error: ${prodRes.status}`);
-        }
-
-        const products = await prodRes.json();
-        const subs = await subRes.json();
+        const products = prodRes.ok ? await prodRes.json() : coffeeSeed;
+        const subs = subRes.ok ? await subRes.json() : subscriptionSeed;
 
         const safeProducts = Array.isArray(products) && products.length ? products : coffeeSeed;
         const safeSubscriptions = Array.isArray(subs) && subs.length ? subs : subscriptionSeed;
@@ -50,7 +46,7 @@ const MenuView = () => {
         setRecommendations(safeProducts.slice(0, 6));
         setSubscriptionPlans(safeSubscriptions);
       } catch (error) {
-        console.error("Gagal ambil data:", error);
+        console.error("Gagal ambil data menu:", error);
         setDisplayedMenu(coffeeSeed.slice(0, 12));
         setRecommendations(coffeeSeed.slice(0, 6));
         setSubscriptionPlans(subscriptionSeed);
