@@ -149,7 +149,7 @@ const CustomerNavbar = () => {
           </nav>
 
           {isLoggedIn ? (
-            <Link to="/member" className="customer-navbar__profile" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Link to="/akun" className="customer-navbar__profile" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <Icon name="user" />
             </Link>
           ) : (
