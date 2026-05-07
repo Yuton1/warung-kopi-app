@@ -384,7 +384,7 @@ const OrdersPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#f4e8da] px-4 py-6 text-[#16110d] sm:px-6 lg:px-10 xl:px-14">
+    <div className="min-h-screen px-4 py-6 text-[#16110d] sm:px-6 lg:px-10 xl:px-14">
       <div className="mx-auto flex w-full max-w-[1320px] flex-col gap-10">
         <header className="pt-1">
           <p className="text-[12px] font-medium text-[#8b745d]">Yuk Lihat Progres pesanan kamu !!</p>
