@@ -85,9 +85,16 @@ const LoginPage = () => {
       {/* SISI KIRI: FORM LOGIN */}
       <div className="flex w-full flex-col justify-center px-8 md:w-1/2 md:px-20 lg:px-32">
         {/* Brand/Logo Section */}
-        <div className="mb-12 flex items-center gap-2">
-          <div className="h-6 w-6 rounded bg-[#1b120d]" />
-          <span className="text-xl font-bold tracking-tight text-[#1b120d]">WarungKopi</span>
+        <div className="mb-12 flex items-center gap-3">
+          <img 
+            src="/Logo_Warkop_Nav.png" 
+            alt="Logo Warung Kopi" 
+            className="h-10 w-auto object-contain" 
+          />
+          {/* Opsional: Jika logomu sudah ada teksnya, span di bawah ini bisa dihapus saja */}
+          <span className="text-2xl font- tracking-tighter text-[#4A3728]">
+            Warung<span className="text-[#6F4E37]">Kopi</span>
+          </span>
         </div>
 
         <div className="mb-10">
@@ -172,8 +179,12 @@ const LoginPage = () => {
             <p className="mt-4 text-sm text-gray-300 max-w-xs">Nikmati kemudahan memesan kopi favoritmu kapan saja dan di mana saja.</p>
           </div>
 
-          <div className="absolute bottom-10 right-10 opacity-30">
-             <span className="text-white font-black tracking-widest text-2xl">WARUNGKOPI</span>
+          <div className="absolute bottom-10 right-10 opacity-10"> {/* Opacity diturunkan jadi 10 agar tidak mengganggu konten */}
+            <img 
+              src="/Logo_Warkop_Nav.png" 
+              alt="Watermark Logo" 
+              className="h-16 w-auto object-contain"
+            />
           </div>
         </div>
       </div>
