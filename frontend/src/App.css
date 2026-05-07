@@ -1281,6 +1281,13 @@ html, body {
   gap: 18px;
 }
 
+.pattern-bg {
+  background-image:
+    radial-gradient(circle at 25px 25px, rgba(74, 55, 40, 0.04) 2px, transparent 0),
+    radial-gradient(circle at 75px 75px, rgba(176, 137, 104, 0.03) 1.5px, transparent 0);
+  background-size: 50px 50px, 100px 100px;
+}
+
 .screen-hero {
   display: grid;
   grid-template-columns: 1.15fr 0.85fr;

@@ -5,7 +5,7 @@ const footerLinks = [
   { to: '/', label: 'Menu' },
   { to: '/promo', label: 'Promo' },
   { to: '/pesanan', label: 'Pesanan' },
-  { to: '/akun', label: 'Member' },
+  { to: '/member', label: 'Member' },
   { to: '/lokasi', label: 'Lokasi' },
 ]
 

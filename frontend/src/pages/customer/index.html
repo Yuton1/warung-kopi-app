@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Warung Kopi - Member Page</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        cream: '#F5EBE0',
+                        espresso: '#4A3728',
+                        terracotta: '#B08968',
+                        gold: '#FFB703',
+                        success: '#80B918',
+                        orange: '#FB8500',
+                    },
+                    fontFamily: {
+                        display: ['Playfair Display', 'serif'],
+                        body: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #F5EBE0; }
+        .pattern-bg {
+            background-image: 
+                radial-gradient(circle at 25px 25px, rgba(74, 55, 40, 0.04) 2px, transparent 0),
+                radial-gradient(circle at 75px 75px, rgba(176, 137, 104, 0.03) 1.5px, transparent 0);
+            background-size: 50px 50px, 100px 100px;
+        }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
+        .float-anim { animation: float 3.5s ease-in-out infinite; }
+        @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+        .shimmer-bar {
+            background: linear-gradient(90deg, #FFB703 0%, #FFD166 40%, #FB8500 60%, #FFB703 100%);
+            background-size: 200% 100%;
+            animation: shimmer 2.5s ease-in-out infinite;
+        }
+        @keyframes pulseGlow {
+            0%, 100% { box-shadow: 0 0 8px rgba(255,183,3,0.4), 0 0 16px rgba(255,183,3,0.15); }
+            50% { box-shadow: 0 0 18px rgba(255,183,3,0.65), 0 0 36px rgba(255,183,3,0.25); }
+        }
+        .glow-pulse { animation: pulseGlow 2.2s ease-in-out infinite; }
+        @keyframes fadeSlideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .fade-slide-up { animation: fadeSlideUp 0.5s ease-out forwards; }
+        .fade-slide-up-d1 { animation-delay: 0.1s; opacity: 0; }
+        .fade-slide-up-d2 { animation-delay: 0.2s; opacity: 0; }
+        .fade-slide-up-d3 { animation-delay: 0.3s; opacity: 0; }
+        @keyframes scaleIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .scale-in { animation: scaleIn 0.4s ease-out forwards; }
+        @keyframes coffeePour {
+            0% { transform: scaleY(0); transform-origin: top; }
+            100% { transform: scaleY(1); transform-origin: top; }
+        }
+        .btn-hover { transition: all 0.3s cubic-bezier(0.4,0,0.2,1); }
+        .btn-hover:hover { transform: translateY(-2px); }
+        .btn-hover:active { transform: translateY(0); }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        /* ============ ICON COMPONENTS (Lucide-style) ============ */
+        const CoffeeIcon = ({ size = 24, color = "currentColor", className = "" }) => (
+            <svg className={className} xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M17 8h1a4 4 0 1 1 0 8h-1"/><path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z"/>
+                <line x1="6" x2="6" y1="2" y2="4"/><line x1="10" x2="10" y1="2" y2="4"/><line x1="14" x2="14" y1="2" y2="4"/>
+            </svg>
+        );
+        const TagIcon = ({ size = 24, color = "currentColor" }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 2H2v10l9.29 9.29c.94.94 2.48.94 3.42 0l6.58-6.58c.94-.94.94-2.48 0-3.42L12 2Z"/><path d="M7 7h.01"/>
+            </svg>
+        );
+        const UsersIcon = ({ size = 24, color = "currentColor" }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+                <path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>
+        );
+        const TicketIcon = ({ size = 24, color = "currentColor" }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/>
+                <path d="M13 5v2"/><path d="M13 17v2"/><path d="M13 11v2"/>
+            </svg>
+        );
+        const SparklesIcon = ({ size = 24, color = "currentColor" }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/>
+                <path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/>
+            </svg>
+        );
+        const CrownIcon = ({ size = 24, color = "currentColor" }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="m2 4 3 12h14l3-12-6 7-4-7-4 7-6-7zm3 16h14"/>
+            </svg>
+        );
+        const StarIcon = ({ size = 24, color = "currentColor", fill = "none" }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill={fill} stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+            </svg>
+        );
+        const LogInIcon = ({ size = 24, color = "currentColor" }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" x2="3" y1="12" y2="12"/>
+            </svg>
+        );
+        const CupSodaIcon = ({ size = 24, color = "currentColor" }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="m6 8 1.75 12.28a2 2 0 0 0 2 1.72h4.54a2 2 0 0 0 2-1.72L18 8"/><path d="M5 8h14"/>
+                <path d="M7 15a6.47 6.47 0 0 1 5 0 6.47 6.47 0 0 0 5 0"/><path d="m12 8 1-6h2"/>
+            </svg>
+        );
+        const ChevronRightIcon = ({ size = 24, color = "currentColor" }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="m9 18 6-6-6-6"/>
+            </svg>
+        );
+        const ZapIcon = ({ size = 24, color = "currentColor" }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+            </svg>
+        );
+
+        /* ============ Coffee Cup Illustration ============ */
+        const CoffeeCupIllustration = () => (
+            <div className="float-anim relative">
+                <svg width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <ellipse cx="90" cy="168" rx="60" ry="10" fill="#4A3728" opacity="0.08"/>
+                    <path d="M50 80 L58 155 C58 155 64 168 92 168 C120 168 126 155 126 155 L134 80 Z" fill="#F5EBE0" stroke="#4A3728" strokeWidth="2.5"/>
+                    <ellipse cx="92" cy="80" rx="42" ry="9" fill="#F5EBE0" stroke="#4A3728" strokeWidth="2.5"/>
+                    <ellipse cx="92" cy="85" rx="36" ry="6.5" fill="#4A3728" opacity="0.65"/>
+                    <path d="M134 92 C152 92 158 112 152 124 C146 136 138 135 134 130" fill="none" stroke="#4A3728" strokeWidth="2.5" strokeLinecap="round"/>
+                    {/* Steam */}
+                    <path d="M75 65 C75 52 82 47 77 34" stroke="#B08968" strokeWidth="2" strokeLinecap="round" opacity="0.45">
+                        <animate attributeName="d" values="M75 65 C75 52 82 47 77 34;M75 65 C68 52 73 47 68 34;M75 65 C75 52 82 47 77 34" dur="3s" repeatCount="indefinite"/>
+                        <animate attributeName="opacity" values="0.45;0.15;0.45" dur="3s" repeatCount="indefinite"/>
+                    </path>
+                    <path d="M92 60 C92 47 86 42 92 28" stroke="#B08968" strokeWidth="2.5" strokeLinecap="round" opacity="0.55">
+                        <animate attributeName="d" values="M92 60 C92 47 86 42 92 28;M92 60 C98 47 93 42 98 28;M92 60 C92 47 86 42 92 28" dur="2.6s" repeatCount="indefinite"/>
+                        <animate attributeName="opacity" values="0.55;0.2;0.55" dur="2.6s" repeatCount="indefinite"/>
+                    </path>
+                    <path d="M109 65 C109 52 103 47 109 34" stroke="#B08968" strokeWidth="2" strokeLinecap="round" opacity="0.35">
+                        <animate attributeName="d" values="M109 65 C109 52 103 47 109 34;M109 65 C115 52 110 47 115 34;M109 65 C109 52 103 47 109 34" dur="3.2s" repeatCount="indefinite"/>
+                        <animate attributeName="opacity" values="0.35;0.1;0.35" dur="3.2s" repeatCount="indefinite"/>
+                    </path>
+                    {/* Heart on cup */}
+                    <path d="M84 118 C84 112 92 107 92 115 C92 107 100 112 100 118 C100 127 92 132 92 132 C92 132 84 127 84 118Z" fill="#FFB703" opacity="0.5"/>
+                    {/* Coffee bean */}
+                    <ellipse cx="60" cy="166" rx="5.5" ry="4" fill="#4A3728" opacity="0.25" transform="rotate(-25 60 166)"/>
+                    <path d="M58 164 Q60 166 62 168" stroke="#F5EBE0" strokeWidth="0.7" opacity="0.3"/>
+                    <ellipse cx="125" cy="164" rx="4.5" ry="3.5" fill="#4A3728" opacity="0.2" transform="rotate(15 125 164)"/>
+                </svg>
+            </div>
+        );
+
+        /* ============ BenefitList Component ============ */
+        const BenefitList = () => {
+            const benefits = [
+                { icon: <TagIcon size={26} color="#FFB703" />, title: "Harga Prioritas", desc: "Diskon hingga 30% untuk semua menu kopi favorit Anda" },
+                { icon: <UsersIcon size={26} color="#FFB703" />, title: "Antrian Khusus", desc: "Layanan express tanpa perlu antri panjang" },
+                { icon: <TicketIcon size={26} color="#FFB703" />, title: "Voucher Eksklusif", desc: "Voucher spesial setiap bulan khusus member" },
+                { icon: <SparklesIcon size={26} color="#FFB703" />, title: "Akses Produk Baru", desc: "Coba menu terbaru sebelum yang lain" },
+            ];
+            return (
+                <div className="mt-12 md:mt-16">
+                    <div className="text-center mb-8 md:mb-10">
+                        <div className="inline-flex items-center gap-2 bg-gold/10 text-gold px-4 py-1.5 rounded-full text-xs font-bold tracking-widest uppercase mb-4">
+                            <StarIcon size={13} color="#FFB703" fill="#FFB703" /> Benefit
+                        </div>
+                        <h2 className="font-display text-2xl md:text-3xl font-bold text-espresso mb-2">Keuntungan Member</h2>
+                        <p className="text-espresso/50 font-body text-sm md:text-base max-w-md mx-auto">
+                            Nikmati berbagai keuntungan eksklusif sebagai member Warung Kopi
+                        </p>
+                    </div>
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
+                        {benefits.map((b, i) => (
+                            <div key={i}
+                                className={`group bg-white/80 backdrop-blur-sm rounded-2xl p-5 md:p-6 border border-espresso/[0.06] hover:border-gold/40 hover:shadow-xl hover:shadow-gold/[0.07] transition-all duration-400 hover:-translate-y-1.5 cursor-default fade-slide-up fade-slide-up-d${i > 0 ? Math.min(i, 3) : ''}`}
+                                style={{ animationDelay: `${0.1 + i * 0.1}s` }}
+                            >
+                                <div className="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-gradient-to-br from-gold/15 to-gold/5 flex items-center justify-center mb-4 group-hover:from-gold/25 group-hover:to-gold/10 transition-all duration-300 group-hover:scale-110">
+                                    {b.icon}
+                                </div>
+                                <h3 className="font-body font-bold text-espresso text-sm md:text-[15px] mb-1.5">{b.title}</h3>
+                                <p className="text-espresso/45 text-xs md:text-[13px] leading-relaxed">{b.desc}</p>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            );
+        };
+
+        /* ============ JoinSection Component ============ */
+        const JoinSection = () => (
+            <div className="pattern-bg bg-gradient-to-br from-cream via-white/40 to-cream rounded-[2rem] border border-espresso/[0.08] overflow-hidden shadow-2xl shadow-espresso/[0.06] scale-in">
+                <div className="flex flex-col md:flex-row items-center gap-4 md:gap-10 p-8 md:p-12 lg:p-16">
+                    <div className="flex-shrink-0 relative">
+                        <div className="absolute inset-0 bg-gold/10 rounded-full blur-3xl scale-75 -z-10" />
+                        <CoffeeCupIllustration />
+                    </div>
+                    <div className="text-center md:text-left flex-1">
+                        <div className="inline-flex items-center gap-2 bg-gradient-to-r from-gold/20 to-gold/10 text-espresso px-4 py-2 rounded-full text-[11px] font-bold mb-6 tracking-widest uppercase border border-gold/20">
+                            <CrownIcon size={14} color="#FFB703" />
+                            Eksklusif Member
+                        </div>
+                        <h1 className="font-display text-3xl md:text-4xl lg:text-[2.75rem] font-extrabold text-espresso leading-[1.15] mb-5">
+                            Gabung Member Warkop &{' '}
+                            <span className="relative inline-block">
+                                <span className="relative z-10 text-terracotta">Hemat s/d 30%!</span>
+                                <span className="absolute bottom-1 left-0 right-0 h-3 bg-gold/20 -z-0 rounded" />
+                            </span>
+                        </h1>
+                        <p className="text-espresso/55 text-[15px] md:text-base mb-8 max-w-lg leading-relaxed">
+                            Dapatkan akses ke promo eksklusif, kumpulkan beans setiap pembelian, dan nikmati kopi favoritmu dengan harga spesial member.
+                        </p>
+                        <div className="flex flex-col sm:flex-row gap-3 justify-center md:justify-start">
+                            <button className="btn-hover group inline-flex items-center justify-center gap-2.5 bg-espresso text-cream px-8 py-4 rounded-2xl font-bold text-[15px] hover:bg-espresso/90 hover:shadow-xl hover:shadow-espresso/20 active:scale-[0.98] transition-all duration-300">
+                                <CoffeeIcon size={20} />
+                                Daftar Member
+                                <ChevronRightIcon size={18} className="transition-transform group-hover:translate-x-0.5" />
+                            </button>
+                            <button className="btn-hover group inline-flex items-center justify-center gap-2.5 border-2 border-espresso/80 text-espresso px-8 py-4 rounded-2xl font-bold text-[15px] hover:bg-espresso hover:text-cream hover:border-espresso transition-all duration-300">
+                                <LogInIcon size={20} />
+                                Masuk
+                            </button>
+                        </div>
+                        {/* Trust badges */}
+                        <div className="flex items-center gap-6 mt-8 justify-center md:justify-start text-espresso/30 text-xs">
+                            <span className="flex items-center gap-1.5"><ZapIcon size={13}/> Aktivasi Instan</span>
+                            <span className="flex items-center gap-1.5"><StarIcon size={13}/> 4.9★ Rating</span>
+                            <span className="flex items-center gap-1.5"><UsersIcon size={13}/> 12K+ Member</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+
+        /* ============ ProfileCard Component ============ */
+        const ProfileCard = () => {
+            const [animatedWidth, setAnimatedWidth] = useState(0);
+            const points = 240, maxPoints = 500;
+            const pct = (points / maxPoints) * 100;
+            useEffect(() => { const t = setTimeout(() => setAnimatedWidth(pct), 300); return () => clearTimeout(t); }, []);
+
+            return (
+                <div className="bg-gradient-to-br from-terracotta via-terracotta to-[#996B4E] rounded-[1.75rem] p-6 md:p-8 text-white shadow-2xl shadow-terracotta/20 relative overflow-hidden scale-in">
+                    {/* Decorative circles */}
+                    <div className="absolute -top-16 -right-16 w-48 h-48 bg-white/[0.04] rounded-full" />
+                    <div className="absolute -bottom-10 -left-10 w-36 h-36 bg-white/[0.04] rounded-full" />
+                    <div className="absolute top-1/2 right-10 w-20 h-20 bg-gold/[0.06] rounded-full" />
+
+                    <div className="relative z-10">
+                        {/* Profile Header */}
+                        <div className="flex items-start gap-4 mb-7">
+                            <div className="relative flex-shrink-0">
+                                <div className="w-[4.5rem] h-[4.5rem] md:w-20 md:h-20 rounded-full p-[3px] bg-gradient-to-br from-gold via-orange to-gold">
+                                    <img
+                                        src="https://ui-avatars.com/api/?name=Moh+Ahsan+Malik&background=4A3728&color=F5EBE0&size=80&font-size=0.33&bold=true"
+                                        alt="Moh Ahsan Malik"
+                                        className="w-full h-full rounded-full object-cover border-2 border-terracotta"
+                                    />
+                                </div>
+                                <div className="absolute -bottom-0.5 -right-0.5 w-5 h-5 bg-success rounded-full border-[2.5px] border-terracotta" />
+                            </div>
+                            <div className="flex-1 min-w-0 pt-1">
+                                <h3 className="font-display text-xl md:text-2xl font-bold text-white truncate">Moh Ahsan Malik</h3>
+                                <div className="inline-flex items-center gap-1.5 mt-2 bg-gold/20 backdrop-blur-sm px-3 py-1 rounded-full">
+                                    <CrownIcon size={13} color="#FFB703" />
+                                    <span className="text-gold text-[11px] font-bold tracking-wide uppercase">Gold Member</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Points Section */}
+                        <div className="bg-white/[0.08] backdrop-blur-md rounded-2xl p-5 border border-white/[0.06]">
+                            <div className="flex items-center justify-between mb-3.5">
+                                <span className="text-white/75 text-sm font-medium flex items-center gap-2">
+                                    <StarIcon size={15} color="#FFB703" fill="#FFB703" />
+                                    Loyalty Beans
+                                </span>
+                                <span className="text-gold font-extrabold text-sm tabular-nums">{points} / {maxPoints}</span>
+                            </div>
+                            {/* Progress Bar */}
+                            <div className="relative h-[18px] bg-white/[0.08] rounded-full overflow-hidden">
+                                <div
+                                    className="h-full rounded-full shimmer-bar glow-pulse relative transition-all duration-1000 ease-out"
+                                    style={{ width: `${animatedWidth}%` }}
+                                >
+                                    <div className="absolute inset-0 bg-gradient-to-t from-transparent to-white/25 rounded-full" />
+                                </div>
+                                {/* Markers */}
+                                <div className="absolute inset-0 flex items-center px-1">
+                                    {[25, 50, 75].map(p => (
+                                        <div key={p} className="absolute top-1 bottom-1 w-px bg-white/10" style={{ left: `${p}%` }} />
+                                    ))}
+                                </div>
+                            </div>
+                            <div className="flex items-center justify-between mt-3">
+                                <p className="text-white/40 text-[11px]">
+                                    🎯 Kumpulkan <span className="text-gold font-semibold">{maxPoints - points} beans</span> lagi untuk <span className="text-gold font-semibold">Platinum</span>
+                                </p>
+                                <span className="text-white/30 text-[11px] font-medium">{Math.round(pct)}%</span>
+                            </div>
+                        </div>
+
+                        {/* Quick stats */}
+                        <div className="grid grid-cols-3 gap-3 mt-4">
+                            {[
+                                { label: 'Total Kopi', value: '127', icon: '☕' },
+                                { label: 'Bulan Ini', value: '14', icon: '📅' },
+                                { label: 'Hemat', value: 'Rp280K', icon: '💰' },
+                            ].map((s, i) => (
+                                <div key={i} className="bg-white/[0.06] rounded-xl p-3 text-center">
+                                    <div className="text-[10px] text-white/40 mb-0.5">{s.icon} {s.label}</div>
+                                    <div className="text-white font-bold text-sm">{s.value}</div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        /* ============ QuotaCard Component ============ */
+        const QuotaCard = () => {
+            const [cups, setCups] = useState(8);
+            const [claiming, setClaiming] = useState(false);
+            const [justClaimed, setJustClaimed] = useState(false);
+            const totalCups = 10;
+
+            const handleClaim = () => {
+                if (cups > 0 && !claiming) {
+                    setClaiming(true);
+                    setTimeout(() => {
+                        setCups(c => c - 1);
+                        setClaiming(false);
+                        setJustClaimed(true);
+                        setTimeout(() => setJustClaimed(false), 1500);
+                    }, 700);
+                }
+            };
+
+            return (
+                <div className="bg-white rounded-[1.75rem] p-6 md:p-8 border border-espresso/[0.07] shadow-xl shadow-espresso/[0.04] relative overflow-hidden scale-in" style={{ animationDelay: '0.15s' }}>
+                    <div className="absolute -top-4 -right-4 opacity-[0.04]">
+                        <CoffeeIcon size={120} color="#4A3728" />
+                    </div>
+
+                    <div className="relative z-10">
+                        <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center gap-2.5">
+                                <div className="w-9 h-9 rounded-xl bg-orange/10 flex items-center justify-center">
+                                    <CupSodaIcon size={18} color="#FB8500" />
+                                </div>
+                                <h3 className="font-body font-bold text-espresso text-[15px]">Kuota Kopi Anda</h3>
+                            </div>
+                            <div className="text-xs font-medium text-espresso/30 bg-espresso/[0.04] px-2.5 py-1 rounded-lg">
+                                Bulan Ini
+                            </div>
+                        </div>
+
+                        <div className="text-center py-5 md:py-7">
+                            <div className="relative inline-block">
+                                <span className={`font-display text-7xl md:text-8xl font-extrabold text-espresso leading-none tabular-nums transition-all duration-300 ${claiming ? 'scale-90 opacity-50' : justClaimed ? 'scale-110' : ''}`}>
+                                    {cups}
+                                </span>
+                                <span className="text-espresso/40 text-xl md:text-2xl font-medium ml-2 align-bottom mb-2 inline-block">Cups</span>
+                            </div>
+                            <p className="text-espresso/35 text-sm mt-1">sisa dari {totalCups} kuota bulanan</p>
+
+                            {/* Cup indicators */}
+                            <div className="flex justify-center gap-2 mt-5 flex-wrap">
+                                {[...Array(totalCups)].map((_, i) => (
+                                    <div key={i} className={`relative w-8 h-8 rounded-xl flex items-center justify-center transition-all duration-500 ${
+                                        i < cups
+                                            ? 'bg-success/15 border border-success/20'
+                                            : 'bg-espresso/[0.03] border border-espresso/[0.05]'
+                                    }`}
+                                    style={{ transitionDelay: `${i * 30}ms` }}
+                                    >
+                                        <CoffeeIcon
+                                            size={16}
+                                            color={i < cups ? '#80B918' : '#4A3728'}
+                                            className={`transition-all duration-300 ${i < cups ? 'opacity-100' : 'opacity-10'}`}
+                                        />
+                                        {i >= cups && i < totalCups && (
+                                            <div className="absolute inset-0 flex items-center justify-center">
+                                                <div className="w-4 h-[1.5px] bg-espresso/10 rounded rotate-45"/>
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+
+                            {/* Success message */}
+                            <div className={`overflow-hidden transition-all duration-500 ${justClaimed ? 'max-h-10 opacity-100 mt-3' : 'max-h-0 opacity-0'}`}>
+                                <span className="text-success text-sm font-semibold">✅ Kopi berhasil diklaim!</span>
+                            </div>
+                        </div>
+
+                        {/* Progress bar mini */}
+                        <div className="w-full h-1.5 bg-espresso/[0.05] rounded-full mb-5 overflow-hidden">
+                            <div
+                                className="h-full rounded-full bg-gradient-to-r from-success to-success/70 transition-all duration-700"
+                                style={{ width: `${(cups / totalCups) * 100}%` }}
+                            />
+                        </div>
+
+                        <button
+                            onClick={handleClaim}
+                            disabled={cups === 0 || claiming}
+                            className={`btn-hover w-full py-4 rounded-2xl font-bold text-[15px] flex items-center justify-center gap-2.5 transition-all duration-300 ${
+                                cups > 0
+                                    ? 'bg-gradient-to-r from-orange to-[#E07B00] text-white hover:shadow-xl hover:shadow-orange/25 active:scale-[0.98]'
+                                    : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                            } ${claiming ? 'scale-[0.97] opacity-70' : ''}`}
+                        >
+                            {claiming ? (
+                                <><svg className="animate-spin h-5 w-5" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg> Mengklaim...</>
+                            ) : cups > 0 ? (
+                                <><CoffeeIcon size={20} /> Klaim Kopi</>
+                            ) : (
+                                <><CupSodaIcon size={20} /> Kuota Habis</>
+                            )}
+                        </button>
+                    </div>
+                </div>
+            );
+        };
+
+        /* ============ Navbar Component ============ */
+        const Navbar = ({ isMember, onToggle }) => (
+            <nav className="flex items-center justify-between mb-8 md:mb-12">
+                <div className="flex items-center gap-3">
+                    <div className="w-11 h-11 bg-espresso rounded-2xl flex items-center justify-center shadow-lg shadow-espresso/15">
+                        <CoffeeIcon size={22} color="#F5EBE0" />
+                    </div>
+                    <div>
+                        <h1 className="font-display text-xl font-bold text-espresso leading-none tracking-tight">Warung Kopi</h1>
+                        <p className="text-espresso/35 text-[10px] mt-0.5 font-medium tracking-wider uppercase">Est. 2024 · Nusantara</p>
+                    </div>
+                </div>
+                {/* Demo Toggle */}
+                <div className="flex items-center gap-3 bg-white/70 backdrop-blur-md px-4 py-2.5 rounded-2xl border border-espresso/[0.06] shadow-sm">
+                    <span className={`text-[11px] font-semibold transition-all duration-300 ${!isMember ? 'text-espresso' : 'text-espresso/25'}`}>
+                        Guest
+                    </span>
+                    <button
+                        onClick={onToggle}
+                        className={`relative w-[50px] h-[26px] rounded-full transition-all duration-400 ${isMember ? 'bg-success shadow-inner' : 'bg-espresso/15'}`}
+                        aria-label="Toggle member status"
+                    >
+                        <div className={`absolute top-[3px] w-5 h-5 bg-white rounded-full shadow-md transition-all duration-400 ease-[cubic-bezier(0.68,-0.55,0.265,1.55)] ${
+                            isMember ? 'left-[27px]' : 'left-[3px]'
+                        }`}>
+                            <span className="absolute inset-0 flex items-center justify-center text-[8px]">
+                                {isMember ? '✓' : ''}
+                            </span>
+                        </div>
+                    </button>
+                    <span className={`text-[11px] font-semibold transition-all duration-300 ${isMember ? 'text-espresso' : 'text-espresso/25'}`}>
+                        Member
+                    </span>
+                </div>
+            </nav>
+        );
+
+        /* ============ MemberPage (Main) ============ */
+        const MemberPage = () => {
+            const [isMember, setIsMember] = useState(false);
+            const [visible, setVisible] = useState(true);
+            const [key, setKey] = useState(0);
+
+            const handleToggle = () => {
+                setVisible(false);
+                setTimeout(() => {
+                    setIsMember(prev => !prev);
+                    setKey(k => k + 1);
+                    setVisible(true);
+                }, 250);
+            };
+
+            return (
+                <div className="min-h-screen bg-cream">
+                    <div className="max-w-5xl mx-auto px-4 md:px-6 lg:px-8 py-6 md:py-10">
+                        <Navbar isMember={isMember} onToggle={handleToggle} />
+
+                        <div
+                            key={key}
+                            className={`transition-all duration-400 ease-out ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-5'}`}
+                        >
+                            {isMember ? (
+                                <div>
+                                    <div className="mb-7 fade-slide-up">
+                                        <h2 className="font-display text-2xl md:text-[1.85rem] font-extrabold text-espresso flex items-center gap-2">
+                                            Selamat Datang Kembali!
+                                            <span className="text-2xl">☕</span>
+                                        </h2>
+                                        <p className="text-espresso/45 text-sm mt-1.5">Berikut ringkasan membership Anda hari ini</p>
+                                    </div>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-6">
+                                        <ProfileCard />
+                                        <QuotaCard />
+                                    </div>
+                                </div>
+                            ) : (
+                                <JoinSection />
+                            )}
+
+                            <BenefitList />
+                        </div>
+
+                        {/* Footer */}
+                        <div className="mt-20 pb-8 text-center">
+                            <div className="w-12 mx-auto h-px bg-espresso/10 mb-6" />
+                            <div className="flex items-center justify-center gap-2 text-espresso/25 text-[11px] font-medium">
+                                <CoffeeIcon size={13} />
+                                <span>© 2024 Warung Kopi — Dibuat dengan ❤️ dan ☕ di Nusantara</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        /* ============ Render ============ */
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<MemberPage />);
+    </script>
+</body>
+</html>

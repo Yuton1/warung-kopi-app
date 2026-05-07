@@ -6,12 +6,11 @@ const navItems = [
   { to: '/', end: true, label: 'Home', state: null, type: 'link' },
   { label: 'Menu', type: 'dropdown' },
   { to: '/pesanan', label: 'Pesanan', state: null, type: 'link', badge: 'orders' },
-  { to: '/akun', label: 'Member', state: null, type: 'link' },
+  { to: '/member', label: 'Member', state: null, type: 'link' },
   { label: 'Keranjang', state: { scrollToCart: true }, type: 'button', badge: 'cart' },
 ]
 
 const menuDropdownItems = [
-  { label: 'Tracking Pesanan', to: '/pesanan' },
   { label: 'Minuman', to: '/menu/minuman' },
   { label: 'Makanan', to: '/menu/makanan' },
   { label: 'Cemilan', to: '/menu/cemilan' },
@@ -150,7 +149,7 @@ const CustomerNavbar = () => {
           </nav>
 
           {isLoggedIn ? (
-            <Link to="/akun" className="customer-navbar__profile" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Link to="/member" className="customer-navbar__profile" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <Icon name="user" />
             </Link>
           ) : (

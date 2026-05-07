@@ -28,7 +28,7 @@ const Banner = () => {
             title: "Voucher Member",
             subtitle: "Kumpulkan Poin Sekarang",
             image_url: "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085",
-            target_url: "/akun"
+            target_url: "/member"
           }
         ];
         

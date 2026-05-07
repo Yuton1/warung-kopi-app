@@ -8,6 +8,7 @@ import MakananPage from './pages/customer/MakananPage'
 import LocationPage from './pages/customer/LocationPage'
 import MenuView from './pages/customer/MenuView'
 import MinumanPage from './pages/customer/MinumanPage'
+import MemberPage from './pages/customer/MemberPage'
 import OrdersPage from './pages/customer/OrdersPage'
 import ProfilePage from './pages/customer/ProfilePage'
 import PromoPage from './pages/customer/PromoPage'
@@ -45,6 +46,7 @@ function App() {
           <Route path="menu/minuman" element={<MinumanPage />} />
           <Route path="menu/makanan" element={<MakananPage />} />
           <Route path="menu/cemilan" element={<CemilanPage />} />
+          <Route path="member" element={<MemberPage />} />
           <Route path="akun" element={<ProfilePage />} />
           <Route path="pesanan" element={<OrdersPage />} />
           <Route path="promo" element={<PromoPage />} />
