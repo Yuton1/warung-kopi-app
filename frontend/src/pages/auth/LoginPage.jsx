@@ -1,191 +1,190 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useState } from 'react'
+import { useNavigate, Link } from 'react-router-dom'
+import axios from 'axios'
+import { AuthField } from './AuthShell'
+import { STORAGE_KEYS, writeStoredValue } from '../../data/customerStorage'
+import { getApiBaseUrl } from '../../utils/apiBaseUrl'
+
 
 const LoginPage = () => {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState(false);
-  const navigate = useNavigate();
+  const navigate = useNavigate()
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [rememberMe, setRememberMe] = useState(false)
 
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setError('');
-    
+  const API_BASE_URL = getApiBaseUrl()
+  const loginUrl = API_BASE_URL ? `${API_BASE_URL}/api/auth/login` : '/api/auth/login'
+
+  const handleSubmit = async (event) => {
+    event.preventDefault()
+
     try {
-      const response = await fetch('http://localhost:3000/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password })
+      // 1. Menggunakan API_BASE_URL agar tidak error saat di-deploy
+      const response = await axios.post(loginUrl, { 
+        email, 
+        password 
       });
 
-      const data = await response.json();
+      const { user, token } = response.data;
+      const userRole = user.role;
 
-      if (response.ok && data.token) {
-        localStorage.setItem('token', data.token);
-        localStorage.setItem('user', JSON.stringify(data.user));
-        setSuccess(true);
-        setTimeout(() => navigate('/dashboard'), 1200);
-      } else {
-        setError(data.message || 'Username atau password salah!');
+      const authUser = {
+        name: user.username,
+        role: userRole,
+        email: user.email,
+        mode: 'login',
+        loggedInAt: new Date().toISOString(),
       }
+
+      // 3. Simpan sesi login
+      writeStoredValue(STORAGE_KEYS.auth, authUser)
+      writeStoredValue(STORAGE_KEYS.account, {
+        ...authUser,
+        city: 'Malang',
+      })
+      localStorage.setItem("token", token);
+
+      window.dispatchEvent(new Event('warungkopi-state-changed'))
+
+      if (userRole === 'admin') {
+        navigate('/admin', { replace: true });
+      } else if (userRole === 'barista') {
+        navigate('/barista', { replace: true });
+      } else {
+        navigate('/', { replace: true });
+      }
+
     } catch (err) {
-      setError('Tidak dapat terhubung ke server.');
-    } finally {
-      setIsLoading(false);
+      console.error("Login Error:", err)
+
+      const serverData = err.response?.data
+      const serverMessage =
+        typeof serverData === 'string'
+          ? serverData
+          : serverData?.message || serverData?.error || serverData?.title || null
+      const isNetworkError = err.code === 'ERR_NETWORK'
+      const fallbackMessage = isNetworkError
+        ? 'Tidak bisa menghubungi API login. Cek deploy backend, rewrite /api, dan env TiDB.'
+        : 'Login gagal. Periksa email/password atau log backend.'
+      const normalizedMessage = serverMessage ? String(serverMessage).trim() : ''
+      const looksLikeHtml = normalizedMessage.startsWith('<')
+      const looksLikeObject = normalizedMessage === '[object Object]'
+
+      alert(
+        normalizedMessage && !looksLikeHtml && !looksLikeObject
+          ? String(serverMessage)
+          : fallbackMessage
+      )
     }
-  };
+  }
 
   return (
-    <div className="flex min-h-screen bg-[#0f0f0f] font-['Poppins'] overflow-hidden">
+    <div className="flex h-screen w-full bg-white font-sans overflow-hidden">
       
-      {/* LEFT PANEL - Branding with Background Image */}
-      <div className="hidden relative w-1/2 md:flex flex-col justify-center items-center p-12 overflow-hidden">
-        {/* Background Image dari folder public */}
-        <img 
-          src="/Gambar_Login.jpg" 
-          alt="Coffee Background" 
-          className="absolute inset-0 w-full h-full object-cover"
-        />
-        {/* Overlay agar teks terbaca jelas */}
-        <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px]" />
-        
-        {/* Dekorasi Biji Kopi (CSS Floating Beans) */}
-        <div className="absolute inset-0 pointer-events-none opacity-20">
-            {[...Array(8)].map((_, i) => (
-                <div key={i} className={`absolute w-5 h-7 bg-[#c19a6b] rounded-full blur-[1px] animate-pulse`} 
-                     style={{ 
-                         top: `${Math.random() * 100}%`, 
-                         left: `${Math.random() * 100}%`,
-                         transform: `rotate(${Math.random() * 360}deg)` 
-                     }} 
-                />
-            ))}
+      {/* SISI KIRI: FORM LOGIN */}
+      <div className="flex w-full flex-col justify-center px-8 md:w-1/2 md:px-20 lg:px-32">
+        {/* Brand/Logo Section */}
+        <div className="mb-12 flex items-center gap-3">
+          <img 
+            src="/Logo_Warkop_Nav.png" 
+            alt="Logo Warung Kopi" 
+            className="h-10 w-auto object-contain" 
+          />
         </div>
 
-        <div className="relative z-10 text-center max-w-md animate-fadeInLeft">
-          <div className="mb-8">
-          </div>
-          <h1 className="text-4xl font-bold text-white mb-4 leading-tight">
-            Selamat Datang di <span className="text-[#c19a6b]">WarungKopi</span>
+        <div className="mb-10">
+          <h1 className="text-4xl font-extrabold text-[#1b120d] leading-tight">
+            Halo, <br /> Welcome Back
           </h1>
-          <p className="text-gray-300 font-light leading-relaxed">
-            Nikmati pengalaman mengelola kedai kopi Anda dengan mudah dan efisien. 
-            Sistem manajemen terpadu untuk bisnis kopi Anda.
+          <p className="mt-3 text-sm text-gray-500">
+            Hey, welcome back to your favorite coffee place.
           </p>
         </div>
+
+        <form className="flex flex-col gap-5" onSubmit={handleSubmit}>
+          <div className="space-y-4">
+            <AuthField
+              icon="mail"
+              type="email"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              placeholder="Email"
+              autoComplete="email"
+              name="email"
+              className="rounded-xl border-gray-200 py-3 focus:border-[#e39b4f] focus:ring-[#e39b4f]"
+            />
+            <AuthField
+              icon="lock"
+              type="password"
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              placeholder="Password"
+              autoComplete="current-password"
+              name="password"
+              className="rounded-xl border-gray-200 py-3 focus:border-[#e39b4f] focus:ring-[#e39b4f]"
+            />
+          </div>
+
+          {/* Remember Me & Forgot Password */}
+          <div className="flex items-center justify-between text-xs">
+            <label className="flex items-center gap-2 cursor-pointer text-gray-600">
+              <input 
+                type="checkbox" 
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+                className="h-4 w-4 rounded border-gray-300 text-[#e39b4f] focus:ring-[#e39b4f]" 
+              />
+              Remember me
+            </label>
+            <Link to="/forgot-password" title="Lupa password?" className="font-semibold text-gray-500 hover:text-[#e39b4f]">
+              Forgot Password?
+            </Link>
+          </div>
+
+          <button
+            type="submit"
+            className="mt-4 w-fit rounded-xl bg-[#e39b4f] px-10 py-3 font-bold text-white shadow-lg shadow-orange-200 transition-all hover:scale-105 hover:brightness-105 active:scale-95"
+          >
+            Sign In
+          </button>
+        </form>
+
+        <p className="mt-12 text-xs text-gray-500">
+          Don't have an account? {' '}
+          <Link to="/register" className="font-bold text-[#e39b4f] hover:underline">
+            Sign Up
+          </Link>
+        </p>
       </div>
 
-      {/* RIGHT PANEL - Login Form */}
-      <div className="w-full md:w-1/2 flex flex-col justify-center items-center p-8 sm:p-16 bg-[#1a1a1a] relative">
-        <div className="absolute left-0 top-0 w-1 h-full bg-gradient-to-b from-transparent via-[#c19a6b]/30 to-transparent hidden md:block" />
-        
-        <div className="w-full max-w-md space-y-8">
-          <div className="animate-fadeInUp">
-            <span className="text-[#c19a6b] text-xs font-semibold tracking-[0.2em] uppercase">Welcome Back</span>
-            <h2 className="text-3xl font-bold text-white mt-2">Masuk ke Akun</h2>
-            <p className="text-gray-500 text-sm mt-2 font-light">Masukkan kredensial Anda untuk melanjutkan</p>
+      {/* SISI KANAN: BACKGROUND GAMBAR DENGAN OVERLAY */}
+      <div className="hidden h-full w-1/2 p-4 md:block">
+        <div className="relative h-full w-full overflow-hidden rounded-[2.5rem] flex items-center justify-center bg-[#1b120d]">
+          
+          {/* Background Image - Path sudah sesuai dengan folder public */}
+          <img 
+            src="/Gambar_Login.jpg" 
+            alt="Background Login" 
+            className="absolute inset-0 h-full w-full object-cover"
+          />
+
+          {/* Overlay Gelap */}
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px]" />
+          
+          <div className="relative z-10 flex flex-col items-center text-center px-12">
+
+            {/* Perbaikan: font-bold ditambahkan agar tidak error */}
+            <h2 className="text-3xl font-bold text-white leading-tight tracking-tighter">
+              The best beans, <br />the best brew.
+            </h2>
+            <p className="mt-4 text-sm text-gray-200 max-w-xs font-medium">
+              Nikmati kemudahan memesan kopi favoritmu kapan saja dan di mana saja.
+            </p>
           </div>
-
-          {/* Feedback Messages */}
-          {error && (
-            <div className="bg-red-500/10 border border-red-500/30 text-red-400 p-4 rounded-xl text-sm flex items-center gap-3 animate-shake">
-              <i className="fas fa-exclamation-circle"></i> {error}
-            </div>
-          )}
-          {success && (
-            <div className="bg-green-500/10 border border-green-500/30 text-green-400 p-4 rounded-xl text-sm flex items-center gap-3">
-              <i className="fas fa-check-circle"></i> Login berhasil! Mengalihkan...
-            </div>
-          )}
-
-          <form onSubmit={handleLogin} className="space-y-6">
-            <div className="space-y-2 animate-fadeInUp">
-              <label className="text-xs font-medium text-gray-400 ml-1">Username</label>
-              <div className="relative group">
-                <i className="fas fa-user absolute left-4 top-1/2 -translate-y-1/2 text-gray-600 group-focus-within:text-[#c19a6b] transition-colors" />
-                <input 
-                  type="text" 
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  placeholder="Masukkan username"
-                  className="w-full pl-12 pr-4 py-3.5 bg-white/5 border border-white/10 rounded-xl text-white outline-none focus:border-[#c19a6b] focus:ring-4 focus:ring-[#c19a6b]/10 transition-all placeholder:text-gray-600"
-                  required
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2 animate-fadeInUp">
-              <label className="text-xs font-medium text-gray-400 ml-1">Password</label>
-              <div className="relative group">
-                <i className="fas fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-gray-600 group-focus-within:text-[#c19a6b] transition-colors" />
-                <input 
-                  type={showPassword ? "text" : "password"}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Masukkan password"
-                  className="w-full pl-12 pr-12 py-3.5 bg-white/5 border border-white/10 rounded-xl text-white outline-none focus:border-[#c19a6b] focus:ring-4 focus:ring-[#c19a6b]/10 transition-all placeholder:text-gray-600"
-                  required
-                />
-                <button 
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-600 hover:text-[#c19a6b] transition-colors"
-                >
-                  <i className={`fas ${showPassword ? 'fa-eye-slash' : 'fa-eye'}`} />
-                </button>
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between text-xs animate-fadeInUp">
-              <label className="flex items-center gap-2 text-gray-500 cursor-pointer group">
-                <input type="checkbox" className="hidden" />
-                <div className="w-4 h-4 border border-white/20 rounded bg-white/5 group-hover:border-[#c19a6b] transition-colors flex items-center justify-center">
-                  <div className="w-2 h-2 bg-[#c19a6b] rounded-sm hidden group-active:block" />
-                </div>
-                Ingat Saya
-              </label>
-              <Link to="/forgot-password" size="sm" className="text-[#c19a6b] hover:underline font-medium">Lupa Password?</Link>
-            </div>
-
-            <button 
-              type="submit" 
-              disabled={isLoading}
-              className="w-full py-4 bg-gradient-to-r from-[#c19a6b] to-[#a0784a] text-white font-bold rounded-xl shadow-lg shadow-[#c19a6b]/20 hover:shadow-[#c19a6b]/40 hover:-translate-y-0.5 transition-all active:translate-y-0 disabled:opacity-70 disabled:cursor-not-allowed animate-fadeInUp"
-            >
-              {isLoading ? (
-                <div className="flex items-center justify-center gap-2">
-                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  <span>Memproses...</span>
-                </div>
-              ) : "Masuk"}
-            </button>
-          </form>
-
-          <div className="relative py-4 animate-fadeInUp">
-            <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-white/5"></div></div>
-            <div className="relative flex justify-center text-xs uppercase"><span className="bg-[#1a1a1a] px-4 text-gray-600 tracking-widest">atau masuk dengan</span></div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4 animate-fadeInUp">
-            <button className="flex items-center justify-center gap-2 py-3 bg-white/5 border border-white/10 rounded-xl text-gray-300 hover:bg-white/10 transition-all">
-              <i className="fab fa-google text-red-500" /> Google
-            </button>
-            <button className="flex items-center justify-center gap-2 py-3 bg-white/5 border border-white/10 rounded-xl text-gray-300 hover:bg-white/10 transition-all">
-              <i className="fab fa-github" /> Facebook
-            </button>
-          </div>
-
-          <p className="text-center text-sm text-gray-500 animate-fadeInUp">
-            Belum punya akun? <Link to="/register" className="text-[#c19a6b] font-bold hover:underline">Daftar Sekarang</Link>
-          </p>
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default LoginPage;
+export default LoginPage
