@@ -5,7 +5,6 @@ import { AuthField } from './AuthShell'
 import { STORAGE_KEYS, writeStoredValue } from '../../data/customerStorage'
 import { getApiBaseUrl } from '../../utils/apiBaseUrl'
 
-
 const LoginPage = () => {
   const navigate = useNavigate()
   const [email, setEmail] = useState('')
@@ -19,7 +18,6 @@ const LoginPage = () => {
     event.preventDefault()
 
     try {
-      // 1. Menggunakan API_BASE_URL agar tidak error saat di-deploy
       const response = await axios.post(loginUrl, { 
         email, 
         password 
@@ -36,7 +34,6 @@ const LoginPage = () => {
         loggedInAt: new Date().toISOString(),
       }
 
-      // 3. Simpan sesi login
       writeStoredValue(STORAGE_KEYS.auth, authUser)
       writeStoredValue(STORAGE_KEYS.account, {
         ...authUser,
@@ -56,48 +53,32 @@ const LoginPage = () => {
 
     } catch (err) {
       console.error("Login Error:", err)
-
       const serverData = err.response?.data
-      const serverMessage =
-        typeof serverData === 'string'
-          ? serverData
-          : serverData?.message || serverData?.error || serverData?.title || null
-      const isNetworkError = err.code === 'ERR_NETWORK'
-      const fallbackMessage = isNetworkError
-        ? 'Tidak bisa menghubungi API login. Cek deploy backend, rewrite /api, dan env TiDB.'
-        : 'Login gagal. Periksa email/password atau log backend.'
-      const normalizedMessage = serverMessage ? String(serverMessage).trim() : ''
-      const looksLikeHtml = normalizedMessage.startsWith('<')
-      const looksLikeObject = normalizedMessage === '[object Object]'
-
-      alert(
-        normalizedMessage && !looksLikeHtml && !looksLikeObject
-          ? String(serverMessage)
-          : fallbackMessage
-      )
+      const serverMessage = typeof serverData === 'string' ? serverData : serverData?.message || serverData?.error || null
+      alert(serverMessage || 'Login gagal. Periksa kembali email/password Anda.')
     }
   }
 
   return (
-    <div className="flex h-screen w-full bg-[#1b120d] font-['Fredoka'] overflow-hidden">
-      
+    <div className="flex h-screen w-full bg-[#1b120d] font-['Fredoka'] overflow-hidden relative">
+
       {/* SISI KIRI: FORM LOGIN */}
       <div className="flex w-full flex-col justify-center px-8 md:w-1/2 md:px-20 lg:px-32">
         {/* Brand/Logo Section */}
-        <div className="mb-12 flex items-center gap-3">
+        <Link to="/" className="mb-12 flex items-center gap-3 w-fit hover:opacity-80 transition-opacity">
           <img 
             src="/Logo Putih.png" 
             alt="Logo Warung Kopi" 
             className="h-10 w-auto object-contain" 
           />
-        </div>
+        </Link>
 
         <div className="mb-10">
-          <h1 className="text-4xl font-extrabold text-[#fff3ec] leading-tight">
-            Halo, <br /> Welcome Back
+          <h1 className="text-4xl font-semibold text-[#fff3ec] leading-tight tracking-tight">
+            Halo, <br /> Selamat Datang
           </h1>
-          <p className="mt-3 text-sm text-[#d7cdc7] ">
-            Hey, welcome back to your favorite coffee place.
+          <p className="mt-3 text-base text-[#d7cdc7] font-reguler">
+            Hey, Selamat datang di kopi favoritmu di Warung Kopi.
           </p>
         </div>
 
@@ -111,7 +92,7 @@ const LoginPage = () => {
               placeholder="Email"
               autoComplete="email"
               name="email"
-              className="rounded-xl border-gray-200 py-3 focus:border-[#e39b4f] focus:ring-[#e39b4f]"
+              className="rounded-2xl border-white/10 bg-white/5 py-4 !text-white placeholder:text-gray-500 focus:border-[#e39b4f] focus:ring-[#e39b4f]"
             />
             <AuthField
               icon="lock"
@@ -121,38 +102,37 @@ const LoginPage = () => {
               placeholder="Password"
               autoComplete="current-password"
               name="password"
-              className="rounded-xl border-gray-200 py-3 focus:border-[#e39b4f] focus:ring-[#e39b4f]"
+              className="rounded-2xl border-white/10 bg-white/5 py-4 !text-white placeholder:text-gray-500 focus:border-[#e39b4f] focus:ring-[#e39b4f]"
             />
           </div>
 
-          {/* Remember Me & Forgot Password */}
-          <div className="flex items-center justify-between text-xs">
-            <label className="flex items-center gap-2 cursor-pointer text-gray-600">
+          <div className="flex items-center justify-between text-sm font-medium">
+            <label className="flex items-center gap-2 cursor-pointer text-[#d7cdc7]">
               <input 
                 type="checkbox" 
                 checked={rememberMe}
                 onChange={(e) => setRememberMe(e.target.checked)}
-                className="h-4 w-4 rounded border-gray-300 text-[#e39b4f] focus:ring-[#e39b4f]" 
+                className="h-4 w-4 rounded border-white/20 bg-white/5 text-[#e39b4f] focus:ring-[#e39b4f]" 
               />
               Remember me
             </label>
-            <Link to="/forgot-password" title="Lupa password?" className="font-semibold text-gray-500 hover:text-[#e39b4f]">
-              Forgot Password?
+            <Link to="/forgot-password" size="sm" className="font-regular !text-[#f5cda5] hover:underline">
+              Lupa Password?
             </Link>
           </div>
 
           <button
             type="submit"
-            className="mt-4 w-fit rounded-xl bg-[#e39b4f] px-10 py-3 font-bold text-white shadow-lg shadow-orange-200 transition-all hover:scale-105 hover:brightness-105 active:scale-95"
+            className="mt-4 w-full md:w-fit rounded-2xl bg-[#f5cda5] px-12 py-4 font-bold text-black shadow-lg shadow-orange-900/20 transition-all hover:scale-105 hover:brightness-105 active:scale-95"
           >
-            Sign In
+            Masuk
           </button>
         </form>
 
-        <p className="mt-12 text-xs text-gray-500">
-          Don't have an account? {' '}
-          <Link to="/register" className="font-bold text-[#e39b4f] hover:underline">
-            Sign Up
+        <p className="mt-12 text-sm text-[#c6c6c6] font-medium">
+          Belum Punya Akun? {' '}
+          <Link to="/register" className="font-bold !text-[#ffa748] hover:underline">
+            Register
           </Link>
         </p>
       </div>
@@ -160,27 +140,11 @@ const LoginPage = () => {
       {/* SISI KANAN: BACKGROUND GAMBAR DENGAN OVERLAY */}
       <div className="hidden h-full w-1/2 p-4 md:block">
         <div className="relative h-full w-full overflow-hidden rounded-[2.5rem] flex items-center justify-center bg-[#1b120d]">
-          
-          {/* Background Image - Path sudah sesuai dengan folder public */}
           <img 
             src="/Gambar_Login.jpg" 
             alt="Background Login" 
             className="absolute inset-0 h-full w-full object-cover"
           />
-
-          {/* Overlay Gelap */}
-          <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px]" />
-          
-          <div className="relative z-10 flex flex-col items-center text-center px-12">
-
-            {/* Perbaikan: font-bold ditambahkan agar tidak error */}
-            <h2 className="text-3xl font-bold text-white leading-tight tracking-tighter">
-              The best beans, <br />the best brew.
-            </h2>
-            <p className="mt-4 text-sm text-gray-200 max-w-xs font-medium">
-              Nikmati kemudahan memesan kopi favoritmu kapan saja dan di mana saja.
-            </p>
-          </div>
         </div>
       </div>
     </div>
