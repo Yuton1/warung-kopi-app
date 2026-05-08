@@ -12,26 +12,26 @@ const footerLinks = [
 const CustomerFooter = () => {
   return (
     <footer
-      className="w-full bg-[#301e16] text-white py-12 relative overflow-hidden"
+      className="w-full bg-[#301e16] text-white py-12 relative overflow-hidden font-['Fredoka']"
       style={{ backgroundImage: 'none' }}
     >
       <div className="max-w-7xl mx-auto px-6 relative z-10">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-12 border-b border-white/10 pb-10">
-          <section className="flex flex-col gap-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center">
-                <span className="w-4 h-4 bg-[#301e16] rounded-full" />
-              </div>
-              <div className="leading-tight">
-                <strong className="block text-xl uppercase tracking-tighter">Drinks</strong>
-                <span className="text-sm font-light">Warung Kopi</span>
-              </div>
-            </div>
+          <section className="flex flex-col gap-5">
+            {/* LOGO BARU MENGGUNAKAN IMAGE */}
+            <Link to="/" className="flex items-center gap-3 w-fit hover:opacity-80 transition-opacity">
+              <img 
+                src="/Logo Putih.png" 
+                alt="Logo Warung Kopi" 
+                className="h-10 w-auto object-contain" 
+              />
+            </Link>
+            
             <p className="text-gray-300 text-sm leading-relaxed max-w-xs">
               Warung Kopi untuk pemesanan menu, pre-order, group order, subscription, dan loyalty points dalam satu tempat yang hangat.
             </p>
             <address className="not-italic text-sm text-gray-400 mt-2">
-              Jl. Rasa Kopi No. 17, Bandung, Jawa Barat <br />
+              Jl. Raya Tlogomas No. 246, Malang, Jawa Timur <br />
               WhatsApp: <span className="text-white">+62 812-3456-7890</span>
             </address>
           </section>
@@ -60,7 +60,7 @@ const CustomerFooter = () => {
             </p>
             <Link
               to="/lokasi"
-              className="mt-4 inline-block bg-white text-[#301e16] px-6 py-2 rounded-full font-bold text-center hover:bg-gray-200 transition-all w-fit"
+              className="mt-4 inline-block bg-[#ff7700] !text-[#ffffff] px-6 py-2 rounded-full font-bold text-center hover:bg-[#ce6000] transition-all w-fit"
             >
               Lihat lokasi
             </Link>
@@ -69,7 +69,7 @@ const CustomerFooter = () => {
 
         <div className="mt-8 flex flex-col md:flex-row justify-between items-center text-[11px] text-gray-500 gap-4">
           <span>Menu, promo, akun, pesanan, dan lokasi tetap mudah dijangkau dari sini.</span>
-          <span className="font-medium">(c) 2026 Warung Kopi. All rights reserved.</span>
+          <span className="font-medium">© 2026 Warung Kopi. All rights reserved.</span>
         </div>
       </div>
     </footer>
