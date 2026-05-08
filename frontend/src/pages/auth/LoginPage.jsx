@@ -79,7 +79,7 @@ const LoginPage = () => {
   }
 
   return (
-    <div className="flex h-screen w-full bg-white font-sans overflow-hidden">
+    <div className="flex h-screen w-full bg-[#1b120d] font-sans overflow-hidden">
       
       {/* SISI KIRI: FORM LOGIN */}
       <div className="flex w-full flex-col justify-center px-8 md:w-1/2 md:px-20 lg:px-32">
