@@ -67,7 +67,6 @@ const AuthShell = ({ title, subtitle, linkText, linkTo, children, footerText }) 
     <div className="relative min-h-screen overflow-hidden bg-[#0f0b08] text-[#f8f0e6]">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(215,166,109,0.22),transparent_30%),radial-gradient(circle_at_bottom_right,rgba(255,255,255,0.08),transparent_28%),linear-gradient(180deg,#130e0a_0%,#0f0b08_100%)]" />
       <div className="absolute inset-0 opacity-25 [background-image:linear-gradient(rgba(255,255,255,0.08)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.08)_1px,transparent_1px)] [background-size:72px_72px]" />
-
       <div className="relative mx-auto flex min-h-screen w-full max-w-[1200px] items-center justify-center px-4 py-10">
         <div className="grid w-full max-w-[1000px] gap-8 lg:grid-cols-[1.1fr_0.9fr]">
           <div className="hidden rounded-[2rem] border border-white/10 bg-white/5 p-10 shadow-2xl shadow-black/20 lg:flex lg:flex-col lg:justify-between">
