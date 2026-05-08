@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { useLocation, useNavigate, Link } from 'react-router-dom'
 import axios from 'axios'
 import { AuthField } from './AuthShell'
 import { STORAGE_KEYS, writeStoredValue } from '../../data/customerStorage'
@@ -7,12 +7,30 @@ import { getApiBaseUrl } from '../../utils/apiBaseUrl'
 
 const LoginPage = () => {
   const navigate = useNavigate()
+  const location = useLocation()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [rememberMe, setRememberMe] = useState(false)
+  const [notice, setNotice] = useState('')
 
   const API_BASE_URL = getApiBaseUrl()
   const loginUrl = API_BASE_URL ? `${API_BASE_URL}/api/auth/login` : '/api/auth/login'
+
+  useEffect(() => {
+    const state = location.state || {}
+
+    if (state.email) {
+      setEmail(state.email)
+    }
+
+    if (state.password) {
+      setPassword(state.password)
+    }
+
+    if (state.message) {
+      setNotice(state.message)
+    }
+  }, [location.state])
 
   const handleSubmit = async (event) => {
     event.preventDefault()
@@ -81,6 +99,12 @@ const LoginPage = () => {
             Hey, Selamat datang di kopi favoritmu di Warung Kopi.
           </p>
         </div>
+
+        {notice ? (
+          <div className="mb-5 rounded-2xl border border-emerald-500/20 bg-emerald-500/10 px-4 py-3 text-sm font-medium text-emerald-100">
+            {notice}
+          </div>
+        ) : null}
 
         <form className="flex flex-col gap-5" onSubmit={handleSubmit}>
           <div className="space-y-4">

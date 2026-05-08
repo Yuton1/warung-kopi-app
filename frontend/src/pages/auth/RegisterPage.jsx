@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
+import axios from 'axios'
 import { AuthField } from './AuthShell'
-import { STORAGE_KEYS, writeStoredValue } from '../../data/customerStorage'
+import { getApiBaseUrl } from '../../utils/apiBaseUrl'
 
 const RegisterPage = () => {
   const navigate = useNavigate()
@@ -9,28 +10,41 @@ const RegisterPage = () => {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
 
-  const handleSubmit = (event) => {
+  const API_BASE_URL = getApiBaseUrl()
+  const registerUrl = API_BASE_URL ? `${API_BASE_URL}/api/auth/register` : '/api/auth/register'
+
+  const handleSubmit = async (event) => {
     event.preventDefault()
 
-    const authUser = {
-      email,
-      name: fullName || email.split('@') || 'Pelanggan Baru',
-      mode: 'register',
-      registeredAt: new Date().toISOString(),
+    const username = fullName.trim() || email.trim().split('@')[0] || 'Pelanggan Baru'
+
+    try {
+      const response = await axios.post(registerUrl, {
+        username,
+        email: email.trim(),
+        password,
+        role: 'customer',
+      })
+
+      const registeredUser = response.data?.user || {}
+
+      navigate('/login', {
+        replace: true,
+        state: {
+          email: registeredUser.email || email.trim(),
+          password,
+          message: 'Registrasi berhasil. Silakan masuk dengan akun baru kamu.',
+        },
+      })
+    } catch (error) {
+      console.error('Register Error:', error)
+      const serverData = error.response?.data
+      const serverMessage = typeof serverData === 'string'
+        ? serverData
+        : serverData?.message || serverData?.error || 'Registrasi gagal. Silakan coba lagi.'
+
+      alert(serverMessage)
     }
-
-    writeStoredValue(STORAGE_KEYS.auth, authUser)
-    writeStoredValue(STORAGE_KEYS.account, {
-      mode: 'register',
-      name: authUser.name,
-      email: authUser.email,
-      phone: '',
-      address: '',
-      city: 'Malang', // Saya sesuaikan ke Malang ya, San
-    })
-
-    window.dispatchEvent(new Event('warungkopi-state-changed'))
-    navigate('/akun', { replace: true })
   }
 
   return (
