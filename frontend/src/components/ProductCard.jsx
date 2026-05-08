@@ -25,7 +25,7 @@ const ProductCard = ({
         <div className="absolute top-6 left-6 flex flex-col gap-2 z-10">
           {product.badge && (
             <span className={`${
-              product.badge.toLowerCase() === 'best seller' ? 'bg-[#FF6E00]' : 'bg-[#A0FF6D] text-[#1A1A1A]'
+              product.badge.toLowerCase() === 'best seller' ? 'bg-[#FF6E00]' : 'bg-[#A0FF6D] !text-[#1A1A1A]'
             } text-white px-5 py-1.5 rounded-full text-[11px] font-bold shadow-lg uppercase tracking-wider`}>
               {product.badge}
             </span>
