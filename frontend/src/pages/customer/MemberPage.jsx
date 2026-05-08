@@ -11,13 +11,14 @@ const defaultAccount = {
   email: '',
 }
 
-const defaultLoyalty = {
-  points: 2340,
-  rewardsUsed: 12,
-  totalOrders: 47,
-  memberSince: 'Jan 2024',
-  memberId: '4728',
-  validThrough: 'Dec 2025',
+const defaultMembership = {
+  points: 0,
+  rewardsUsed: 0,
+  totalOrders: 0,
+  memberSince: '',
+  memberId: '',
+  validThrough: '',
+  tier: '',
 }
 
 const normalizeText = (value) => String(value ?? '').trim()
@@ -37,13 +38,15 @@ const tierFromPoints = (points) => {
 const MemberPage = () => {
   const [authUser, setAuthUser] = useState(() => readStoredValue(STORAGE_KEYS.auth, null))
   const [account, setAccount] = useState(() => readStoredValue(STORAGE_KEYS.account, defaultAccount))
-  const [loyalty, setLoyalty] = useState(() => readStoredValue(STORAGE_KEYS.loyalty, defaultLoyalty))
+  const [loyalty, setLoyalty] = useState(() => readStoredValue(STORAGE_KEYS.loyalty, null))
+  const [subscription, setSubscription] = useState(() => readStoredValue(STORAGE_KEYS.subscription, null))
 
   useEffect(() => {
     const syncStorage = () => {
       setAuthUser(readStoredValue(STORAGE_KEYS.auth, null))
       setAccount(readStoredValue(STORAGE_KEYS.account, defaultAccount))
-      setLoyalty(readStoredValue(STORAGE_KEYS.loyalty, defaultLoyalty))
+      setLoyalty(readStoredValue(STORAGE_KEYS.loyalty, null))
+      setSubscription(readStoredValue(STORAGE_KEYS.subscription, null))
     }
 
     syncStorage()
@@ -56,14 +59,25 @@ const MemberPage = () => {
     }
   }, [])
 
-  const isMember = Boolean(authUser?.email)
+  const membershipSource = subscription || loyalty || null
+  const isMember = Boolean(
+    membershipSource &&
+      (
+        membershipSource?.status === 'active' ||
+        membershipSource?.isActive === true ||
+        membershipSource?.is_member === true ||
+        membershipSource?.memberId ||
+        membershipSource?.planId ||
+        membershipSource?.points > 0
+      )
+  )
   const displayName = normalizeText(authUser?.name || account?.name || 'Tamu Warung Kopi')
   const displayEmail = normalizeText(authUser?.email || account?.email || 'Belum login')
-  const loyaltyPoints = parseNumber(loyalty?.points, defaultLoyalty.points)
-  const memberTier = loyalty?.tier || tierFromPoints(loyaltyPoints)
-  const memberSince = normalizeText(loyalty?.memberSince || defaultLoyalty.memberSince)
-  const validThrough = normalizeText(loyalty?.validThrough || defaultLoyalty.validThrough)
-  const memberCode = normalizeText(loyalty?.memberId || defaultLoyalty.memberId)
+  const loyaltyPoints = parseNumber(membershipSource?.points, defaultMembership.points)
+  const memberTier = membershipSource?.tier || tierFromPoints(loyaltyPoints)
+  const memberSince = normalizeText(membershipSource?.memberSince || membershipSource?.startedAt || '')
+  const validThrough = normalizeText(membershipSource?.validThrough || membershipSource?.expiresAt || '')
+  const memberCode = normalizeText(membershipSource?.memberId || membershipSource?.memberCode || '')
 
   const memberInfo = useMemo(
     () => ({
@@ -72,11 +86,11 @@ const MemberPage = () => {
       tier: memberTier,
       points: loyaltyPoints,
       pointsTarget: Math.max(loyaltyPoints + 910, 3250),
-      totalOrders: parseNumber(loyalty?.totalOrders, defaultLoyalty.totalOrders),
-      rewardsUsed: parseNumber(loyalty?.rewardsUsed, defaultLoyalty.rewardsUsed),
-      memberSince,
-      validThrough,
-      memberCode,
+      totalOrders: parseNumber(membershipSource?.totalOrders, defaultMembership.totalOrders),
+      rewardsUsed: parseNumber(membershipSource?.rewardsUsed, defaultMembership.rewardsUsed),
+      memberSince: memberSince || 'Baru bergabung',
+      validThrough: validThrough || 'Tidak ada tanggal kedaluwarsa',
+      memberCode: memberCode || 'WK-NEW',
       initials: displayName
         .split(/\s+/)
         .filter(Boolean)
@@ -84,7 +98,17 @@ const MemberPage = () => {
         .map((part) => part.charAt(0).toUpperCase())
         .join('') || 'WK',
     }),
-    [displayEmail, displayName, loyalty?.rewardsUsed, loyalty?.totalOrders, loyaltyPoints, memberCode, memberSince, memberTier, validThrough]
+    [
+      displayEmail,
+      displayName,
+      loyaltyPoints,
+      memberCode,
+      memberSince,
+      memberTier,
+      membershipSource?.rewardsUsed,
+      membershipSource?.totalOrders,
+      validThrough,
+    ]
   )
 
   const heroStats = useMemo(
@@ -159,7 +183,33 @@ const MemberPage = () => {
           </div>
         </section>
       ) : (
-        <JoinSection />
+        <div className="space-y-6">
+          <JoinSection />
+
+          <section className="rounded-[28px] border border-[#e1cdbb] bg-[#fff8ef] px-6 py-5 shadow-[0_16px_40px_rgba(45,25,15,0.06)]">
+            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+              <div>
+                <span className="eyebrow">Belum jadi member</span>
+                <h2 className="mt-2 text-2xl font-extrabold text-[#4a3728]">
+                  Kamu belum terdaftar sebagai member aktif.
+                </h2>
+                <p className="mt-2 max-w-2xl text-sm leading-7 text-[#6f6257]">
+                  Untuk melihat kartu member, poin, dan benefit aktif, daftar dulu sebagai member atau masuk jika
+                  akunmu sudah punya data membership.
+                </p>
+              </div>
+
+              <div className="flex flex-wrap gap-3">
+                <Link to="/register" className="btn btn-primary">
+                  Gabung Member
+                </Link>
+                <Link to="/login" className="btn btn-secondary">
+                  Masuk
+                </Link>
+              </div>
+            </div>
+          </section>
+        </div>
       )}
 
       {isMember ? (
