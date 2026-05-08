@@ -79,24 +79,24 @@ const LoginPage = () => {
   }
 
   return (
-    <div className="flex h-screen w-full bg-[#1b120d] font-sans overflow-hidden">
+    <div className="flex h-screen w-full bg-[#1b120d] font-['Fredoka'] overflow-hidden">
       
       {/* SISI KIRI: FORM LOGIN */}
       <div className="flex w-full flex-col justify-center px-8 md:w-1/2 md:px-20 lg:px-32">
         {/* Brand/Logo Section */}
         <div className="mb-12 flex items-center gap-3">
           <img 
-            src="/Logo_Warkop_Nav.png" 
+            src="/Logo Putih.png" 
             alt="Logo Warung Kopi" 
             className="h-10 w-auto object-contain" 
           />
         </div>
 
         <div className="mb-10">
-          <h1 className="text-4xl font-extrabold text-[#1b120d] leading-tight">
+          <h1 className="text-4xl font-extrabold text-[#fff3ec] leading-tight">
             Halo, <br /> Welcome Back
           </h1>
-          <p className="mt-3 text-sm text-gray-500">
+          <p className="mt-3 text-sm text-[#d7cdc7] ">
             Hey, welcome back to your favorite coffee place.
           </p>
         </div>
