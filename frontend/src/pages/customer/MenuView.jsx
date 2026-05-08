@@ -1,4 +1,5 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import Banner from './MenuViewComponents/Banner';
 import PromoMingguan from './MenuViewComponents/PromoMingguan';
 import Recommendations from './MenuViewComponents/Recommendations';
@@ -11,8 +12,7 @@ import CartFloating from '../../components/CartFloating';
 import { coffeeSeed, subscriptionPlans as subscriptionSeed } from '../../data/menuSeed';
 
 const MenuView = () => {
-  const [recommendations, setRecommendations] = useState(coffeeSeed.slice(0, 6));
-  const [displayedMenu, setDisplayedMenu] = useState(coffeeSeed.slice(0, 12));
+  const [allProducts, setAllProducts] = useState(coffeeSeed);
   const [loadingMenu, setLoadingMenu] = useState(true);
   const [cart, setCart] = useState([]);
   const [favoriteIdSet, setFavoriteIdSet] = useState(new Set());
@@ -20,11 +20,32 @@ const MenuView = () => {
   const [groupOrder, setGroupOrder] = useState({ members: 4, items: [], status: 'idle' });
   const [subscriptionPlans, setSubscriptionPlans] = useState(subscriptionSeed);
   const [activeSub, setActiveSub] = useState({ id: null });
+  const [searchParams] = useSearchParams();
 
   const monthlySpend = 150000;
   const favoriteCoffee = "Latte";
   const planStatus = "Active";
   const menuSectionRef = useRef(null);
+  const searchQuery = searchParams.get('q')?.trim() || '';
+  const normalizedSearchQuery = searchQuery.toLowerCase();
+
+  const matchesSearch = (product) => {
+    if (!normalizedSearchQuery) return true;
+
+    const haystack = [
+      product.name,
+      product.category,
+      product.category_label,
+      product.badge,
+      product.description,
+      product.initials,
+    ]
+      .filter(Boolean)
+      .join(' ')
+      .toLowerCase();
+
+    return haystack.includes(normalizedSearchQuery);
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -42,13 +63,11 @@ const MenuView = () => {
         const safeProducts = Array.isArray(products) && products.length ? products : coffeeSeed;
         const safeSubscriptions = Array.isArray(subs) && subs.length ? subs : subscriptionSeed;
 
-        setDisplayedMenu(safeProducts.slice(0, 12));
-        setRecommendations(safeProducts.slice(0, 6));
+        setAllProducts(safeProducts);
         setSubscriptionPlans(safeSubscriptions);
       } catch (error) {
         console.error("Gagal ambil data menu:", error);
-        setDisplayedMenu(coffeeSeed.slice(0, 12));
-        setRecommendations(coffeeSeed.slice(0, 6));
+        setAllProducts(coffeeSeed);
         setSubscriptionPlans(subscriptionSeed);
       } finally {
         setLoadingMenu(false);
@@ -56,6 +75,37 @@ const MenuView = () => {
     };
     fetchData();
   }, []);
+
+  useEffect(() => {
+    if (!searchQuery) return
+
+    requestAnimationFrame(() => {
+      menuSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    })
+  }, [searchQuery])
+
+  const filteredMenu = useMemo(() => {
+    const baseMenu = Array.isArray(allProducts) ? allProducts : coffeeSeed
+    return baseMenu.filter(matchesSearch)
+  }, [allProducts, normalizedSearchQuery])
+
+  const recommendations = useMemo(() => {
+    if (normalizedSearchQuery) {
+      return filteredMenu.slice(0, 6)
+    }
+
+    return filteredMenu.slice(0, 6)
+  }, [filteredMenu, normalizedSearchQuery])
+
+  const menuTitle = normalizedSearchQuery
+    ? `Hasil pencarian untuk "${searchQuery}"`
+    : 'Menu Sering di Pesan'
+
+  const emptyMessage = normalizedSearchQuery
+    ? `Tidak ada menu yang cocok dengan "${searchQuery}". Coba kata kunci lain seperti kopi, latte, makanan, atau signature.`
+    : 'Menu belum tersedia.'
+
+  const visibleMenu = normalizedSearchQuery ? filteredMenu : filteredMenu.slice(0, 12)
 
   const toggleFavorite = (id) => {
     const newFavs = new Set(favoriteIdSet);
@@ -90,13 +140,16 @@ const MenuView = () => {
           
           <section className="w-full px-6 lg:px-12">
             <MenuGrid 
-              menu={displayedMenu} 
+              menu={visibleMenu} 
               loading={loadingMenu}
               favoriteIdSet={favoriteIdSet}
               toggleFavorite={toggleFavorite}
               addToCart={addToCart}
               addToGroup={addToGroup}
               menuRef={menuSectionRef}
+              limit={normalizedSearchQuery ? undefined : 12}
+              title={menuTitle}
+              emptyMessage={emptyMessage}
             />
           </section>
 

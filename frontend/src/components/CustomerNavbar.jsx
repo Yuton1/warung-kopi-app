@@ -74,17 +74,13 @@ const CustomerNavbar = () => {
   }, [])
 
   const handleSearchSubmit = (e) => {
-    e.preventDefault();
-    if (!searchValue.trim()) return; // Jangan cari jika input kosong
+    e.preventDefault()
 
-    // Kirim query ke halaman utama
-    navigate('/', { 
-      state: { 
-        focusSearch: true, 
-        searchQuery: searchValue.trim() 
-      } 
-    });
-  };
+    const query = searchValue.trim()
+    if (!query) return
+
+    navigate(`/?q=${encodeURIComponent(query)}`, { replace: false })
+  }
 
   return (
     <header className="site-header" style={{ backgroundColor: '#ffffff' }}>

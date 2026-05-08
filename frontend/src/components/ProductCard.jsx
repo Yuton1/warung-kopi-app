@@ -1,146 +1,107 @@
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import { formatRupiah } from '../utils/formatRupiah'
-
-// Fallback jika data size dari database belum ada
-const FALLBACK_SIZES = [
-  { label: 'Tall', factor: 1, note: '250 ml' },
-  { label: 'Grande', factor: 1.2, note: '350 ml' },
-  { label: 'Venti', factor: 1.5, note: '450 ml' }
-]
 
 const ProductCard = ({
   product,
   isFavorite,
   onToggleFavorite,
   onAddToCart,
-  onAddToGroup,
+  onViewDetail
 }) => {
-  // Mengambil data size dari produk atau fallback
-  const sizes = product.sizes?.length ? product.sizes : FALLBACK_SIZES
-  
-  // Default selection (Grande jika ada, atau index ke-1)
-  const [selectedSize, setSelectedSize] = useState(sizes[Math.min(1, sizes.length - 1)])
-
-  const activeSize = sizes.find((item) => item.label === selectedSize?.label) || sizes[0]
-
-  // Hitung harga berdasarkan factor ukuran
-  const price = useMemo(() => {
-    const basePrice = Number(product.price) || 0
-    const factor = activeSize?.factor ?? 1
-    return Math.round(basePrice * factor)
-  }, [activeSize, product.price])
+  // Ukuran tetap ada untuk keperluan logic Keranjang, tapi UI diubah menjadi informasi statis
+  const selectedSize = 'Normal' 
 
   return (
-    <article className="bg-white rounded-[2.5rem] shadow-xl overflow-hidden flex flex-col w-full border border-gray-100">
+    /* Container dengan Golden Ratio Padding (p-[26px]) */
+    <article className="bg-white rounded-[2.5rem] p-[26px] shadow-2xl flex flex-col w-full max-w-[420px] font-['Fredoka'] border border-gray-50 transition-all duration-300 hover:shadow-[0_20px_50px_rgba(74,55,40,0.15)] hover:-translate-y-1">
       
-      {/* --- BAGIAN ATAS: Gradient & Initials --- */}
-      <div className="relative h-36 bg-gradient-to-br from-[#5D4037] to-[#2B1B17] p-6 flex items-start justify-between">
-        {/* Lingkaran Cahaya Dekat Favorit (Opsional untuk estetika) */}
-        <div className="absolute top-[-20%] right-[-10%] w-40 h-40 bg-white/10 rounded-full blur-3xl" />
-        
-        {/* Chip Inisial */}
-        <div className="w-16 h-16 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/30 shadow-inner">
-          <span className="text-white text-2xl font-serif font-bold tracking-tighter">
-            {product.initials || 'WK'}
-          </span>
+      {/* --- BAGIAN 1: VISUAL FULL (Tanpa Side Padding) --- */}
+      <div className="relative aspect-[1.618/1] w-[calc(100%+52px)] -ml-[26px] -mt-[26px] bg-[#4A3728] rounded-t-[2.5rem] rounded-b-[2rem] overflow-hidden mb-7 group">
+        {/* Badge Best Seller & New */}
+        <div className="absolute top-6 left-6 flex flex-col gap-2 z-10">
+          {product.isBestSeller && (
+            <span className="bg-[#FF6E00] text-white px-5 py-1.5 rounded-full text-[10px] font-bold shadow-lg uppercase tracking-wider animate-pulse">
+              Best Seller
+            </span>
+          )}
+          {product.isNew && (
+            <span className="bg-[#A0FF6D] text-[#1A1A1A] px-5 py-1.5 rounded-full text-[10px] font-bold shadow-lg uppercase tracking-wider">
+              New Menu
+            </span>
+          )}
         </div>
 
-        {/* Tombol Favorit */}
+        {/* Ikon Heart (Favorit) */}
         <button
           type="button"
           onClick={() => onToggleFavorite(product.id)}
-          className={`px-4 py-1.5 rounded-full text-xs font-semibold backdrop-blur-md border transition-all shadow-sm ${
-            isFavorite 
-            ? 'bg-orange-500 text-white border-orange-400' 
-            : 'bg-white/20 text-white border-white/20 hover:bg-white/30'
-          }`}
+          className="absolute top-6 right-6 z-10 transition-all hover:scale-125 active:scale-90"
         >
-          Favorit
+          <i 
+            className={`fa-solid fa-heart text-[42px] drop-shadow-lg ${isFavorite ? 'text-red-600' : 'text-white/80'}`}
+          ></i>
+        </button>
+
+        <img 
+          src={product.image || '/Gambar_Login.jpg'} 
+          alt={product.name} 
+          className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
+        />
+      </div>
+
+      {/* --- BAGIAN 2: NAMA MENU & IKON --- */}
+      <div className="flex justify-between items-start mb-6 px-1">
+        <h3 className="text-[36px] font-semibold text-[#4A3728] leading-[1.1] tracking-tight w-[70%]">
+          {product.name || 'Nama menu'}
+        </h3>
+
+        {/* Ikon Karakteristik Sesuai Gambar image_1a53d2.png */}
+        <div className="flex gap-3 text-[#4A3728] text-2xl pt-2">
+          {product.category?.toLowerCase() === 'coffee' && (
+             <i className="fa-solid fa-mug-saucer border-b-2 border-[#4A3728] pb-0.5" title="Coffee"></i>
+          )}
+          <i className="fa-solid fa-snowflake" title="Ice"></i>
+          <i className="fa-solid fa-fire-flame-simple" title="Hot"></i>
+        </div>
+      </div>
+
+      {/* --- BAGIAN 3: INFORMASI UKURAN (STATIS / BUKAN TOMBOL) --- */}
+      <div className="flex gap-3 mb-8 px-1">
+        <div className="bg-[#FFC444] text-[#4A3728] px-8 py-2.5 rounded-2xl font-normal text-lg shadow-sm border border-[#FFC444]">
+          Normal
+        </div>
+        <div className="bg-[#FF6E00] text-white px-10 py-2.5 rounded-2xl font-normal text-lg shadow-sm border border-[#FF6E00]">
+          Besar
+        </div>
+      </div>
+
+      {/* --- BAGIAN 4: HARGA --- */}
+      <div className="mb-8 px-1">
+        <p className="text-xl text-[#4A3728]/60 font-medium mb-1">Harga</p>
+        <strong className="text-[48px] font-semibold text-[#4A3728] leading-none tracking-tighter">
+          {formatRupiah(product.price) || 'Rp Harga'}
+        </strong>
+      </div>
+
+      {/* --- BAGIAN 5: AKSI UTAMA DENGAN GOLDEN RATIO WIDTH --- */}
+      <div className="flex gap-4 mt-auto">
+        <button 
+          type="button" 
+          onClick={() => onViewDetail(product.id)}
+          className="flex-1 bg-[#FFC444] text-[#4A3728] py-5 rounded-[1.5rem] !font-semibold text-xl hover:bg-[#ffbc2d] transition-all active:scale-95 shadow-lg shadow-yellow-600/10"
+        >
+          Detail
+        </button>
+        <button 
+          type="button" 
+          onClick={() => onAddToCart(product, selectedSize)}
+          className="flex-[1.618] bg-[#FF6E00] text-white py-5 rounded-[1.5rem] !font-semibold text-xl hover:bg-[#e66300] transition-all active:scale-95 shadow-lg shadow-orange-600/20 flex items-center justify-center gap-3"
+        >
+          <i className="fa-solid fa-cart-shopping"></i>
+          Keranjang
         </button>
       </div>
 
-      {/* --- BAGIAN BODY --- */}
-      <div className="p-6 flex flex-col gap-4">
-        
-        {/* Meta: Kategori & Badge Status */}
-        <div className="flex justify-between items-center">
-          <span className="text-[11px] font-black text-[#5D4037] uppercase tracking-[0.2em]">
-            {product.category_label || product.category || 'KOPI'}
-          </span>
-          <span className="text-[11px] font-black text-[#5D4037] uppercase tracking-[0.2em]">
-            {product.badge || 'FRESH'}
-          </span>
-        </div>
-
-        {/* Judul & Deskripsi */}
-        <div className="space-y-1">
-          <h3 className="text-2xl font-bold text-gray-900 leading-tight">
-            {product.name}
-          </h3>
-          <p className="text-sm text-gray-500 leading-relaxed line-clamp-2">
-            {product.description || 'Deskripsi produk kopi yang nikmat dan segar.'}
-          </p>
-        </div>
-
-        {/* Pemilihan Ukuran (Pills) */}
-        <div className="flex gap-2 py-2">
-          {sizes.map((size) => {
-            const isActive = activeSize.label === size.label
-            return (
-              <button
-                key={size.label}
-                type="button"
-                onClick={() => setSelectedSize(size)}
-                className={`flex-1 flex flex-col items-center justify-center py-2 rounded-[1.25rem] border-2 transition-all ${
-                  isActive 
-                  ? 'border-[#5D4037] bg-white ring-4 ring-[#5D4037]/5' 
-                  : 'border-transparent bg-gray-50 text-gray-400 hover:bg-gray-100'
-                }`}
-              >
-                <span className={`text-sm font-bold ${isActive ? 'text-black' : 'text-gray-500'}`}>
-                  {size.label}
-                </span>
-                <small className="text-[10px] opacity-70">{size.note}</small>
-              </button>
-            )
-          })}
-        </div>
-
-        {/* Harga & Poin */}
-        <div className="flex justify-between items-end mt-2">
-          <div>
-            <p className="text-[10px] text-gray-400 font-bold uppercase mb-0.5">Harga</p>
-            <strong className="text-xl font-extrabold text-black tracking-tight">
-              {formatRupiah(price)}
-            </strong>
-          </div>
-          <div className="text-right">
-            <p className="text-[10px] text-gray-400 font-bold uppercase mb-0.5">Poin</p>
-            <strong className="text-xl font-extrabold text-black">
-              {product.points || '0'}
-            </strong>
-          </div>
-        </div>
-
-        {/* Tombol Aksi */}
-        <div className="grid grid-cols-5 gap-3 mt-2">
-          <button 
-            type="button" 
-            className="col-span-3 bg-[#1A120B] text-white py-4 rounded-2xl font-bold text-sm shadow-lg shadow-black/20 hover:bg-black transition-transform active:scale-95"
-            onClick={() => onAddToCart(product, activeSize, price)}
-          >
-            Tambah ke Keranjang
-          </button>
-          <button 
-            type="button" 
-            className="col-span-2 bg-gray-100 text-[#1A120B] py-4 rounded-2xl font-bold text-sm hover:bg-gray-200 transition-transform active:scale-95"
-            onClick={() => onAddToGroup(product, activeSize, price)}
-          >
-            Tambah ke Grup
-          </button>
-        </div>
-
-      </div>
     </article>
   )
 }

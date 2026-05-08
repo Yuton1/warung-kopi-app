@@ -202,12 +202,6 @@ const ProfilePage = () => {
           <strong>{displayAddress ? 'Ada' : 'Belum ada'}</strong>
         </article>
       </section>
-
-      <div className="mt-2 flex justify-end">
-        <Link to="/" className="link-button">
-          Kembali ke menu
-        </Link>
-      </div>
     </div>
   )
 }
