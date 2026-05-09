@@ -71,10 +71,10 @@ const ProductCard = ({
       {/* --- BAGIAN 3: INFORMASI UKURAN (LABEL STATIS) --- */}
       {/* Mengikuti skema warna di gambar: Kuning untuk Normal, Orange untuk Besar */}
       <div className="flex gap-4 mb-8 px-1">
-        <div className="bg-[#FFC444] text-[#4A3728] px-8 py-2.5 rounded-[1.2rem] font-semibold text-lg shadow-sm">
+        <div className="bg-[#3b3b3b] text-white px-8 py-2.5 rounded-[1.2rem] font-semibold text-lg shadow-sm">
           Normal
         </div>
-        <div className="bg-[#FF6E00] text-white px-10 py-2.5 rounded-[1.2rem] font-semibold text-lg shadow-sm">
+        <div className="bg-[#636363] text-white px-10 py-2.5 rounded-[1.2rem] font-semibold text-lg shadow-sm">
           Besar
         </div>
       </div>
