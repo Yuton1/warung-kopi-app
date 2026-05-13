@@ -24,7 +24,7 @@ const MenuManagement = () => {
     try {
       const res = await axios.get(API_URL);
       setMenus(res.data);
-    } catch (err) {
+    } catch {
       console.error("Gagal mengambil data:", err);
     }
   };
@@ -43,7 +43,7 @@ const MenuManagement = () => {
       // Tambahkan data baru ke paling atas tabel
       setMenus([res.data, ...menus]);
       setIsModalOpen(false);
-    } catch (err) {
+    } catch {
       alert("Cek koneksi backend atau kategori ENUM database!");
     }
   };
@@ -55,7 +55,7 @@ const MenuManagement = () => {
         await axios.delete(`${API_URL}/${id}`);
         // Update tampilan secara instan dengan membuang item yang dihapus dari array
         setMenus(menus.filter(item => item.id !== id));
-      } catch (err) {
+      } catch {
         alert("Gagal menghapus menu dari database");
       }
     }

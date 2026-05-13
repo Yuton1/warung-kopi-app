@@ -36,13 +36,13 @@ const LoginPage = () => {
     event.preventDefault()
 
     try {
-      const response = await axios.post(loginUrl, { 
-        email, 
-        password 
-      });
+      const response = await axios.post(loginUrl, {
+        email,
+        password,
+      })
 
-      const { user, token } = response.data;
-      const userRole = user.role;
+      const { user, token } = response.data
+      const userRole = user.role
 
       const authUser = {
         name: user.username,
@@ -57,37 +57,47 @@ const LoginPage = () => {
         ...authUser,
         city: 'Malang',
       })
-      localStorage.setItem("token", token);
+      localStorage.setItem('token', token)
 
       window.dispatchEvent(new Event('warungkopi-state-changed'))
 
       if (userRole === 'admin') {
-        navigate('/admin', { replace: true });
+        navigate('/admin', { replace: true })
       } else if (userRole === 'barista') {
-        navigate('/barista', { replace: true });
+        navigate('/barista', { replace: true })
       } else {
-        navigate('/', { replace: true });
+        navigate('/', { replace: true })
       }
-
     } catch (err) {
-      console.error("Login Error:", err)
+      console.error('Login Error:', err)
+
       const serverData = err.response?.data
-      const serverMessage = typeof serverData === 'string' ? serverData : serverData?.message || serverData?.error || null
-      alert(serverMessage || 'Login gagal. Periksa kembali email/password Anda.')
+      const serverMessage =
+        typeof serverData === 'string'
+          ? serverData
+          : serverData?.message || serverData?.error || err.response?.data?.message || err.response?.data?.error
+
+      const isNetworkError = err.code === 'ERR_NETWORK'
+
+      alert(
+        serverMessage ||
+          (isNetworkError
+            ? 'Tidak bisa menghubungi API login. Cek backend, env, dan routing /api.'
+            : 'Login gagal. Periksa kembali email/password Anda.')
+      )
     }
   }
 
   return (
     <div className="flex h-screen w-full bg-[#1b120d] font-['Fredoka'] overflow-hidden relative">
-
       {/* SISI KIRI: FORM LOGIN */}
       <div className="flex w-full flex-col justify-center px-8 md:w-1/2 md:px-20 lg:px-32">
         {/* Brand/Logo Section */}
         <Link to="/" className="mb-12 flex items-center gap-3 w-fit hover:opacity-80 transition-opacity">
-          <img 
-            src="/Logo Putih.png" 
-            alt="Logo Warung Kopi" 
-            className="h-10 w-auto object-contain" 
+          <img
+            src="/Logo Putih.png"
+            alt="Logo Warung Kopi"
+            className="h-10 w-auto object-contain"
           />
         </Link>
 
@@ -132,15 +142,15 @@ const LoginPage = () => {
 
           <div className="flex items-center justify-between text-sm font-medium">
             <label className="flex items-center gap-2 cursor-pointer text-[#d7cdc7]">
-              <input 
-                type="checkbox" 
+              <input
+                type="checkbox"
                 checked={rememberMe}
                 onChange={(e) => setRememberMe(e.target.checked)}
-                className="h-4 w-4 rounded border-white/20 bg-white/5 text-[#e39b4f] focus:ring-[#e39b4f]" 
+                className="h-4 w-4 rounded border-white/20 bg-white/5 text-[#e39b4f] focus:ring-[#e39b4f]"
               />
               Remember me
             </label>
-            <Link to="/forgot-password" size="sm" className="font-regular !text-[#f5cda5] hover:underline">
+            <Link to="/forgot-password" className="font-regular !text-[#f5cda5] hover:underline">
               Lupa Password?
             </Link>
           </div>
@@ -164,9 +174,9 @@ const LoginPage = () => {
       {/* SISI KANAN: BACKGROUND GAMBAR DENGAN OVERLAY */}
       <div className="hidden h-full w-1/2 p-4 md:block">
         <div className="relative h-full w-full overflow-hidden rounded-[2.5rem] flex items-center justify-center bg-[#1b120d]">
-          <img 
-            src="/Gambar_Login.jpg" 
-            alt="Background Login" 
+          <img
+            src="/Gambar_Login.jpg"
+            alt="Background Login"
             className="absolute inset-0 h-full w-full object-cover"
           />
         </div>

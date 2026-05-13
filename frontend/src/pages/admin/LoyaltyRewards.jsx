@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import Sidebar from '../../components/Sidebar/Sidebar';
-import { Gift, Star, ArrowUpRight, Plus, Trash2, Edit, Ticket, Search } from 'lucide-react';
+import { Gift, Star, Plus, Trash2, Edit, Ticket, Search } from 'lucide-react';
 
 const LoyaltyRewards = () => {
   const [searchTerm, setSearchTerm] = useState('');

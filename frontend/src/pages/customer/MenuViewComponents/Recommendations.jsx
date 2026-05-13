@@ -1,4 +1,3 @@
-import React from 'react';
 
 const Recommendations = ({ items = [] }) => {
   const safeItems = Array.isArray(items) ? items : [];

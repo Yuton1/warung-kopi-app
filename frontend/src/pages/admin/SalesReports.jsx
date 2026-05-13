@@ -2,7 +2,7 @@ import { useState } from 'react';
 import Sidebar from '../../components/Sidebar/Sidebar';
 import { 
   TrendingUp, DollarSign, ShoppingBag, 
-  Download, Calendar, ArrowUpRight, ArrowDownRight 
+  Download, ArrowUpRight, ArrowDownRight 
 } from 'lucide-react';
 
 const SalesReports = () => {

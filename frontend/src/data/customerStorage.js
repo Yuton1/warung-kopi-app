@@ -8,6 +8,7 @@ export const STORAGE_KEYS = {
   loyalty: 'warungkopi.loyalty',
   preorder: 'warungkopi.preorder',
   profile: 'warungkopi.profile',
+  banners: 'warungkopi.banners',
   subscription: 'warungkopi.subscription',
 }
 

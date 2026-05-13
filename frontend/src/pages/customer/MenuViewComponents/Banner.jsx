@@ -1,4 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { readBannerList } from '../../../data/bannerStorage';
 
 const safeText = (value, fallback = '') => String(value ?? fallback);
 const shorten = (value, limit) => {
@@ -7,40 +9,22 @@ const shorten = (value, limit) => {
 };
 
 const Banner = () => {
-  const [banners, setBanners] = useState([]);
+  const [banners, setBanners] = useState(() => readBannerList());
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [loading, setLoading] = useState(true);
-
-  // 1. Fetch Data
+  
   useEffect(() => {
-    const fetchBanners = async () => {
-      try {
-        const dummyData = [
-          {
-            id: 1,
-            title: "Promo Mingguan",
-            subtitle: "Jangan Sampai Kelewatan",
-            image_url: "https://images.unsplash.com/photo-1509042239860-f550ce710b93",
-            target_url: "/menu"
-          },
-          {
-            id: 2,
-            title: "Voucher Member",
-            subtitle: "Kumpulkan Poin Sekarang",
-            image_url: "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085",
-            target_url: "/member"
-          }
-        ];
-        
-        setBanners(dummyData);
-      } catch (error) {
-        console.error("Gagal mengambil data banner:", error);
-      } finally {
-        setLoading(false);
-      }
+    const syncBanners = () => {
+      setBanners(readBannerList());
     };
 
-    fetchBanners();
+    syncBanners();
+    window.addEventListener('warungkopi-state-changed', syncBanners);
+    window.addEventListener('storage', syncBanners);
+
+    return () => {
+      window.removeEventListener('warungkopi-state-changed', syncBanners);
+      window.removeEventListener('storage', syncBanners);
+    };
   }, []);
 
   // 2. Animasi Auto-Slide
@@ -53,9 +37,30 @@ const Banner = () => {
     }
   }, [banners]);
 
-  // UPDATE: Aspect ratio disesuaikan ke 720/300
-  if (loading) return <div className="w-full aspect-[720/300] bg-gray-100 animate-pulse rounded-2xl" />;
+  useEffect(() => {
+    if (currentIndex >= banners.length) {
+      setCurrentIndex(0);
+    }
+  }, [banners.length, currentIndex]);
+
   if ((banners || []).length === 0) return null;
+
+  const isExternalUrl = (value) => /^https?:\/\//i.test(String(value ?? ''));
+  const BannerButton = ({ href, children, className }) => {
+    if (isExternalUrl(href)) {
+      return (
+        <a href={href} className={className} target="_blank" rel="noreferrer">
+          {children}
+        </a>
+      );
+    }
+
+    return (
+      <Link to={href} className={className}>
+        {children}
+      </Link>
+    );
+  };
 
   return (
     <div className="relative w-full overflow-hidden rounded-2xl shadow-sm bg-[#F5F5F5]">
@@ -84,16 +89,22 @@ const Banner = () => {
                 <h2 className="text-3xl md:text-5xl lg:text-6xl font-bold tracking-wide">
                   {shorten(item?.title, 20)}
                 </h2>
+
+                {item?.description ? (
+                  <p className="mt-4 max-w-xl text-sm md:text-base leading-relaxed text-white/90">
+                    {shorten(item?.description, 120)}
+                  </p>
+                ) : null}
               </div>
               
               {/* Tombol Detail di Kiri Bawah */}
               <div className="mb-8 md:mb-6">
-                <a 
+                <BannerButton
                   href={item.target_url}
                   className="bg-[#FF6E00] hover:bg-[#e66300] text-white text-base md:text-lg font-medium py-3 px-10 rounded-full w-fit transition-all shadow-lg inline-block"
                 >
-                  Detail
-                </a>
+                  {shorten(item?.button_label, 24)}
+                </BannerButton>
               </div>
             </div>
           </div>

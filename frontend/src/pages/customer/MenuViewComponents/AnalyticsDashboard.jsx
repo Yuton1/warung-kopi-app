@@ -1,4 +1,3 @@
-import React from 'react';
 import { formatRupiah } from '../../../utils/formatRupiah';
 
 const AnalyticsDashboard = ({ monthlySpend, favoriteCoffee, planStatus, subscriptionData = { remaining: 3, total: 5 } }) => {

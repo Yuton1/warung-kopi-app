@@ -1,7 +1,6 @@
-import React from 'react';
 import { 
   LayoutDashboard, Users, Coffee, 
-  ClipboardList, PieChart, Settings, LogOut, Ticket
+  ClipboardList, PieChart, Settings, LogOut, Ticket, ImagePlus
 } from 'lucide-react';
 import SidebarItem from './SidebarItem';
 import { useNavigate } from 'react-router-dom';
@@ -38,6 +37,7 @@ const Sidebar = ({ role }) => {
             <SidebarItem icon={LayoutDashboard} label="Dashboard" path="/admin" />
             <SidebarItem icon={Users} label="User Management" path="/admin/users" />
             <SidebarItem icon={Coffee} label="Menu Management" path="/admin/menu" />
+            <SidebarItem icon={ImagePlus} label="Banner Management" path="/admin/banner" />
             <SidebarItem icon={Ticket} label="Loyalty Rewards" path="/admin/rewards" />
             <SidebarItem icon={PieChart} label="Sales Reports" path="/admin/reports" />
           </>

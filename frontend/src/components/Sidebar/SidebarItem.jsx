@@ -1,7 +1,6 @@
-import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 
-const SidebarItem = ({ icon: Icon, label, path, active }) => {
+const SidebarItem = ({ icon: Icon, label, path }) => {
   const location = useLocation();
   const isActive = location.pathname === path;
 

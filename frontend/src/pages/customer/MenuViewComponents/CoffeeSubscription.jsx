@@ -1,4 +1,3 @@
-import React from 'react';
 import { formatRupiah } from '../../../utils/formatRupiah';
 
 const CoffeeSubscription = ({ plans, activeId, onActivate }) => {

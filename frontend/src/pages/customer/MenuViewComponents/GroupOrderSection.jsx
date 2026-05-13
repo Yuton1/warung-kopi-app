@@ -1,4 +1,3 @@
-import React from 'react';
 
 const GroupOrderSection = ({ groupOrder, hasCart, onUpdateMembers, onAddCart, onConfirm }) => {
   const groupCode = groupOrder?.code || "GRP-D64J";

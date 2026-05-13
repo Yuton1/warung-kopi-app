@@ -1,5 +1,5 @@
 import Sidebar from '../../components/Sidebar/Sidebar';
-import { Package, AlertTriangle } from 'lucide-react';
+import { AlertTriangle } from 'lucide-react';
 
 const Inventory = () => {
   return (

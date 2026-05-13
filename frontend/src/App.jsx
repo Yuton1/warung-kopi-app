@@ -17,9 +17,11 @@ import MenuManagement from './pages/admin/MenuManagement'
 import UserManagement from './pages/admin/UserManagement';
 import LoyaltyRewards from './pages/admin/LoyaltyRewards';
 import SalesReports from './pages/admin/SalesReports';
+import BannerManagement from './pages/admin/BannerManagement';
 import OrderQueue from './pages/barista/OrderQueue';
 import Inventory from './pages/barista/Inventory';
 import CartPage from './pages/customer/CartPage';
+import MenuDetail from './pages/customer/MenuDetail';
 
 function App() {
   return (
@@ -32,6 +34,7 @@ function App() {
         {/* ADMIN ROUTES - Management System */}
         <Route path="admin" element={<AdminDashboard />} />
         <Route path="admin/menu" element={<MenuManagement />} />
+        <Route path="admin/banner" element={<BannerManagement />} />
         <Route path="/admin/users" element={<UserManagement />} />
         <Route path="/admin/rewards" element={<LoyaltyRewards />} />
         <Route path="/admin/reports" element={<SalesReports />} />
@@ -54,6 +57,8 @@ function App() {
           <Route path="lokasi" element={<LocationPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
           <Route path="/cart" element={<CartPage />} />
+          <Route path="menu/minuman" element={<MinumanPage />} />
+          <Route path="menu/:id" element={<MenuDetail />} />
         </Route>
       </Routes>
     </BrowserRouter>
