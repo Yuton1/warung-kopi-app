@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react'; // Tambahkan useEffect
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios'; // Pastikan axios sudah di-import
 import Sidebar from '../../components/Sidebar/Sidebar';
 import { Plus, Edit3, Trash2, Search, Coffee, Utensils, Cookie } from 'lucide-react';
@@ -6,6 +7,7 @@ import AddMenuModal from '../../components/Modals/AddMenuModal';
 import { getApiBaseUrl } from '../../utils/apiBaseUrl';
 
 const MenuManagement = () => {
+  const navigate = useNavigate();
   // 1. Ubah default state ke kategori database agar sinkron
   const [activeTab, setActiveTab] = useState('coffee'); 
   const [searchTerm, setSearchTerm] = useState('');
@@ -24,7 +26,7 @@ const MenuManagement = () => {
     try {
       const res = await axios.get(API_URL);
       setMenus(res.data);
-    } catch {
+    } catch (err) {
       console.error("Gagal mengambil data:", err);
     }
   };
@@ -35,13 +37,16 @@ const MenuManagement = () => {
       ...formData,
       initials: formData.name.substring(0, 2).toUpperCase(),
       base_points: Math.floor(formData.price / 1000), // Poin loyalitas otomatis
-      is_available: true
+      is_available: true,
+      badge: formData.badge || 'New',
+      description: formData.description || '',
+      image_url: formData.image_url || '',
     };
 
     try {
       const res = await axios.post(API_URL, payload);
       // Tambahkan data baru ke paling atas tabel
-      setMenus([res.data, ...menus]);
+      setMenus((prevMenus) => [res.data, ...prevMenus]);
       setIsModalOpen(false);
     } catch {
       alert("Cek koneksi backend atau kategori ENUM database!");
@@ -59,6 +64,10 @@ const MenuManagement = () => {
         alert("Gagal menghapus menu dari database");
       }
     }
+  };
+
+  const handleEditMenu = (item) => {
+    navigate(`/admin/menu/edit/${item.id}`);
   };
 
     const filteredMenu = menus.filter(item => {
@@ -162,7 +171,12 @@ const MenuManagement = () => {
                     <td className="px-6 py-4">{item.stock} unit</td>
                     <td className="px-6 py-4">
                       <div className="flex justify-center gap-2">
-                        <button className="p-2 text-blue-500 hover:bg-blue-50 rounded-lg transition"><Edit3 size={18}/></button>
+                        <button
+                          onClick={() => handleEditMenu(item)}
+                          className="p-2 text-blue-500 hover:bg-blue-50 rounded-lg transition"
+                        >
+                          <Edit3 size={18}/>
+                        </button>
                         <button onClick={() => handleDeleteMenu(item.id)} className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition"><Trash2 size={18}/></button>
                       </div>
                     </td>

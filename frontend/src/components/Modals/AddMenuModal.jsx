@@ -5,7 +5,7 @@ const AddMenuModal = ({ isOpen, onClose, onAdd }) => {
   const [formData, setFormData] = useState({
     name: '',
     price: '',
-    category: 'minuman',
+    category: 'coffee',
     stock: ''
   });
 

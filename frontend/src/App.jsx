@@ -14,6 +14,7 @@ import ProfilePage from './pages/customer/ProfilePage'
 import PromoPage from './pages/customer/PromoPage'
 import AdminDashboard from './pages/admin/AdminDashboard'
 import MenuManagement from './pages/admin/MenuManagement'
+import MenuEdit from './pages/admin/MenuEdit/MenuEdit'
 import UserManagement from './pages/admin/UserManagement';
 import LoyaltyRewards from './pages/admin/LoyaltyRewards';
 import SalesReports from './pages/admin/SalesReports';
@@ -34,6 +35,7 @@ function App() {
         {/* ADMIN ROUTES - Management System */}
         <Route path="admin" element={<AdminDashboard />} />
         <Route path="admin/menu" element={<MenuManagement />} />
+        <Route path="admin/menu/edit/:id" element={<MenuEdit />} />
         <Route path="admin/banner" element={<BannerManagement />} />
         <Route path="/admin/users" element={<UserManagement />} />
         <Route path="/admin/rewards" element={<LoyaltyRewards />} />
