@@ -7,6 +7,7 @@ const MenuGrid = ({
   toggleFavorite = () => {},
   addToCart = () => {},
   addToGroup = () => {},
+  onViewDetail = () => {},
   menuRef,
   limit = 12,
   eyebrow = 'Personal Suggestions',
@@ -37,6 +38,7 @@ const MenuGrid = ({
                 onToggleFavorite={toggleFavorite}
                 onAddToCart={addToCart}
                 onAddToGroup={addToGroup}
+                onViewDetail={onViewDetail}
               />
             ))
           ) : !loading ? (

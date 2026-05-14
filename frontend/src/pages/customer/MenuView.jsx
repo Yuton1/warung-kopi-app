@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import Banner from './MenuViewComponents/Banner';
 import PromoMingguan from './MenuViewComponents/PromoMingguan';
 import Recommendations from './MenuViewComponents/Recommendations';
@@ -21,6 +21,7 @@ const MenuView = () => {
   const [subscriptionPlans, setSubscriptionPlans] = useState(subscriptionSeed);
   const [activeSub, setActiveSub] = useState({ id: null });
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
 
   const monthlySpend = 150000;
   const favoriteCoffee = "Latte";
@@ -116,6 +117,17 @@ const MenuView = () => {
 
   const addToCart = (item) => setCart([...cart, item]);
   const addToGroup = (item) => console.log("Grup add:", item);
+  const viewDetail = (productId) => {
+    const product = (Array.isArray(allProducts) ? allProducts : []).find(
+      (item) => String(item.id) === String(productId)
+    )
+
+    navigate(`/menu/${productId}`, {
+      state: {
+        product: product || null,
+      },
+    });
+  };
   const savePreOrder = (data) => setPreOrder(data);
   const cancelPreOrder = () => setPreOrder(null);
   const updateGroupMembers = (members) => setGroupOrder({...groupOrder, members});
@@ -146,6 +158,7 @@ const MenuView = () => {
               toggleFavorite={toggleFavorite}
               addToCart={addToCart}
               addToGroup={addToGroup}
+              onViewDetail={viewDetail}
               menuRef={menuSectionRef}
               limit={normalizedSearchQuery ? undefined : 12}
               title={menuTitle}

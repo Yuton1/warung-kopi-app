@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import axios from 'axios'
-import { ArrowLeft, Image as ImageIcon, Save, ToggleLeft, ToggleRight } from 'lucide-react'
+import { ArrowLeft, Camera, Image as ImageIcon, Save, ToggleLeft, ToggleRight } from 'lucide-react'
 import Sidebar from '../../../components/Sidebar/Sidebar'
 import { getApiBaseUrl } from '../../../utils/apiBaseUrl'
 import { formatRupiah } from '../../../utils/formatRupiah'
+import { getImageFileError, readImageFileAsDataUrl } from '../../../utils/imageUpload'
 
 const categoryOptions = [
   { value: 'coffee', label: 'Coffee' },
@@ -42,6 +43,8 @@ const MenuEdit = () => {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
+  const [imageError, setImageError] = useState('')
+  const [imageName, setImageName] = useState('')
 
   const API_BASE_URL = getApiBaseUrl()
   const API_URL = API_BASE_URL ? `${API_BASE_URL}/api/products` : '/api/products'
@@ -66,6 +69,7 @@ const MenuEdit = () => {
           stock: String(product.stock ?? ''),
           is_available: Boolean(Number(product.is_available ?? 1)),
         })
+        setImageName(product.image_url ? 'Gambar tersimpan' : '')
       } catch (fetchError) {
         console.error('Gagal memuat menu:', fetchError)
         setError(fetchError.response?.data?.message || 'Menu tidak ditemukan atau gagal dimuat.')
@@ -92,6 +96,34 @@ const MenuEdit = () => {
       ...prev,
       [field]: value,
     }))
+  }
+
+  const handleImageChange = async (event) => {
+    const file = event.target.files?.[0]
+    const uploadError = getImageFileError(file)
+
+    if (uploadError) {
+      setImageError(uploadError)
+      setImageName('')
+      setForm((prev) => ({ ...prev, image_url: '' }))
+      event.target.value = ''
+      return
+    }
+
+    if (!file) return
+
+    try {
+      setImageError('')
+      const dataUrl = await readImageFileAsDataUrl(file)
+      setImageName(file.name)
+      setForm((prev) => ({ ...prev, image_url: dataUrl }))
+    } catch (readError) {
+      console.error(readError)
+      setImageError('Gagal membaca file gambar.')
+      setImageName('')
+      setForm((prev) => ({ ...prev, image_url: '' }))
+      event.target.value = ''
+    }
   }
 
   const handleSubmit = async (event) => {
@@ -308,16 +340,54 @@ const MenuEdit = () => {
                 </label>
 
                 <label className="grid gap-2 md:col-span-2">
-                  <span className="text-sm font-bold text-[#4a3728]">Image URL</span>
-                  <div className="flex items-center gap-3 rounded-2xl border border-[#ead9ca] px-4 py-3 focus-within:border-[#e39b4f] focus-within:ring-2 focus-within:ring-[#e39b4f]/20">
-                    <ImageIcon className="h-4 w-4 text-[#a78c78]" />
-                    <input
-                      type="text"
-                      value={form.image_url}
-                      onChange={handleChange('image_url')}
-                      className="w-full outline-none"
-                      placeholder="https://..."
-                    />
+                  <span className="text-sm font-bold text-[#4a3728]">Gambar Menu</span>
+                  <div className="rounded-2xl border border-dashed border-[#ead9ca] bg-[#fffaf5] p-4">
+                    <label className="flex cursor-pointer items-center justify-center gap-2 rounded-2xl border border-[#e39b4f]/20 bg-white px-4 py-3 text-sm font-bold text-[#8b5e34] transition hover:bg-[#fff8ef]">
+                      <Camera className="h-4 w-4" />
+                      Upload gambar
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={handleImageChange}
+                      />
+                    </label>
+
+                    <p className="mt-2 text-xs text-[#8c7661]">Format gambar saja. Maksimal 2 MB.</p>
+
+                    {imageError ? (
+                      <p className="mt-2 text-sm font-medium text-red-600">{imageError}</p>
+                    ) : null}
+
+                    {form.image_url ? (
+                      <div className="mt-4 overflow-hidden rounded-2xl border border-[#ead9ca] bg-white">
+                        <img
+                          src={form.image_url}
+                          alt={imageName || form.name || 'Preview menu'}
+                          className="h-56 w-full object-cover"
+                        />
+                        <div className="flex items-center justify-between gap-3 border-t border-[#f1e6da] px-4 py-3 text-xs text-[#7b6a5b]">
+                          <span className="truncate">{imageName || 'Gambar tersimpan'}</span>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setForm((prev) => ({ ...prev, image_url: '' }))
+                              setImageName('')
+                            }}
+                            className="font-bold text-[#e39b4f] hover:underline"
+                          >
+                            Hapus
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="mt-4 grid h-56 place-items-center rounded-2xl border border-dashed border-[#ead9ca] bg-white text-center text-sm text-[#a78c78]">
+                        <div>
+                          <ImageIcon className="mx-auto mb-2 h-5 w-5" />
+                          Belum ada gambar. Upload file untuk preview.
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </label>
               </div>
@@ -401,19 +471,7 @@ const MenuEdit = () => {
                   </span>
                 </div>
 
-                {form.image_url ? (
-                  <div className="mt-5 overflow-hidden rounded-[24px] border border-[#ead9ca]">
-                    <img
-                      src={form.image_url}
-                      alt={form.name || 'Preview menu'}
-                      className="h-56 w-full object-cover"
-                    />
-                  </div>
-                ) : (
-                  <div className="mt-5 grid h-56 place-items-center rounded-[24px] border border-dashed border-[#ead9ca] bg-[#fffaf5] text-center text-sm text-[#a78c78]">
-                    Tambahkan image URL untuk melihat preview gambar menu.
-                  </div>
-                )}
+                {/* Preview gambar sudah ditampilkan di form sebelah kiri */}
               </div>
             </div>
           </section>

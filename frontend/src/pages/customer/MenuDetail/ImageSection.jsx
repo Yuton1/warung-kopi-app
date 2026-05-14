@@ -4,12 +4,13 @@ import { faHeart } from "@fortawesome/free-solid-svg-icons"
 const ImageSection = ({ product }) => {
   const defaultImage =
     "https://images.unsplash.com/photo-1517701604599-bb29b565090c?q=80&w=1600&auto=format&fit=crop"
+  const imageSrc = product?.image_url || product?.image || defaultImage
 
   return (
     <section className="relative w-full h-[280px] md:h-[420px] overflow-hidden">
       {/* Product Image */}
       <img
-        src={product?.image || defaultImage}
+        src={imageSrc}
         alt={product?.name || "Coffee Menu"}
         className="w-full h-full object-cover"
       />
@@ -20,7 +21,7 @@ const ImageSection = ({ product }) => {
       {/* Badge */}
       <div className="absolute top-5 left-5">
         <span className="bg-[#FF6E00] text-white text-sm md:text-base font-semibold px-4 py-2 rounded-2xl shadow-lg">
-          Best Seller
+          {product?.badge || 'Best Seller'}
         </span>
       </div>
 

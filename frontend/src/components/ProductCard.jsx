@@ -6,7 +6,7 @@ const ProductCard = ({
   isFavorite,
   onToggleFavorite,
   onAddToCart,
-  onViewDetail
+  onViewDetail = () => {},
 }) => {
   // Tetap menggunakan 'Normal' sebagai default untuk keperluan payload keranjang
   const selectedSize = 'Normal' 
