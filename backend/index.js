@@ -10,9 +10,11 @@ const promoRoutes = require('./src/routes/promoRoutes');
 const subscriptionRoutes = require('./src/routes/subscriptionRoutes');
 const userRoutes = require('./src/routes/userRoutes');
 const orderRoutes = require('./src/routes/orderRoutes');
+const ensureProductImageColumn = require('./src/migrations/ensureProductImageColumn');
 
 // Import database pool
 require('./src/config/db');
+ensureProductImageColumn();
 
 const app = express();
 
