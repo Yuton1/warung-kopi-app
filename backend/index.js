@@ -10,6 +10,7 @@ const promoRoutes = require('./src/routes/promoRoutes');
 const subscriptionRoutes = require('./src/routes/subscriptionRoutes');
 const userRoutes = require('./src/routes/userRoutes');
 const orderRoutes = require('./src/routes/orderRoutes');
+const adminRoutes = require('./src/routes/adminRoutes');
 const ensureProductImageColumn = require('./src/migrations/ensureProductImageColumn');
 
 // Import database pool
@@ -30,6 +31,7 @@ app.use('/api/promos', promoRoutes);
 app.use('/api/subscriptions', subscriptionRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/orders', orderRoutes);
+app.use('/api/admin', adminRoutes);
 
 app.get('/api', (req, res) => {
     res.json({
