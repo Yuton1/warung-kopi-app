@@ -23,6 +23,7 @@ import OrderQueue from './pages/barista/OrderQueue';
 import Inventory from './pages/barista/Inventory';
 import CartPage from './pages/customer/CartPage';
 import MenuDetail from './pages/customer/MenuDetail';
+import ConfirmPesanan from './pages/customer/confirmpesanan';
 
 function App() {
   return (
@@ -55,6 +56,8 @@ function App() {
           <Route path="member" element={<MemberPage />} />
           <Route path="akun" element={<ProfilePage />} />
           <Route path="pesanan" element={<OrdersPage />} />
+          <Route path="confirm-pesanan" element={<ConfirmPesanan />} />
+          <Route path="confirmpesanan" element={<ConfirmPesanan />} />
           <Route path="promo" element={<PromoPage />} />
           <Route path="lokasi" element={<LocationPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />

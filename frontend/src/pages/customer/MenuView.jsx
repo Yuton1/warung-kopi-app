@@ -319,7 +319,7 @@ const MenuView = () => {
           onOrderNoteChange={setOrderNote}
           onSavePreOrder={savePreOrder}
           onCancelPreOrder={cancelPreOrder}
-          onCheckout={() => navigate('/cart')}
+          onCheckout={() => navigate('/confirm-pesanan')}
         />
       )}
     </div>

@@ -119,7 +119,12 @@ const CartPage = () => {
               </button>
             </div>
             <div className="lg:col-span-1">
-              <OrderSummary subtotal={subtotal} tax={tax} total={total} />
+              <OrderSummary
+                subtotal={subtotal}
+                tax={tax}
+                total={total}
+                onCheckout={() => navigate('/confirm-pesanan')}
+              />
             </div>
           </div>
         ) : (
