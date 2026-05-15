@@ -231,7 +231,307 @@ const listOrders = async ({ userId, userEmail, userName } = {}) => {
   return groupOrders(rows);
 };
 
+const getActiveSession = async (connection, userId) => {
+  const [rows] = await withTimeout(
+    connection.execute(
+      `
+      SELECT id, group_code, host_id, status, created_at
+      FROM group_sessions
+      WHERE host_id = ? AND status = 'active'
+      ORDER BY created_at DESC, id DESC
+      LIMIT 1
+      `,
+      [userId]
+    )
+  );
+
+  return rows[0] || null;
+};
+
+const getCheckoutCartRows = async (connection, sessionId, userId) => {
+  const [rows] = await withTimeout(
+    connection.execute(
+      `
+      SELECT
+        gci.id AS item_id,
+        gci.group_session_id,
+        gci.user_id,
+        gci.product_id,
+        gci.quantity,
+        p.name AS product_name,
+        p.category AS product_category,
+        p.description AS product_description,
+        p.price AS product_price,
+        p.image_url AS product_image,
+        p.badge AS product_badge,
+        p.stock AS product_stock
+      FROM group_cart_items gci
+      LEFT JOIN products p ON p.id = gci.product_id
+      WHERE gci.group_session_id = ? AND gci.user_id = ?
+      ORDER BY gci.id DESC
+      `,
+      [sessionId, userId]
+    )
+  );
+
+  return rows;
+};
+
+const createCheckoutOrder = async ({
+  userId,
+  userEmail,
+  userName,
+  orderType = 'dine-in',
+  paymentMethod = 'Cashier',
+  promoCode = '',
+  tableNumber = null,
+  pickupTime = null,
+  pickupNote = '',
+  isPreorder = false,
+  splitBills = [],
+} = {}) => {
+  const resolvedUserId = await resolveUserId({ userId, userEmail, userName });
+  if (!resolvedUserId) {
+    const error = new Error('User tidak ditemukan');
+    error.statusCode = 404;
+    throw error;
+  }
+
+  const connection = await db.getConnection();
+
+  try {
+    await connection.beginTransaction();
+
+    const session = await getActiveSession(connection, resolvedUserId);
+    if (!session) {
+      const error = new Error('Keranjang kosong');
+      error.statusCode = 400;
+      throw error;
+    }
+
+    const rows = await getCheckoutCartRows(connection, session.id, resolvedUserId);
+    if (!rows.length) {
+      const error = new Error('Keranjang kosong');
+      error.statusCode = 400;
+      throw error;
+    }
+
+    const items = rows.map((row) => {
+      const quantity = parseNumber(row.quantity, 1);
+      const unitPrice = parseNumber(row.product_price, 0);
+
+      return {
+        productId: row.product_id,
+        quantity,
+        priceAtTime: unitPrice,
+        subtotal: quantity * unitPrice,
+        notes: normalizeText(row.product_description),
+        name: normalizeText(row.product_name) || 'Menu',
+      };
+    });
+
+    const subtotal = items.reduce((sum, item) => sum + item.subtotal, 0);
+    let discountAmount = 0;
+    let promoClaim = null;
+    const normalizedPromoCode = normalizeText(promoCode);
+
+    if (normalizedPromoCode) {
+      const [promoRows] = await withTimeout(
+        connection.execute(
+          `
+          SELECT
+            ucp.id AS claim_id,
+            ucp.promo_id,
+            ucp.unique_code,
+            ucp.is_used,
+            wp.discount_amount,
+            wp.is_active
+          FROM user_promo_claims ucp
+          INNER JOIN weekly_promos wp ON wp.id = ucp.promo_id
+          WHERE ucp.user_id = ? AND ucp.unique_code = ?
+          LIMIT 1
+          `,
+          [resolvedUserId, normalizedPromoCode]
+        )
+      );
+
+      promoClaim = promoRows[0] || null;
+
+      if (!promoClaim) {
+        const error = new Error('Kode promo tidak ditemukan');
+        error.statusCode = 404;
+        throw error;
+      }
+
+      if (!promoClaim.is_active) {
+        const error = new Error('Promo sudah tidak aktif');
+        error.statusCode = 400;
+        throw error;
+      }
+
+      if (Number(promoClaim.is_used)) {
+        const error = new Error('Promo sudah digunakan');
+        error.statusCode = 409;
+        throw error;
+      }
+
+      discountAmount = Math.min(subtotal, parseNumber(promoClaim.discount_amount, 0));
+    }
+
+    const totalAmount = Math.max(subtotal - discountAmount, 0);
+    const pickupNoteText = [
+      paymentMethod ? `Pembayaran: ${normalizeText(paymentMethod)}` : '',
+      normalizedPromoCode ? `Promo: ${normalizedPromoCode}` : '',
+      normalizeText(pickupNote) ? `Catatan: ${normalizeText(pickupNote)}` : '',
+    ]
+      .filter(Boolean)
+      .join(' | ') || null;
+
+    const [orderResult] = await withTimeout(
+      connection.execute(
+        `
+        INSERT INTO orders (
+          user_id,
+          group_session_id,
+          total_amount,
+          status,
+          order_type,
+          is_preorder,
+          table_number,
+          pickup_time,
+          pickup_note
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `,
+        [
+          resolvedUserId,
+          session.id,
+          totalAmount,
+          'pending',
+          normalizeText(orderType) || 'dine-in',
+          isPreorder ? 1 : 0,
+          tableNumber || null,
+          pickupTime || null,
+          pickupNoteText,
+        ]
+      )
+    );
+
+    const orderId = orderResult.insertId;
+
+    for (const item of items) {
+      await withTimeout(
+        connection.execute(
+          `
+          INSERT INTO order_items (
+            order_id,
+            product_id,
+            quantity,
+            price_at_time,
+            notes
+          )
+          VALUES (?, ?, ?, ?, ?)
+          `,
+          [
+            orderId,
+            item.productId,
+            item.quantity,
+            item.priceAtTime,
+            item.notes || `Dibeli melalui checkout ${orderType}`,
+          ]
+        )
+      );
+    }
+
+    if (promoClaim) {
+      await withTimeout(
+        connection.execute(
+          `
+          UPDATE user_promo_claims
+          SET is_used = 1, used_at = NOW()
+          WHERE id = ?
+          `,
+          [promoClaim.claim_id]
+        )
+      );
+    }
+
+    if (Array.isArray(splitBills) && splitBills.length > 0) {
+      for (const bill of splitBills) {
+        const splitUserId = await resolveUserId({
+          userId: bill.userId,
+          userEmail: bill.userEmail,
+          userName: bill.userName,
+        });
+
+        if (!splitUserId) {
+          const error = new Error('Data split bill tidak valid');
+          error.statusCode = 400;
+          throw error;
+        }
+
+        const amountToPay = parseNumber(bill.amountToPay ?? bill.amount, 0);
+
+        await withTimeout(
+          connection.execute(
+            `
+            INSERT INTO split_bills (order_id, user_id, amount_to_pay, payment_status)
+            VALUES (?, ?, ?, ?)
+            `,
+            [orderId, splitUserId, amountToPay, normalizeText(bill.paymentStatus) || 'pending']
+          )
+        );
+      }
+    }
+
+    await withTimeout(
+      connection.execute('DELETE FROM group_cart_items WHERE group_session_id = ? AND user_id = ?', [
+        session.id,
+        resolvedUserId,
+      ])
+    );
+
+    await withTimeout(
+      connection.execute("UPDATE group_sessions SET status = 'checkout' WHERE id = ?", [session.id])
+    );
+
+    await connection.commit();
+
+    return {
+      order: {
+        id: orderId,
+        userId: resolvedUserId,
+        groupSessionId: session.id,
+        totalAmount,
+        subtotal,
+        discountAmount,
+        status: 'pending',
+        orderType: normalizeText(orderType) || 'dine-in',
+        isPreorder: Boolean(isPreorder),
+        tableNumber: tableNumber || null,
+        pickupTime: pickupTime || null,
+        pickupNote: pickupNoteText,
+      },
+      items,
+      subtotal,
+      discountAmount,
+      totalAmount,
+      session: {
+        id: session.id,
+        groupCode: session.group_code,
+        status: 'checkout',
+      },
+    };
+  } catch (error) {
+    await connection.rollback();
+    throw error;
+  } finally {
+    connection.release();
+  }
+};
+
 module.exports = {
   listOrders,
   statusToStep,
+  createCheckoutOrder,
 };

@@ -297,3 +297,39 @@ export const clearCart = async () => {
 }
 
 export const getStoredCart = () => readLocalCart()
+
+export const createCheckoutOrder = async ({
+  orderType = 'dine-in',
+  paymentMethod = 'Cashier',
+  promoCode = '',
+  tableNumber = null,
+  pickupTime = null,
+  pickupNote = '',
+  isPreorder = false,
+  splitBills = [],
+} = {}) => {
+  if (!hasRemoteSession()) {
+    const error = new Error('Login dibutuhkan untuk checkout ke database')
+    error.statusCode = 401
+    throw error
+  }
+
+  const auth = getAuthIdentity()
+  const response = await axios.post(`${getCartApiUrl().replace(/\/cart$/, '/orders')}/checkout`, {
+    userEmail: auth?.email,
+    userName: auth?.name,
+    orderType,
+    paymentMethod,
+    promoCode,
+    tableNumber,
+    pickupTime,
+    pickupNote,
+    isPreorder,
+    splitBills,
+  })
+
+  writeStoredValue(STORAGE_KEYS.cart, [])
+  dispatchCartChange()
+
+  return response.data
+}
