@@ -1,18 +1,21 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Link, useLocation, useParams } from 'react-router-dom'
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
 import axios from 'axios'
 import { ArrowLeft, BadgeInfo, Clock3, ShoppingCart, Star } from 'lucide-react'
 import ImageSection from './MenuDetail/ImageSection'
 import { coffeeSeed } from '../../data/menuSeed'
 import { getApiBaseUrl } from '../../utils/apiBaseUrl'
 import { formatRupiah } from '../../utils/formatRupiah'
+import { addCartItem } from '../../services/cartService'
 
 const MenuDetail = () => {
   const { id } = useParams()
   const location = useLocation()
+  const navigate = useNavigate()
   const [product, setProduct] = useState(location.state?.product || null)
   const [loading, setLoading] = useState(!location.state?.product)
   const [error, setError] = useState('')
+  const [addingToCart, setAddingToCart] = useState(false)
 
   const API_BASE_URL = getApiBaseUrl()
   const API_URL = API_BASE_URL ? `${API_BASE_URL}/api/products` : '/api/products'
@@ -83,6 +86,19 @@ const MenuDetail = () => {
 
   const imageUrl = displayProduct.image_url || displayProduct.image || '/Gambar_Login.jpg'
 
+  const handleAddToCart = async () => {
+    try {
+      setAddingToCart(true)
+      await addCartItem(displayProduct, 1)
+      navigate('/cart')
+    } catch (cartError) {
+      console.error('Gagal menambahkan ke keranjang:', cartError)
+      alert(cartError?.response?.data?.error || cartError.message || 'Gagal menambahkan menu ke keranjang.')
+    } finally {
+      setAddingToCart(false)
+    }
+  }
+
   return (
     <main className="min-h-screen bg-[#F3E9DD]">
       <ImageSection product={{ ...displayProduct, image: imageUrl }} />
@@ -135,13 +151,28 @@ const MenuDetail = () => {
               </div>
             </div>
 
-            <Link
-              to="/"
-              className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-[20px] bg-[#FFC444] px-5 py-4 font-bold text-[#4A3728] shadow-lg shadow-yellow-600/10 transition hover:brightness-105"
-            >
-              <ShoppingCart className="h-5 w-5" />
-              Kembali ke Menu
-            </Link>
+            <div className="mt-6 space-y-3">
+              <button
+                type="button"
+                onClick={handleAddToCart}
+                disabled={addingToCart || !Number(displayProduct.is_available ?? 1)}
+                className="inline-flex w-full items-center justify-center gap-2 rounded-[20px] bg-[#FF6E00] px-5 py-4 font-bold text-white shadow-lg shadow-orange-600/20 transition hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-70"
+              >
+                <ShoppingCart className="h-5 w-5" />
+                {addingToCart
+                  ? 'Menambahkan...'
+                  : Number(displayProduct.is_available ?? 1)
+                    ? 'Tambah ke Keranjang'
+                    : 'Menu Tidak Tersedia'}
+              </button>
+              <Link
+                to="/"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-[20px] bg-[#FFC444] px-5 py-4 font-bold text-[#4A3728] shadow-lg shadow-yellow-600/10 transition hover:brightness-105"
+              >
+                <ShoppingCart className="h-5 w-5" />
+                Kembali ke Menu
+              </Link>
+            </div>
           </aside>
         </div>
       </section>

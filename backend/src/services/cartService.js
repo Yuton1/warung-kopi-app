@@ -11,6 +11,8 @@ const withTimeout = (operation, timeoutMs = 5000) => {
   return Promise.race([operation, timeout]).finally(() => clearTimeout(timer))
 }
 
+const FALLBACK_IMAGE = '/Logo_Warkop_Nav.png'
+
 const parseNumber = (value, fallback = 0) => {
   const parsed = Number(value)
   return Number.isFinite(parsed) ? parsed : fallback
@@ -85,12 +87,12 @@ const createSession = async (userId) => {
     group_code: groupCode,
     host_id: userId,
     status: 'active',
+    created_at: new Date().toISOString(),
   }
 }
 
-const getOrCreateActiveSession = async (userId) => {
+const ensureActiveSession = async (userId) => {
   const existingSession = await getActiveSession(userId)
-
   if (existingSession) {
     return existingSession
   }
@@ -131,6 +133,7 @@ const buildCartPayload = (session, rows) => {
   const items = rows.map((row) => {
     const quantity = parseNumber(row.quantity, 1)
     const unitPrice = parseNumber(row.product_price, 0)
+    const imageUrl = normalizeText(row.product_image) || FALLBACK_IMAGE
 
     return {
       id: row.item_id,
@@ -140,7 +143,8 @@ const buildCartPayload = (session, rows) => {
       name: normalizeText(row.product_name) || 'Menu',
       category: normalizeText(row.product_category) || 'Menu',
       description: normalizeText(row.product_description),
-      imageUrl: normalizeText(row.product_image),
+      imageUrl,
+      image: imageUrl,
       badge: normalizeText(row.product_badge),
       stock: parseNumber(row.product_stock, 0),
       qty: quantity,
@@ -164,12 +168,14 @@ const buildCartPayload = (session, rows) => {
           id: session.id,
           groupCode: session.group_code,
           status: session.status,
+          hostId: session.host_id,
           createdAt: session.created_at || null,
         }
       : null,
     items,
     subtotal,
     totalItems,
+    count: totalItems,
   }
 }
 
@@ -182,6 +188,7 @@ const getCart = async ({ userId, userEmail, userName }) => {
       items: [],
       subtotal: 0,
       totalItems: 0,
+      count: 0,
     }
   }
 
@@ -193,6 +200,7 @@ const getCart = async ({ userId, userEmail, userName }) => {
       items: [],
       subtotal: 0,
       totalItems: 0,
+      count: 0,
     }
   }
 
@@ -219,7 +227,12 @@ const addCartItem = async ({ userId, userEmail, userName, productId, quantity = 
 
   const [productRows] = await withTimeout(
     db.execute(
-      'SELECT id FROM products WHERE id = ? LIMIT 1',
+      `
+      SELECT id, stock, is_available
+      FROM products
+      WHERE id = ?
+      LIMIT 1
+      `,
       [productNumericId]
     )
   )
@@ -230,7 +243,14 @@ const addCartItem = async ({ userId, userEmail, userName, productId, quantity = 
     throw error
   }
 
-  const session = await getOrCreateActiveSession(resolvedUserId)
+  const product = productRows[0]
+  if (Number(product.is_available) === 0 || parseNumber(product.stock, 0) <= 0) {
+    const error = new Error('Menu sedang tidak tersedia')
+    error.statusCode = 400
+    throw error
+  }
+
+  const session = await ensureActiveSession(resolvedUserId)
 
   const [existingRows] = await withTimeout(
     db.execute(
@@ -245,14 +265,25 @@ const addCartItem = async ({ userId, userEmail, userName, productId, quantity = 
   )
 
   if (existingRows.length > 0) {
-    const newQuantity = parseNumber(existingRows[0].quantity, 0) + addQuantity
+    const currentQuantity = parseNumber(existingRows[0].quantity, 0)
+    const nextQuantity = currentQuantity + addQuantity
+
+    if (parseNumber(product.stock, 0) > 0 && nextQuantity > parseNumber(product.stock, 0)) {
+      const error = new Error('Stok menu tidak mencukupi')
+      error.statusCode = 400
+      throw error
+    }
+
     await withTimeout(
-      db.execute(
-        'UPDATE group_cart_items SET quantity = ? WHERE id = ?',
-        [newQuantity, existingRows[0].id]
-      )
+      db.execute('UPDATE group_cart_items SET quantity = ? WHERE id = ?', [nextQuantity, existingRows[0].id])
     )
   } else {
+    if (parseNumber(product.stock, 0) > 0 && addQuantity > parseNumber(product.stock, 0)) {
+      const error = new Error('Stok menu tidak mencukupi')
+      error.statusCode = 400
+      throw error
+    }
+
     await withTimeout(
       db.execute(
         `
@@ -345,6 +376,7 @@ const clearCart = async ({ userId, userEmail, userName }) => {
       items: [],
       subtotal: 0,
       totalItems: 0,
+      count: 0,
     }
   }
 

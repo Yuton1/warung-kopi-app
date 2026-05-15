@@ -7,7 +7,7 @@ const CustomerLayout = () => {
     <div className="app-shell flex flex-col min-h-screen bg-[#F5EBE0]">
       <CustomerNavbar />
       <main className="flex-grow w-full">
-        <div className="mmx-auto w-full max-w-[1860px] py-8">
+        <div className="mx-auto w-full max-w-[1860px] px-4 sm:px-6 lg:px-8 py-8">
           <Outlet />
         </div>
       </main>

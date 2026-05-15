@@ -1,5 +1,6 @@
 import React from 'react';
 import { Trash2, Plus, Minus } from 'lucide-react';
+import { formatRupiah } from '../../../utils/formatRupiah';
 
 const CartItem = ({ item, onUpdateQty, onRemove }) => {
   return (
@@ -7,12 +8,12 @@ const CartItem = ({ item, onUpdateQty, onRemove }) => {
       <div className="flex items-center gap-5">
         {/* Gambar Produk */}
         <div className="w-20 h-20 bg-[#F5EBE0] rounded-2xl overflow-hidden shadow-inner">
-          <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+          <img src={item.imageUrl || item.image || '/Logo_Warkop_Nav.png'} alt={item.name} className="w-full h-full object-cover" />
         </div>
         {/* Info Produk */}
         <div>
           <h3 className="text-lg font-black text-[#4A3728] leading-tight">{item.name}</h3>
-          <p className="text-[#B08968] font-bold text-sm">Rp {item.price.toLocaleString('id-ID')}</p>
+          <p className="text-[#B08968] font-bold text-sm">{formatRupiah(item.price ?? item.unitPrice ?? 0)}</p>
         </div>
       </div>
 

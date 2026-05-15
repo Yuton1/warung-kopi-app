@@ -10,13 +10,24 @@ import CoffeeSubscription from './MenuViewComponents/CoffeeSubscription';
 import AnalyticsDashboard from './MenuViewComponents/AnalyticsDashboard';
 import CartFloating from '../../components/CartFloating';
 import { coffeeSeed, subscriptionPlans as subscriptionSeed } from '../../data/menuSeed';
+import {
+  addCartItem,
+  clearCart as clearStoredCart,
+  fetchCart,
+  getStoredCart,
+  removeCartItem,
+  setCartItemQuantity,
+} from '../../services/cartService';
 
 const MenuView = () => {
   const [allProducts, setAllProducts] = useState(coffeeSeed);
   const [loadingMenu, setLoadingMenu] = useState(true);
-  const [cart, setCart] = useState([]);
+  const [cart, setCart] = useState(() => getStoredCart().items || []);
   const [favoriteIdSet, setFavoriteIdSet] = useState(new Set());
-  const [preOrder, setPreOrder] = useState({ date: "", time: "" });
+  const [tableNumber, setTableNumber] = useState('');
+  const [pickupTime, setPickupTime] = useState('');
+  const [orderNote, setOrderNote] = useState('');
+  const [preOrder, setPreOrder] = useState(null);
   const [groupOrder, setGroupOrder] = useState({ members: 4, items: [], status: 'idle' });
   const [subscriptionPlans, setSubscriptionPlans] = useState(subscriptionSeed);
   const [activeSub, setActiveSub] = useState({ id: null });
@@ -78,6 +89,31 @@ const MenuView = () => {
   }, []);
 
   useEffect(() => {
+    const syncCart = async () => {
+      try {
+        const snapshot = await fetchCart()
+        setCart(snapshot.items || [])
+      } catch (error) {
+        console.error('Gagal memuat keranjang:', error)
+      }
+    }
+
+    syncCart()
+
+    const handleCartChange = () => {
+      syncCart()
+    }
+
+    window.addEventListener('storage', handleCartChange)
+    window.addEventListener('warungkopi-state-changed', handleCartChange)
+
+    return () => {
+      window.removeEventListener('storage', handleCartChange)
+      window.removeEventListener('warungkopi-state-changed', handleCartChange)
+    }
+  }, [])
+
+  useEffect(() => {
     if (!searchQuery) return
 
     requestAnimationFrame(() => {
@@ -115,7 +151,14 @@ const MenuView = () => {
     setFavoriteIdSet(newFavs);
   };
 
-  const addToCart = (item) => setCart([...cart, item]);
+  const addToCart = async (item) => {
+    try {
+      const snapshot = await addCartItem(item, 1)
+      setCart(snapshot.items || [])
+    } catch (error) {
+      console.error('Gagal menambahkan menu ke keranjang:', error)
+    }
+  };
   const addToGroup = (item) => console.log("Grup add:", item);
   const viewDetail = (productId) => {
     const product = (Array.isArray(allProducts) ? allProducts : []).find(
@@ -128,12 +171,62 @@ const MenuView = () => {
       },
     });
   };
-  const savePreOrder = (data) => setPreOrder(data);
-  const cancelPreOrder = () => setPreOrder(null);
+  const savePreOrder = (data = {}) =>
+    setPreOrder({
+      status: 'Tersimpan',
+      time: data.time || pickupTime,
+      pickupTime: data.time || pickupTime,
+      note: data.note || orderNote,
+      items: cart,
+      tableNumber,
+    });
+  const cancelPreOrder = () => {
+    setPreOrder(null);
+    setPickupTime('');
+    setOrderNote('');
+  };
   const updateGroupMembers = (members) => setGroupOrder({...groupOrder, members});
   const addCartToGroup = () => console.log("Sync group cart");
   const confirmGroupPayment = () => alert("Group payment confirmed!");
   const activatePlan = (planId) => setActiveSub({ id: planId });
+
+  const updateCartQuantity = async (itemId, nextQuantity) => {
+    try {
+      const snapshot = await setCartItemQuantity(itemId, nextQuantity)
+      setCart(snapshot.items || [])
+    } catch (error) {
+      console.error('Gagal memperbarui keranjang:', error)
+    }
+  }
+
+  const handleRemoveCartItem = async (itemId) => {
+    try {
+      const snapshot = await removeCartItem(itemId)
+      setCart(snapshot.items || [])
+    } catch (error) {
+      console.error('Gagal menghapus item keranjang:', error)
+    }
+  }
+
+  const handleClearCart = async () => {
+    try {
+      const snapshot = await clearStoredCart()
+      setCart(snapshot.items || [])
+    } catch (error) {
+      console.error('Gagal mengosongkan keranjang:', error)
+    }
+  }
+
+  const subtotal = useMemo(
+    () =>
+      cart.reduce(
+        (sum, item) =>
+          sum +
+          (Number(item.subtotal) || Number(item.price || item.unitPrice || 0) * (Number(item.qty) || 0)),
+        0
+      ),
+    [cart]
+  )
 
   return (
     <div className="page-shell min-h-screen bg-white">
@@ -209,7 +302,26 @@ const MenuView = () => {
           </section>
         </main>
       </section>
-      {cart.length > 0 && <CartFloating count={cart.length} />}
+      {cart.length > 0 && (
+        <CartFloating
+          cart={cart}
+          subtotal={subtotal}
+          tableNumber={tableNumber}
+          pickupTime={pickupTime}
+          orderNote={orderNote}
+          preOrder={preOrder}
+          loyaltyPoints={Math.floor(subtotal / 1000)}
+          onUpdateQuantity={updateCartQuantity}
+          onRemoveItem={handleRemoveCartItem}
+          onClearCart={handleClearCart}
+          onTableNumberChange={setTableNumber}
+          onPickupTimeChange={setPickupTime}
+          onOrderNoteChange={setOrderNote}
+          onSavePreOrder={savePreOrder}
+          onCancelPreOrder={cancelPreOrder}
+          onCheckout={() => navigate('/cart')}
+        />
+      )}
     </div>
   );
 }

@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import { formatRupiah } from '../utils/formatRupiah'
 
 const ProductCard = ({
@@ -8,8 +7,11 @@ const ProductCard = ({
   onAddToCart,
   onViewDetail = () => {},
 }) => {
-  // Tetap menggunakan 'Normal' sebagai default untuk keperluan payload keranjang
-  const selectedSize = 'Normal' 
+  const selectedSize = {
+    label: 'Normal',
+    note: '',
+    factor: 1,
+  }
 
   return (
     /* Container menggunakan Golden Ratio p-[26px].

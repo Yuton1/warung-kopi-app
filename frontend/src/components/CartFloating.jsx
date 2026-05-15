@@ -18,7 +18,7 @@ const CartFloating = ({
   onCancelPreOrder = () => {},
   onCheckout = () => {},
 }) => {
-  const cartCount = cart.reduce((total, item) => total + (item.qty || 0), 0)
+  const cartCount = cart.reduce((total, item) => total + (Number(item?.qty) || 0), 0)
 
   return (
     <aside className="summary-panel" id="cart-panel">
@@ -83,23 +83,23 @@ const CartFloating = ({
           </div>
         ) : (
           cart.map((item) => (
-            <div key={`${item.id}-${item.size.label}`} className="cart-row">
+            <div key={`${item.id}-${item.size?.label || 'normal'}`} className="cart-row">
               <div className="cart-row__content">
                 <strong>{item.name}</strong>
                 <span>
-                  {item.size.label} - {formatRupiah(item.price)}
+                  {item.size?.label || 'Normal'} - {formatRupiah(item.price ?? item.unitPrice ?? 0)}
                 </span>
               </div>
               <div className="cart-row__controls">
-                <button type="button" onClick={() => onUpdateQuantity(item.id, item.size.label, -1)}>
+                <button type="button" onClick={() => onUpdateQuantity(item.id, Math.max((Number(item.qty) || 1) - 1, 0))}>
                   -
                 </button>
                 <span>{item.qty}</span>
-                <button type="button" onClick={() => onUpdateQuantity(item.id, item.size.label, 1)}>
+                <button type="button" onClick={() => onUpdateQuantity(item.id, (Number(item.qty) || 0) + 1)}>
                   +
                 </button>
               </div>
-              <button type="button" className="link-button" onClick={() => onRemoveItem(item.id, item.size.label)}>
+              <button type="button" className="link-button" onClick={() => onRemoveItem(item.id)}>
                 Hapus
               </button>
             </div>
