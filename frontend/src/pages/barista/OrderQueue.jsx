@@ -1,175 +1,92 @@
-import { useState } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
-import axios from 'axios' // Gunakan axios untuk koneksi ke backend/TiDB
-import { AuthField } from '../auth/AuthShell'
-import { STORAGE_KEYS, writeStoredValue } from '../../data/customerStorage'
+import React, { useState } from 'react';
+import { formatRupiah } from '../../utils/formatRupiah';
 
-const LoginPage = () => {
-  const navigate = useNavigate()
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [rememberMe, setRememberMe] = useState(false)
-
-  // --- TAMBAHAN LOGIKA DINAMIS ---
-  // Jika dibuka di localhost, arahkan ke port 3000. 
-  // Jika di Vercel, arahkan ke URL backend kamu (silakan ganti link di bawah nanti).
-  const API_BASE_URL = window.location.hostname === 'localhost'
-    ? (import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000')
-    : '';
-
-  const handleSubmit = async (event) => {
-    event.preventDefault()
-
-    try {
-      // 1. Menggunakan API_BASE_URL agar tidak error saat di-deploy
-      const response = await axios.post(`${API_BASE_URL}/api/auth/login`, { 
-        email, 
-        password 
-      });
-
-      // 2. Ambil data user asli dari database (seperti yang terlihat di image_7048d1.png)
-      const { user, token } = response.data;
-      const userRole = user.role; // Mengambil 'barista' atau 'admin' dari kolom role
-
-      const authUser = {
-        name: user.username,
-        role: userRole,
-        email: user.email,
-        mode: 'login',
-        loggedInAt: new Date().toISOString(),
-      }
-
-      // 3. Simpan sesi login
-      writeStoredValue(STORAGE_KEYS.auth, authUser)
-      writeStoredValue(STORAGE_KEYS.account, {
-        ...authUser,
-        city: 'Malang',
-      })
-      localStorage.setItem("token", token);
-
-      window.dispatchEvent(new Event('warungkopi-state-changed'))
-
-      // 4. Navigasi otomatis sesuai role di database
-      if (userRole === 'admin') {
-        navigate('/admin', { replace: true });
-      } else if (userRole === 'barista') {
-        navigate('/barista', { replace: true });
-      } else {
-        navigate('/', { replace: true });
-      }
-
-    } catch (err) {
-      console.error("Login Error:", err)
-
-      const serverMessage = err.response?.data?.message || err.response?.data?.error
-      const isNetworkError = err.code === 'ERR_NETWORK'
-
-      alert(serverMessage || (isNetworkError
-        ? 'Tidak bisa menghubungi API /api/auth/login. Cek deploy Vercel backend, env TiDB, dan rewrite /api.'
-        : 'Login gagal. Periksa email/password atau log backend.'))
+const OrdersQueue = () => {
+  // Dummy data dari tabel orders & order_items
+  const [activeOrders, setActiveOrders] = useState([
+    {
+      id: 'ORD-001',
+      type: 'Dine-in',
+      table: 'Meja 05',
+      status: 'Preparing',
+      items: [
+        { name: 'Kopi Hitam Racik', size: 'Normal', qty: 2 },
+        { name: 'Kopi Kapal Api', size: 'Besar', qty: 1 }
+      ],
+      time: '10 Menit lalu'
+    },
+    {
+      id: 'ORD-002',
+      type: 'Takeaway',
+      table: '-',
+      status: 'Pending',
+      items: [
+        { name: 'Kopi TOP', size: 'Normal', qty: 1 }
+      ],
+      time: '2 Menit lalu'
     }
-  }
+  ]);
 
   return (
-    <div className="flex h-screen w-full bg-white font-sans overflow-hidden">
-      
-      {/* SISI KIRI: FORM LOGIN */}
-      <div className="flex w-full flex-col justify-center px-8 md:w-1/2 md:px-20 lg:px-32">
-        {/* Brand/Logo Section */}
-        <div className="mb-12 flex items-center gap-2">
-          <div className="h-6 w-6 rounded bg-[#1b120d]" />
-          <span className="text-xl font-bold tracking-tight text-[#1b120d]">WarungKopi</span>
+    <div className="min-h-screen bg-[#F4F4F4] font-['Fredoka'] p-8 text-[#4A3728]">
+      <header className="flex justify-between items-center mb-10">
+        <div>
+          <h1 className="text-4xl font-bold uppercase tracking-tight">Antrean Pesanan</h1>
+          <p className="text-gray-500 text-lg">Semangat menyeduh, Barista! ☕</p>
         </div>
-
-        <div className="mb-10">
-          <h1 className="text-4xl font-extrabold text-[#1b120d] leading-tight">
-            Halo, <br /> Welcome Back
-          </h1>
-          <p className="mt-3 text-sm text-gray-500">
-            Hey, welcome back to your favorite coffee place.
-          </p>
-        </div>
-
-        <form className="flex flex-col gap-5" onSubmit={handleSubmit}>
-          <div className="space-y-4">
-            <AuthField
-              icon="mail"
-              type="email"
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
-              placeholder="Email"
-              autoComplete="email"
-              name="email"
-              className="rounded-xl border-gray-200 py-3 focus:border-[#e39b4f] focus:ring-[#e39b4f]"
-            />
-            <AuthField
-              icon="lock"
-              type="password"
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
-              placeholder="Password"
-              autoComplete="current-password"
-              name="password"
-              className="rounded-xl border-gray-200 py-3 focus:border-[#e39b4f] focus:ring-[#e39b4f]"
-            />
-          </div>
-
-          {/* Remember Me & Forgot Password */}
-          <div className="flex items-center justify-between text-xs">
-            <label className="flex items-center gap-2 cursor-pointer text-gray-600">
-              <input 
-                type="checkbox" 
-                checked={rememberMe}
-                onChange={(e) => setRememberMe(e.target.checked)}
-                className="h-4 w-4 rounded border-gray-300 text-[#e39b4f] focus:ring-[#e39b4f]" 
-              />
-              Remember me
-            </label>
-            <Link to="/forgot-password" title="Lupa password?" className="font-semibold text-gray-500 hover:text-[#e39b4f]">
-              Forgot Password?
-            </Link>
-          </div>
-
-          <button
-            type="submit"
-            className="mt-4 w-fit rounded-xl bg-[#e39b4f] px-10 py-3 font-bold text-white shadow-lg shadow-orange-200 transition-all hover:scale-105 hover:brightness-105 active:scale-95"
-          >
-            Sign In
-          </button>
-        </form>
-
-        <p className="mt-12 text-xs text-gray-500">
-          Don&apos;t have an account? {' '}
-          <Link to="/register" className="font-bold text-[#e39b4f] hover:underline">
-            Sign Up
-          </Link>
-        </p>
-      </div>
-
-      {/* SISI KANAN: ILUSTRASI DENGAN GRADIENT KOPI */}
-      <div className="hidden h-full w-1/2 p-4 md:block">
-        <div className="relative h-full w-full overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-[#4A3728] via-[#2B1B17] to-[#1b120d] flex items-center justify-center">
-          
-          <div className="absolute top-[-10%] right-[-10%] h-80 w-80 rounded-full bg-[#e39b4f] opacity-20 blur-[100px]" />
-          <div className="absolute bottom-[-10%] left-[-10%] h-80 w-80 rounded-full bg-[#e39b4f] opacity-10 blur-[100px]" />
-
-          <div className="relative z-10 flex flex-col items-center text-center px-12">
-            <img 
-              src="/coffee-illustration.png" 
-              alt="Coffee Illustration" 
-              className="w-4/5 drop-shadow-2xl transition-transform duration-700 hover:scale-105"
-            />
-            <h2 className="mt-8 text-3xl font-bold text-white">The best beans, <br />the best brew.</h2>
-            <p className="mt-4 text-sm text-gray-300 max-w-xs">Nikmati kemudahan memesan kopi favoritmu kapan saja dan di mana saja.</p>
-          </div>
-
-          <div className="absolute bottom-10 right-10 opacity-30">
-             <span className="text-white font-black tracking-widest text-2xl">WARUNGKOPI</span>
+        <div className="flex gap-4">
+          <div className="bg-white p-4 rounded-2xl shadow-sm border-l-4 border-[#FF6E00]">
+            <p className="text-xs text-gray-400">Pesanan Aktif</p>
+            <p className="text-2xl font-bold">{activeOrders.length}</p>
           </div>
         </div>
+      </header>
+
+      {/* Grid Antrean */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {activeOrders.map((order) => (
+          <div key={order.id} className="bg-white rounded-[2rem] overflow-hidden shadow-md border border-gray-100 flex flex-col transition-all hover:shadow-xl">
+            {/* Header Card */}
+            <div className={`p-6 flex justify-between items-center ${order.type === 'Takeaway' ? 'bg-orange-50' : 'bg-blue-50'}`}>
+              <div>
+                <span className="text-xs font-bold uppercase tracking-widest text-gray-400">{order.id}</span>
+                <h2 className="text-xl font-bold">{order.type} {order.table !== '-' && `• ${order.table}`}</h2>
+              </div>
+              <span className="text-sm font-medium bg-white px-4 py-1.5 rounded-full shadow-sm">{order.time}</span>
+            </div>
+
+            {/* List Item */}
+            <div className="p-6 flex-1 space-y-4">
+              {order.items.map((item, idx) => (
+                <div key={idx} className="flex justify-between items-center bg-[#FDF7F2] p-4 rounded-2xl">
+                  <div>
+                    <p className="font-bold text-lg">{item.name}</p>
+                    <p className="text-sm text-gray-500 uppercase">{item.size}</p>
+                  </div>
+                  <div className="bg-[#4A3728] text-white w-10 h-10 rounded-full flex items-center justify-center font-bold">
+                    {item.qty}x
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Action Button */}
+            <div className="p-6 bg-gray-50 flex gap-3">
+              {order.status === 'Pending' ? (
+                <button className="flex-1 bg-[#4A3728] text-white py-4 rounded-xl font-bold hover:brightness-110 transition-all">
+                  Mulai Proses
+                </button>
+              ) : (
+                <button className="flex-1 bg-[#FF6E00] text-white py-4 rounded-xl font-bold hover:brightness-110 transition-all">
+                  Selesai / Panggil
+                </button>
+              )}
+            </div>
+          </div>
+        ))}
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default LoginPage
+export default OrdersQueue;
