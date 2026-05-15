@@ -9,11 +9,7 @@ const getBaristaOrdersUrl = () => {
 const normalizeOrder = (order) => ({
   ...order,
   id: order.id,
-  statusRaw: Number.isFinite(Number(order.statusRaw))
-    ? Number(order.statusRaw)
-    : Number.isFinite(Number(order.status))
-      ? Number(order.status)
-      : order.statusRaw ?? order.status,
+  statusRaw: String(order.statusRaw ?? order.status ?? '').toLowerCase(),
   status: order.status || 'Pending',
   customerName: order.customerName || 'Pelanggan',
   groupCode: order.groupCode || '',
@@ -36,7 +32,9 @@ export const fetchBaristaQueue = async () => {
 }
 
 export const updateBaristaOrderStatus = async (orderId, status) => {
-  const response = await axios.patch(`${getBaristaOrdersUrl()}/${orderId}/status`, {
+  const baseUrl = getApiBaseUrl()
+  const url = baseUrl ? `${baseUrl}/api/orders/${orderId}/status` : `/api/orders/${orderId}/status`
+  const response = await axios.patch(url, {
     status,
   })
 

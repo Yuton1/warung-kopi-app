@@ -5,20 +5,31 @@ import { formatRupiah } from '../../utils/formatRupiah'
 import { CheckCircle, Clock, Coffee, Package, RefreshCw, User, Loader2 } from 'lucide-react'
 
 const ORDER_STATUS = {
-  PENDING: 0,
-  PROCESSING: 1,
-  READY: 2,
+  PENDING: 'pending',
+  PROCESSING: 'processing',
+  READY: 'ready',
 }
 
 const toStatusCode = (order) => {
-  const numeric = Number(order?.statusRaw ?? order?.status)
-  if (Number.isFinite(numeric)) {
-    return numeric
+  const normalized = String(order?.statusRaw ?? order?.status ?? '').toLowerCase()
+
+  if (normalized === 'pending' || normalized === 'new' || normalized === 'menunggu' || normalized === 'pemesanan') {
+    return ORDER_STATUS.PENDING
   }
 
-  const normalized = String(order?.status ?? '').toLowerCase()
-  if (normalized.includes('process')) return ORDER_STATUS.PROCESSING
-  if (normalized.includes('ready') || normalized.includes('siap')) return ORDER_STATUS.READY
+  if (
+    normalized === 'processing' ||
+    normalized === 'proses' ||
+    normalized === 'diproses' ||
+    normalized === 'in progress'
+  ) {
+    return ORDER_STATUS.PROCESSING
+  }
+
+  if (normalized === 'ready' || normalized === 'siap' || normalized === 'siap diambil' || normalized === 'siap_diambil') {
+    return ORDER_STATUS.READY
+  }
+
   return ORDER_STATUS.PENDING
 }
 
@@ -60,7 +71,7 @@ const OrderCard = ({ order, onMoveStatus, updatingOrderId }) => {
 
   return (
     <div className={`rounded-[2rem] border p-6 shadow-sm transition-all hover:shadow-md ${meta.panel}`}>
-      <div className="flex items-start justify-between gap-4 mb-4">
+      <div className="mb-4 flex items-start justify-between gap-4">
         <div>
           <div className={`inline-flex items-center rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] ${meta.chip}`}>
             {meta.label}
@@ -113,7 +124,7 @@ const OrderCard = ({ order, onMoveStatus, updatingOrderId }) => {
             {order.items.map((item) => (
               <li key={`${order.id}-${item.id}`} className="flex items-center justify-between gap-4 rounded-xl bg-[#FDF7F2] px-3 py-2">
                 <div className="min-w-0">
-                  <p className="font-semibold truncate">
+                  <p className="truncate font-semibold">
                     {item.name} <span className="text-gray-400">x {item.quantity}</span>
                   </p>
                   <p className="text-xs text-gray-400">
@@ -223,7 +234,7 @@ const OrderQueue = () => {
   }
 
   return (
-    <div className="flex min-h-screen bg-[#F8F9FA] overflow-hidden font-['Fredoka']">
+    <div className="flex min-h-screen overflow-hidden bg-[#F8F9FA] font-['Fredoka']">
       <Sidebar role="barista" />
 
       <main className="flex-1 overflow-y-auto p-8">
@@ -262,23 +273,21 @@ const OrderQueue = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-8 xl:grid-cols-3">
-            {[
-              ORDER_STATUS.PENDING,
-              ORDER_STATUS.PROCESSING,
-              ORDER_STATUS.READY,
-            ].map((statusCode) => {
+            {[ORDER_STATUS.PENDING, ORDER_STATUS.PROCESSING, ORDER_STATUS.READY].map((statusCode) => {
               const meta = statusMeta[statusCode]
               const Icon = meta.icon
 
               return (
                 <section key={statusCode} className="space-y-5">
-                  <h2 className={`flex items-center gap-2 text-sm font-bold uppercase tracking-[0.18em] ${
-                    statusCode === ORDER_STATUS.PENDING
-                      ? 'text-[#e39b4f]'
-                      : statusCode === ORDER_STATUS.PROCESSING
-                        ? 'text-blue-600'
-                        : 'text-green-600'
-                  }`}>
+                  <h2
+                    className={`flex items-center gap-2 text-sm font-bold uppercase tracking-[0.18em] ${
+                      statusCode === ORDER_STATUS.PENDING
+                        ? 'text-[#e39b4f]'
+                        : statusCode === ORDER_STATUS.PROCESSING
+                          ? 'text-blue-600'
+                          : 'text-green-600'
+                    }`}
+                  >
                     <Icon size={18} />
                     {meta.title}
                   </h2>

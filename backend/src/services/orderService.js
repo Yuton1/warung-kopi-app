@@ -12,10 +12,10 @@ const withTimeout = (operation, timeoutMs = 5000) => {
 
 const FALLBACK_IMAGE = '/Logo_Warkop_Nav.png';
 const ORDER_STATUS = {
-  PENDING: 0,
-  PROCESSING: 1,
-  READY: 2,
-  COMPLETED: 3,
+  PENDING: 'pending',
+  PROCESSING: 'processing',
+  READY: 'ready',
+  COMPLETED: 'completed',
 };
 
 const parseNumber = (value, fallback = 0) => {
@@ -30,7 +30,10 @@ const normalizeStatus = (value) => normalizeText(value).toLowerCase();
 const normalizeStatusCode = (value) => {
   const numericValue = Number(value);
   if (Number.isFinite(numericValue)) {
-    return numericValue;
+    if (numericValue === 0) return ORDER_STATUS.PENDING;
+    if (numericValue === 1) return ORDER_STATUS.PROCESSING;
+    if (numericValue === 2) return ORDER_STATUS.READY;
+    if (numericValue === 3) return ORDER_STATUS.COMPLETED;
   }
 
   const normalized = normalizeStatus(value);
@@ -93,11 +96,11 @@ const statusToStep = (value) => {
 
   if (normalized === 'pemesanan' || normalized === 'menunggu' || normalized === 'pending') return 0;
   if (normalized === 'pembayaran' || normalized === 'paid' || normalized === 'dibayar') return 1;
-  if (normalized === 'proses' || normalized === 'diproses') return 2;
-  if (normalized === 'siap diambil' || normalized === 'siap_diambil') return 3;
+  if (normalized === 'proses' || normalized === 'diproses' || normalized === 'processing') return 2;
+  if (normalized === 'siap diambil' || normalized === 'siap_diambil' || normalized === 'ready') return 3;
   if (normalized === 'selesai' || normalized === 'done' || normalized === 'completed') return 4;
 
-  return 2;
+  return 1;
 };
 
 const formatOrderTime = (value) => {
@@ -373,7 +376,10 @@ const listBaristaOrders = async () => {
     LEFT JOIN group_sessions gs ON gs.id = o.group_session_id
     LEFT JOIN order_items oi ON oi.order_id = o.id
     LEFT JOIN products p ON p.id = oi.product_id
-    WHERE (o.status IN (0, 1, 2) OR o.status IN ('pending', 'processing', 'ready'))
+    WHERE (
+      LOWER(CAST(o.status AS CHAR)) IN ('pending', 'processing', 'ready')
+      OR o.status IN (0, 1, 2)
+    )
     ORDER BY o.created_at ASC, o.id ASC, oi.id ASC
   `;
 
@@ -677,7 +683,7 @@ const createCheckoutOrder = async ({
         totalAmount,
         subtotal,
         discountAmount,
-        status: 'pending',
+        status: ORDER_STATUS.PENDING,
         orderType: normalizeText(orderType) || 'dine-in',
         isPreorder: Boolean(isPreorder),
         tableNumber: tableNumber || null,
