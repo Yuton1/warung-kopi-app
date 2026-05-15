@@ -43,7 +43,8 @@ function App() {
         <Route path="/admin/reports" element={<SalesReports />} />
         
         {/* BARISTA ROUTES - Operational System */}
-        <Route path="/barista" element={<OrderQueue />} />
+        <Route path="/barista" element={<Navigate to="/barista/order-queue" replace />} />
+        <Route path="/barista/order-queue" element={<OrderQueue />} />
         <Route path="/barista/inventory" element={<Inventory />} />
 
         {/* CUSTOMER ROUTES - Mobile/User View */}

@@ -46,7 +46,7 @@ const Sidebar = ({ role }) => {
         {/* Menu Khusus Barista */}
         {role === 'barista' && (
           <>
-            <SidebarItem icon={ClipboardList} label="Order Queue" path="/barista" />
+            <SidebarItem icon={ClipboardList} label="Order Queue" path="/barista/order-queue" />
             <SidebarItem icon={Coffee} label="Inventory" path="/barista/inventory" />
             <SidebarItem icon={PieChart} label="Daily Report" path="/barista/report" />
           </>

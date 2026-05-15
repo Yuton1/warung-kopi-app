@@ -64,7 +64,7 @@ const LoginPage = () => {
       if (userRole === 'admin') {
         navigate('/admin', { replace: true })
       } else if (userRole === 'barista') {
-        navigate('/barista', { replace: true })
+        navigate('/barista/order-queue', { replace: true })
       } else {
         navigate('/', { replace: true })
       }
