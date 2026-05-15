@@ -11,6 +11,12 @@ const withTimeout = (operation, timeoutMs = 5000) => {
 };
 
 const FALLBACK_IMAGE = '/Logo_Warkop_Nav.png';
+const ORDER_STATUS = {
+  PENDING: 0,
+  PROCESSING: 1,
+  READY: 2,
+  COMPLETED: 3,
+};
 
 const parseNumber = (value, fallback = 0) => {
   const parsed = Number(value);
@@ -21,7 +27,45 @@ const normalizeText = (value) => String(value ?? '').trim();
 
 const normalizeStatus = (value) => normalizeText(value).toLowerCase();
 
+const normalizeStatusCode = (value) => {
+  const numericValue = Number(value);
+  if (Number.isFinite(numericValue)) {
+    return numericValue;
+  }
+
+  const normalized = normalizeStatus(value);
+
+  if (normalized === 'pending' || normalized === 'new' || normalized === 'menunggu' || normalized === 'pemesanan') {
+    return ORDER_STATUS.PENDING;
+  }
+
+  if (
+    normalized === 'processing' ||
+    normalized === 'proses' ||
+    normalized === 'diproses' ||
+    normalized === 'in progress'
+  ) {
+    return ORDER_STATUS.PROCESSING;
+  }
+
+  if (normalized === 'ready' || normalized === 'siap' || normalized === 'siap diambil' || normalized === 'siap_diambil') {
+    return ORDER_STATUS.READY;
+  }
+
+  if (normalized === 'completed' || normalized === 'selesai' || normalized === 'done') {
+    return ORDER_STATUS.COMPLETED;
+  }
+
+  return null;
+};
+
 const formatStatusLabel = (value) => {
+  const code = normalizeStatusCode(value);
+  if (code === ORDER_STATUS.PENDING) return 'Pending';
+  if (code === ORDER_STATUS.PROCESSING) return 'Processing';
+  if (code === ORDER_STATUS.READY) return 'Ready';
+  if (code === ORDER_STATUS.COMPLETED) return 'Completed';
+
   const normalized = normalizeStatus(value);
 
   if (!normalized) return 'Proses';
@@ -39,6 +83,12 @@ const formatStatusLabel = (value) => {
 };
 
 const statusToStep = (value) => {
+  const code = normalizeStatusCode(value);
+  if (code === ORDER_STATUS.PENDING) return 0;
+  if (code === ORDER_STATUS.PROCESSING) return 1;
+  if (code === ORDER_STATUS.READY) return 2;
+  if (code === ORDER_STATUS.COMPLETED) return 3;
+
   const normalized = normalizeStatus(value);
 
   if (normalized === 'pemesanan' || normalized === 'menunggu' || normalized === 'pending') return 0;
@@ -122,17 +172,19 @@ const resolveUserId = async ({ userId, userEmail, userName }) => {
 const buildOrderItem = (row) => {
   const quantity = parseNumber(row.quantity);
   const priceAtTime = parseNumber(row.price_at_time ?? row.priceAtTime);
+  const imageUrl = normalizeText(row.product_image || row.image_url) || FALLBACK_IMAGE;
 
   return {
     id: row.item_id ?? row.id ?? null,
     productId: row.product_id ?? null,
     name: normalizeText(row.product_name || row.name) || 'Menu',
     category: normalizeText(row.product_category || row.category) || 'Menu',
-    imageUrl: normalizeText(row.product_image || row.image_url) || FALLBACK_IMAGE,
+    imageUrl,
     quantity,
     priceAtTime,
     notes: normalizeText(row.item_notes || row.notes),
     subtotal: parseNumber(row.item_subtotal ?? row.subtotal, quantity * priceAtTime),
+    size: normalizeText(row.size || row.item_size || 'Normal') || 'Normal',
   };
 };
 
@@ -229,6 +281,126 @@ const listOrders = async ({ userId, userEmail, userName } = {}) => {
 
   const [rows] = await withTimeout(db.execute(query, [resolvedUserId]));
   return groupOrders(rows);
+};
+
+const groupBaristaOrders = (rows) => {
+  const grouped = new Map();
+
+  rows.forEach((row) => {
+    const orderId = row.order_id ?? row.id;
+
+    if (!grouped.has(orderId)) {
+      grouped.set(orderId, {
+        id: orderId,
+        userId: row.user_id ?? null,
+        customerName: normalizeText(row.customer_name || row.username || row.user_name) || 'Pelanggan',
+        groupSessionId: row.group_session_id ?? null,
+        groupCode: normalizeText(row.group_code),
+        totalAmount: parseNumber(row.total_amount ?? row.totalAmount),
+        status: formatStatusLabel(row.status),
+        statusRaw: normalizeStatusCode(row.status),
+        orderType: normalizeText(row.order_type),
+        isPreorder: Boolean(Number(row.is_preorder ?? row.isPreorder ?? 0)),
+        tableNumber: row.table_number ?? null,
+        pickupTime: row.pickup_time ?? null,
+        pickupNote: normalizeText(row.pickup_note ?? row.pickupNote),
+        createdAt: row.created_at ?? row.createdAt ?? null,
+        currentStep: statusToStep(row.status),
+        items: [],
+      });
+    }
+
+    const order = grouped.get(orderId);
+    const item = buildOrderItem(row);
+
+    if (row.item_id != null || row.product_id != null || row.product_name || row.name) {
+      order.items.push(item);
+    }
+  });
+
+  return Array.from(grouped.values()).map((order) => {
+    const totalQuantity = order.items.reduce((sum, item) => sum + parseNumber(item.quantity), 0);
+    const primaryItem = order.items[0] || {
+      id: null,
+      productId: null,
+      name: `Order #${order.id}`,
+      category: 'Menu',
+      imageUrl: FALLBACK_IMAGE,
+      quantity: totalQuantity || 1,
+      priceAtTime: order.totalAmount,
+      notes: '',
+      subtotal: order.totalAmount,
+      size: 'Normal',
+    };
+
+    return {
+      ...order,
+      totalQuantity: totalQuantity || parseNumber(primaryItem.quantity, 0),
+      primaryItem,
+      infoTime: formatOrderTime(order.pickupTime || order.createdAt),
+      infoDate: formatOrderDate(order.createdAt || order.pickupTime),
+    };
+  });
+};
+
+const listBaristaOrders = async () => {
+  const query = `
+    SELECT
+      o.id AS order_id,
+      o.user_id,
+      o.group_session_id,
+      o.total_amount,
+      o.status,
+      o.order_type,
+      o.is_preorder,
+      o.table_number,
+      o.pickup_time,
+      o.pickup_note,
+      o.created_at,
+      u.username AS customer_name,
+      u.email AS customer_email,
+      gs.group_code,
+      oi.id AS item_id,
+      oi.product_id,
+      oi.quantity,
+      oi.price_at_time,
+      oi.notes AS item_notes,
+      p.name AS product_name,
+      p.category AS product_category,
+      p.image_url AS product_image
+    FROM orders o
+    LEFT JOIN users u ON u.id = o.user_id
+    LEFT JOIN group_sessions gs ON gs.id = o.group_session_id
+    LEFT JOIN order_items oi ON oi.order_id = o.id
+    LEFT JOIN products p ON p.id = oi.product_id
+    WHERE (o.status IN (0, 1, 2) OR o.status IN ('pending', 'processing', 'ready'))
+    ORDER BY o.created_at ASC, o.id ASC, oi.id ASC
+  `;
+
+  const [rows] = await withTimeout(db.execute(query));
+  return groupBaristaOrders(rows);
+};
+
+const updateOrderStatus = async ({ orderId, status }) => {
+  const numericOrderId = Number.parseInt(orderId, 10);
+  if (!Number.isFinite(numericOrderId) || numericOrderId <= 0) {
+    const error = new Error('orderId wajib diisi');
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const nextStatus = normalizeStatusCode(status);
+  if (![ORDER_STATUS.PENDING, ORDER_STATUS.PROCESSING, ORDER_STATUS.READY].includes(nextStatus)) {
+    const error = new Error('Status pesanan tidak valid');
+    error.statusCode = 400;
+    throw error;
+  }
+
+  await withTimeout(
+    db.execute('UPDATE orders SET status = ? WHERE id = ?', [nextStatus, numericOrderId])
+  );
+
+  return listBaristaOrders();
 };
 
 const getActiveSession = async (connection, userId) => {
@@ -407,7 +579,7 @@ const createCheckoutOrder = async ({
           resolvedUserId,
           session.id,
           totalAmount,
-          'pending',
+          ORDER_STATUS.PENDING,
           normalizeText(orderType) || 'dine-in',
           isPreorder ? 1 : 0,
           tableNumber || null,
@@ -534,4 +706,7 @@ module.exports = {
   listOrders,
   statusToStep,
   createCheckoutOrder,
+  listBaristaOrders,
+  updateOrderStatus,
+  ORDER_STATUS,
 };

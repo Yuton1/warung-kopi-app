@@ -1,4 +1,9 @@
-const { listOrders, createCheckoutOrder } = require('../services/orderService');
+const {
+  listOrders,
+  createCheckoutOrder,
+  listBaristaOrders,
+  updateOrderStatus,
+} = require('../services/orderService');
 
 const getOrders = async (req, res) => {
   try {
@@ -42,7 +47,37 @@ const checkoutOrder = async (req, res) => {
   }
 };
 
+const getBaristaQueue = async (req, res) => {
+  try {
+    const orders = await listBaristaOrders();
+    res.json(orders);
+  } catch (error) {
+    res.status(500).json({
+      message: 'Gagal memuat antrean barista',
+      error: error.message,
+    });
+  }
+};
+
+const updateBaristaOrderStatus = async (req, res) => {
+  try {
+    const orders = await updateOrderStatus({
+      orderId: req.params.id,
+      status: req.body.status,
+    });
+
+    res.json(orders);
+  } catch (error) {
+    res.status(error.statusCode || 500).json({
+      message: 'Gagal memperbarui status pesanan',
+      error: error.message,
+    });
+  }
+};
+
 module.exports = {
   getOrders,
   checkoutOrder,
+  getBaristaQueue,
+  updateBaristaOrderStatus,
 };
