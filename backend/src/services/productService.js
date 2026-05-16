@@ -142,4 +142,30 @@ const removeProduct = async (id) => {
     return result.affectedRows > 0;
 };
 
-module.exports = { listProducts, getProductById, createProduct, updateProduct, removeProduct };
+const updateProductAvailability = async (id, isAvailable) => {
+    const existing = await getProductById(id);
+
+    if (!existing) {
+        const error = new Error('Produk tidak ditemukan');
+        error.statusCode = 404;
+        throw error;
+    }
+
+    const normalizedAvailability = Number(isAvailable) ? 1 : 0;
+
+    await db.execute(
+        `
+        UPDATE products
+        SET is_available = ?
+        WHERE id = ?
+        `,
+        [normalizedAvailability, id]
+    );
+
+    return {
+        ...existing,
+        is_available: normalizedAvailability,
+    };
+};
+
+module.exports = { listProducts, getProductById, createProduct, updateProduct, removeProduct, updateProductAvailability };

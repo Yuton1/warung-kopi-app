@@ -1,4 +1,11 @@
-const { listProducts, getProductById, createProduct, updateProduct, removeProduct } = require('../services/productService');
+const {
+    listProducts,
+    getProductById,
+    createProduct,
+    updateProduct,
+    removeProduct,
+    updateProductAvailability,
+} = require('../services/productService');
 
 const withTimeout = (operation, timeoutMs = 2500) => {
     let timer;
@@ -65,4 +72,13 @@ const deleteProduct = async (req, res) => {
     }
 };
 
-module.exports = { getProducts, getProduct, addProduct, editProduct, deleteProduct };
+const toggleProductAvailability = async (req, res) => {
+    try {
+        const product = await withTimeout(updateProductAvailability(req.params.id, req.body.is_available));
+        res.json(product);
+    } catch (error) {
+        res.status(error.statusCode || 500).json({ error: error.message });
+    }
+};
+
+module.exports = { getProducts, getProduct, addProduct, editProduct, deleteProduct, toggleProductAvailability };
