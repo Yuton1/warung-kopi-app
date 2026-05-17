@@ -46,11 +46,9 @@ const Profile = ({
       
       {/* Kontainer Utama Layout Split antara Deskripsi Kiri & Data Kanan */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
-        
-        {/* ================= SISI KIRI: INFORMASI UTAMA & CTA ================= */}
         <div className="lg:col-span-5 space-y-6">
           <div className="space-y-3">
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-[#ecb176]/10 border border-[#ecb176]/30 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.15em] text-[#ecb176]">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg!-[#ecb176]/10 border border-[#ecb176]/30 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.15em] text-[#ecb176]">
               <Coffee className="h-3.5 w-3.5" />
               Warung Kopi App
             </span>
