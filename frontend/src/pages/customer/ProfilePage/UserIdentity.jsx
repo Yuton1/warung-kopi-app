@@ -20,6 +20,7 @@ const Field = ({ icon: Icon, label, value }) => (
 const UserIdentity = ({ profile, loading = false, onSave }) => {
   const [isEditing, setIsEditing] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
+  const [notice, setNotice] = useState({ type: '', message: '' })
   const [formData, setFormData] = useState({ username: '', email: '', phone: '' })
 
   // Kalkulasi Level Membership berdasarkan Poin secara Akurat
@@ -40,6 +41,7 @@ const UserIdentity = ({ profile, loading = false, onSave }) => {
   }, [profile?.membershipStatus, profile?.membership_status, profile?.tier, profile?.points])
 
   useEffect(() => {
+    setNotice({ type: '', message: '' })
     setFormData({
       username: profile?.username || profile?.name || '',
       email: profile?.email || '',
@@ -53,9 +55,23 @@ const UserIdentity = ({ profile, loading = false, onSave }) => {
 
     try {
       setIsSaving(true)
-      await onSave(formData)
+      const payload = {
+        username: String(formData.username || '').trim(),
+        email: String(formData.email || '').trim(),
+        phone: String(formData.phone || '').trim(),
+      }
+
+      const result = await onSave(payload)
+      setNotice({
+        type: 'success',
+        message: result?.message || 'Nomor HP berhasil dikonfirmasi dan disimpan.',
+      })
       setIsEditing(false)
     } catch (error) {
+      setNotice({
+        type: 'error',
+        message: error?.message || 'Gagal menyimpan nomor HP.',
+      })
       console.error('Gagal memperbarui profil:', error)
     } finally {
       setIsSaving(false)
@@ -98,6 +114,18 @@ const UserIdentity = ({ profile, loading = false, onSave }) => {
         )}
       </div>
 
+      {notice.message ? (
+        <div
+          className={`mb-5 rounded-2xl px-4 py-3 text-sm font-semibold transition-all duration-300 ${
+            notice.type === 'success'
+              ? 'border border-emerald-200 bg-emerald-50 text-emerald-700'
+              : 'border border-red-200 bg-red-50 text-red-600'
+          }`}
+        >
+          {notice.message}
+        </div>
+      ) : null}
+
       {/* Konten Utama Form / Detail View */}
       <div className={`transition-all duration-500 ease-in-out ${isEditing ? 'opacity-100 transform translate-y-0' : 'opacity-100'}`}>
         {isEditing ? (
@@ -121,7 +149,10 @@ const UserIdentity = ({ profile, loading = false, onSave }) => {
                   Phone Number
                 </label>
                 <input
-                  type="text"
+                  type="tel"
+                  inputMode="tel"
+                  autoComplete="tel"
+                  pattern="[0-9+\\-\\s]*"
                   value={formData.phone}
                   onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                   className="mt-1.5 w-full rounded-xl border border-gray-200 bg-[#f8f1e8]/20 px-4 py-3 text-sm font-semibold text-[#4b3729] transition-all duration-300 focus:border-[#6b4a34] focus:outline-none focus:ring-2 focus:ring-[#6b4a34]/10"

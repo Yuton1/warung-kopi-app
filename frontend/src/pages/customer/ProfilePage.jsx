@@ -132,12 +132,35 @@ const ProfilePage = () => {
 
       const updated = responseData.user || responseData
       setProfile(updated)
+      const normalizedPhone = updated.phone || phone || ''
 
       // Segarkan status auth lokal
-      const nextAuth = { ...authUser, username: updated.username, name: updated.username, email: updated.email }
+      const nextAuth = {
+        ...authUser,
+        username: updated.username,
+        name: updated.username,
+        email: updated.email,
+        phone: normalizedPhone,
+      }
       setAuthUser(nextAuth)
       writeStoredValue(STORAGE_KEYS.auth, nextAuth)
+
+      const nextAccount = {
+        ...account,
+        name: updated.username,
+        email: updated.email,
+        phone: normalizedPhone,
+      }
+      setAccount(nextAccount)
+      writeStoredValue(STORAGE_KEYS.account, nextAccount)
+
       window.dispatchEvent(new Event('warungkopi-state-changed'))
+
+      return {
+        message: normalizedPhone
+          ? 'Nomor HP berhasil dikonfirmasi dan disimpan.'
+          : 'Profil berhasil diperbarui.',
+      }
     } catch (error) {
       console.error('Gagal update profile:', error)
       throw error
