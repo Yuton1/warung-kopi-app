@@ -62,6 +62,18 @@ const normalizeStatusCode = (value) => {
   return null;
 };
 
+const normalizeOrderType = (value) => {
+  const normalized = normalizeText(value).toLowerCase().replace(/\s+/g, '-');
+
+  if (!normalized) return 'dine-in';
+  if (normalized === 'dine_in' || normalized === 'dinein') return 'dine-in';
+  if (normalized === 'take-away' || normalized === 'takeaway' || normalized === 'take_away') return 'takeaway';
+  if (normalized === 'pre-order' || normalized === 'pre_order' || normalized === 'preorder') return 'preorder';
+  if (normalized === 'delivery' || normalized === 'antar') return 'delivery';
+
+  return normalized.slice(0, 20);
+};
+
 const formatStatusLabel = (value) => {
   const code = normalizeStatusCode(value);
   if (code === ORDER_STATUS.PENDING) return 'Pending';
@@ -205,7 +217,7 @@ const groupOrders = (rows) => {
         totalAmount: parseNumber(row.total_amount ?? row.totalAmount),
         status: formatStatusLabel(row.status),
         statusRaw: normalizeStatus(row.status),
-        orderType: normalizeText(row.order_type),
+        orderType: normalizeOrderType(row.order_type),
         isPreorder: Boolean(Number(row.is_preorder ?? row.isPreorder ?? 0)),
         tableNumber: row.table_number ?? null,
         pickupTime: row.pickup_time ?? null,
@@ -302,7 +314,7 @@ const groupBaristaOrders = (rows) => {
         totalAmount: parseNumber(row.total_amount ?? row.totalAmount),
         status: formatStatusLabel(row.status),
         statusRaw: normalizeStatusCode(row.status),
-        orderType: normalizeText(row.order_type),
+        orderType: normalizeOrderType(row.order_type),
         isPreorder: Boolean(Number(row.is_preorder ?? row.isPreorder ?? 0)),
         tableNumber: row.table_number ?? null,
         pickupTime: row.pickup_time ?? null,
@@ -586,7 +598,7 @@ const createCheckoutOrder = async ({
           session.id,
           totalAmount,
           ORDER_STATUS.PENDING,
-          normalizeText(orderType) || 'dine-in',
+          normalizeOrderType(orderType),
           isPreorder ? 1 : 0,
           tableNumber || null,
           pickupTime || null,
@@ -684,7 +696,7 @@ const createCheckoutOrder = async ({
         subtotal,
         discountAmount,
         status: ORDER_STATUS.PENDING,
-        orderType: normalizeText(orderType) || 'dine-in',
+        orderType: normalizeOrderType(orderType),
         isPreorder: Boolean(isPreorder),
         tableNumber: tableNumber || null,
         pickupTime: pickupTime || null,

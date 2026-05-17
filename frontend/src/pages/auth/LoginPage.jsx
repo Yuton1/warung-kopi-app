@@ -48,6 +48,9 @@ const LoginPage = () => {
         name: user.username,
         role: userRole,
         email: user.email,
+        phone: user.phone || '',
+        membership_status: user.membership_status || '',
+        points: user.points || 0,
         mode: 'login',
         loggedInAt: new Date().toISOString(),
       }

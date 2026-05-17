@@ -13,10 +13,14 @@ const orderRoutes = require('./src/routes/orderRoutes');
 const cartRoutes = require('./src/routes/cartRoutes');
 const adminRoutes = require('./src/routes/adminRoutes');
 const ensureProductImageColumn = require('./src/migrations/ensureProductImageColumn');
+const ensureUserProfileColumns = require('./src/migrations/ensureUserProfileColumns');
+const ensureOrderTypeColumn = require('./src/migrations/ensureOrderTypeColumn');
 
 // Import database pool
 require('./src/config/db');
 ensureProductImageColumn();
+ensureUserProfileColumns();
+ensureOrderTypeColumn();
 
 const app = express();
 

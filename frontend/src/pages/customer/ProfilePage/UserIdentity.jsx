@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Mail, Pencil, Phone, UserRound, Loader2, Save, X } from 'lucide-react'
 
 const Field = ({ icon: Icon, label, value }) => (
@@ -11,60 +11,44 @@ const Field = ({ icon: Icon, label, value }) => (
         <label className="mb-1 block text-[10px] font-bold uppercase tracking-[0.16em] text-[#8c7661]">
           {label}
         </label>
-        <span className="text-sm font-semibold text-[#4b3729]">{value}</span>
+        <span className="text-sm font-semibold text-[#4b3729]">{value || '-'}</span>
       </div>
     </div>
   </div>
 )
 
-// Menghapus parameter props statik karena kita akan fetch langsung dari user session / API
-const UserIdentity = () => {
-  const [user, setUser] = useState(null)
-  const [loading, setLoading] = useState(true)
+const UserIdentity = ({ profile, loading = false, onSave }) => {
   const [isEditing, setIsEditing] = useState(false)
-  
-  // State form untuk menampung inputan baru saat mengedit data profil
-  const [formData, setFormData] = useState({ name: '', email: '', phone: '' })
+  const [isSaving, setIsSaving] = useState(false)
+  const [formData, setFormData] = useState({ username: '', email: '', phone: '' })
 
-  // 1. Ambil data user aktif dari tabel 'users' saat komponen dimuat
+  const membershipLabel = useMemo(() => {
+    return profile?.membershipStatus || profile?.membership_status || 'Bronze Member'
+  }, [profile?.membershipStatus, profile?.membership_status])
+
   useEffect(() => {
-    fetchUserProfile()
-  }, [])
+    setFormData({
+      username: profile?.username || profile?.name || '',
+      email: profile?.email || '',
+      phone: profile?.phone || '',
+    })
+  }, [profile])
 
-  const fetchUserProfile = async () => {
-    try {
-      setLoading(true)
-      // Gunakan endpoint profile atau sesuaikan berdasarkan mekanisme auth/session kamu
-      const response = await fetch('/api/user/profile') 
-      const data = await response.json()
-      
-      setUser(data)
-      setFormData({ name: data.name, email: data.email, phone: data.phone || '' })
-    } catch (error) {
-      console.error("Gagal memuat identitas pengguna:", error)
-    } finally {
-      setLoading(false)
+  const handleSubmit = async (event) => {
+    event.preventDefault()
+
+    if (!onSave) {
+      return
     }
-  }
 
-  // 2. Kirim update perubahan data ke database TiDB
-  const handleUpdateProfile = async (e) => {
-    e.preventDefault()
     try {
-      // Query di Backend: UPDATE users SET name = ?, email = ?, phone = ? WHERE Id = ?
-      const response = await fetch('/api/user/profile', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
-      })
-
-      if (response.ok) {
-        const updatedUser = await response.json()
-        setUser(updatedUser)
-        setIsEditing(false)
-      }
+      setIsSaving(true)
+      await onSave(formData)
+      setIsEditing(false)
     } catch (error) {
-      console.error("Gagal memperbarui profil:", error)
+      console.error('Gagal memperbarui profil:', error)
+    } finally {
+      setIsSaving(false)
     }
   }
 
@@ -89,33 +73,38 @@ const UserIdentity = () => {
             <p>Your personal information</p>
           </div>
         </div>
-        {!isEditing && (
-          <button 
-            type="button" 
-            onClick={() => setIsEditing(true)} 
+
+        {!isEditing ? (
+          <button
+            type="button"
+            onClick={() => setIsEditing(true)}
             className="card-action"
           >
             <Pencil className="h-[14px] w-[14px]" />
             Edit
           </button>
-        )}
+        ) : null}
       </div>
 
       {isEditing ? (
-        /* Form interaktif untuk edit data profil */
-        <form onSubmit={handleUpdateProfile} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="text-xs font-bold text-[#8c7661] uppercase tracking-wider pl-1">Full Name</label>
+            <label className="pl-1 text-xs font-bold uppercase tracking-wider text-[#8c7661]">
+              Full Name
+            </label>
             <input
               type="text"
-              value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              value={formData.username}
+              onChange={(e) => setFormData({ ...formData, username: e.target.value })}
               className="mt-1 w-full rounded-xl border border-gray-200 bg-[#f8f1e8]/30 px-4 py-3 text-sm font-semibold text-[#4b3729] focus:outline-none focus:ring-2 focus:ring-[#6b4a34]"
               required
             />
           </div>
+
           <div>
-            <label className="text-xs font-bold text-[#8c7661] uppercase tracking-wider pl-1">Email Address</label>
+            <label className="pl-1 text-xs font-bold uppercase tracking-wider text-[#8c7661]">
+              Email Address
+            </label>
             <input
               type="email"
               value={formData.email}
@@ -124,48 +113,57 @@ const UserIdentity = () => {
               required
             />
           </div>
+
           <div>
-            <label className="text-xs font-bold text-[#8c7661] uppercase tracking-wider pl-1">Phone Number</label>
+            <label className="pl-1 text-xs font-bold uppercase tracking-wider text-[#8c7661]">
+              Phone Number
+            </label>
             <input
               type="text"
               value={formData.phone}
               onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
               className="mt-1 w-full rounded-xl border border-gray-200 bg-[#f8f1e8]/30 px-4 py-3 text-sm font-semibold text-[#4b3729] focus:outline-none focus:ring-2 focus:ring-[#6b4a34]"
+              placeholder="Contoh: 08xxxxxxxxxx"
             />
           </div>
 
           <div className="flex gap-2 pt-2">
             <button
               type="submit"
-              className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-[#6b4a34] py-2.5 text-xs font-bold text-white shadow-sm hover:bg-[#543926] transition-all"
+              disabled={isSaving}
+              className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-[#6b4a34] py-2.5 text-xs font-bold text-white shadow-sm transition-all hover:bg-[#543926] disabled:cursor-not-allowed disabled:opacity-70"
             >
-              <Save className="h-3.5 w-3.5" /> Simpan
+              {isSaving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />}
+              Simpan
             </button>
             <button
               type="button"
               onClick={() => {
                 setIsEditing(false)
-                setFormData({ name: user.name, email: user.email, phone: user.phone || '' })
+                setFormData({
+                  username: profile?.username || profile?.name || '',
+                  email: profile?.email || '',
+                  phone: profile?.phone || '',
+                })
               }}
-              className="flex items-center justify-center rounded-xl bg-gray-100 px-3 py-2.5 text-xs font-bold text-gray-500 hover:bg-gray-200 transition-all"
+              className="flex items-center justify-center rounded-xl bg-gray-100 px-3 py-2.5 text-xs font-bold text-gray-500 transition-all hover:bg-gray-200"
             >
               <X className="h-4 w-4" />
             </button>
           </div>
         </form>
       ) : (
-        /* Tampilan Utama Mode Read-Only */
         <div className="space-y-4">
-          <Field icon={UserRound} label="Full Name" value={user?.name || '-'} />
-          <Field icon={Mail} label="Email Address" value={user?.email || '-'} />
-          <Field icon={Phone} label="Phone Number" value={user?.phone || '-'} />
+          <Field icon={UserRound} label="Full Name" value={profile?.username || profile?.name} />
+          <Field icon={Mail} label="Email Address" value={profile?.email} />
+          <Field icon={Phone} label="Phone Number" value={profile?.phone} />
 
           <div className="rounded-2xl bg-[#f8f1e8] px-4 py-4">
             <label className="mb-1 block text-[10px] font-bold uppercase tracking-[0.16em] text-[#8c7661]">
               Membership Status
             </label>
             <span className="inline-flex items-center gap-2 rounded-full bg-[#c9a96e] px-3 py-1 text-xs font-bold text-[#3a2a1e]">
-              {user?.membership_status || 'Gold Member'}
+              {membershipLabel}
             </span>
           </div>
         </div>

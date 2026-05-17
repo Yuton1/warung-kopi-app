@@ -20,7 +20,10 @@ router.post('/login', async (req, res) => {
   try {
     // Ambil data user beserta role-nya
     const [rows] = await withTimeout(
-      db.query('SELECT id, username, email, password, role FROM users WHERE email = ?', [email])
+      db.query(
+        'SELECT id, username, email, password, role, points, phone, membership_status FROM users WHERE email = ?',
+        [email]
+      )
     );
     
     if (rows.length === 0) return res.status(401).json({ message: "User tidak ditemukan" });
@@ -36,7 +39,10 @@ router.post('/login', async (req, res) => {
         id: user.id,
         username: user.username,
         email: user.email,
-        role: user.role // Ini yang akan dibaca LoginPage.jsx
+        role: user.role,
+        points: user.points,
+        phone: user.phone,
+        membership_status: user.membership_status, // Ini yang akan dibaca LoginPage.jsx
       },
       token: "dummy-token-ahsan" // Sesuaikan dengan JWT jika kamu pakai
     });
