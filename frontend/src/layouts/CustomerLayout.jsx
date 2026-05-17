@@ -4,10 +4,12 @@ import CustomerNavbar from '../components/CustomerNavbar'
 
 const CustomerLayout = () => {
   return (
-    <div className="app-shell flex flex-col min-h-screen bg-[#F5EBE0]">
+    // Jika warna krem latar belakang ingin diganti abu-abu terang bersih, ubah bg-[#F5EBE0] menjadi bg-[#F8F9FA]
+    <div className="app-shell flex flex-col min-h-screen bg-[#F8F9FA]">
       <CustomerNavbar />
       <main className="flex-grow w-full">
-        <div className="mx-auto w-full max-w-[1860px] px-4 sm:px-6 lg:px-8 py-8">
+        {/* KUNCI: Menghilangkan px-4 sm:px-6 lg:px-8 py-8 agar halaman bisa nempel mentok ke ujung layar */}
+        <div className="mx-auto w-full max-w-[1860px]">
           <Outlet />
         </div>
       </main>
