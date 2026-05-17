@@ -150,15 +150,22 @@ const ProfilePage = () => {
     loadProfile()
   }, [authUser?.email, navigate])
 
-  const displayName = normalizeText(profile?.username || profile?.name || authUser?.name || account?.name || 'Tamu Warung Kopi')
+  const displayName = normalizeText(
+    profile?.username ||
+      profile?.name ||
+      authUser?.username ||
+      authUser?.name ||
+      account?.name ||
+      'Tamu Warung Kopi'
+  )
   const displayEmail = normalizeText(profile?.email || authUser?.email || account?.email || 'Belum login')
   const displayPhone = normalizeText(profile?.phone || account?.phone || '-')
   const displayAddress = normalizeText(
     account?.address || 'Jl. Raya Tlogomas No. 246, Kec. Lowokwaru, Kota Malang'
   )
 
-  const loyaltyPoints = parseNumber(profile?.points ?? loyalty?.points, defaultLoyalty.points)
-  const memberTier = profile?.membership_status || profile?.membershipStatus || loyalty?.tier || tierFromPoints(loyaltyPoints)
+  const points = parseNumber(profile?.points ?? loyalty?.points, defaultLoyalty.points)
+  const memberTier = profile?.membership_status || profile?.membershipStatus || loyalty?.tier || tierFromPoints(points)
   const memberCode = normalizeText(profile?.id ? `WK-${String(profile.id).padStart(4, '0')}` : loyalty?.memberId || defaultLoyalty.memberId)
   const memberSince = profile?.created_at ? formatMemberSince(profile.created_at) : normalizeText(loyalty?.memberSince || defaultLoyalty.memberSince)
   const validThrough = normalizeText(loyalty?.validThrough || defaultLoyalty.validThrough)
@@ -172,19 +179,19 @@ const ProfilePage = () => {
       memberCode,
       memberSince,
       validThrough,
-      points: loyaltyPoints,
-      pointsTarget: Math.max(loyaltyPoints + 910, 3250),
+      points,
+      pointsTarget: Math.max(points + 910, 3250),
     }),
-    [displayName, loyaltyPoints, memberCode, memberSince, memberTier, validThrough]
+    [displayName, points, memberCode, memberSince, memberTier, validThrough]
   )
 
   const stats = useMemo(
     () => [
       { value: totalOrders, label: 'Total Orders' },
-      { value: loyaltyPoints, label: 'Loyalty Points' },
+      { value: points, label: 'Points' },
       { value: rewardsUsed, label: 'Rewards Used' },
     ],
-    [loyaltyPoints, rewardsUsed, totalOrders]
+    [points, rewardsUsed, totalOrders]
   )
 
   const addresses = useMemo(
@@ -254,6 +261,7 @@ const ProfilePage = () => {
 
       const nextAuth = {
         ...(authUser || {}),
+        username: updatedProfile.username || username,
         name: updatedProfile.username || updatedProfile.name || username,
         email: updatedProfile.email || email,
       }
@@ -272,7 +280,7 @@ const ProfilePage = () => {
 
       const nextLoyalty = {
         ...(loyalty || defaultLoyalty),
-        points: parseNumber(updatedProfile.points, loyaltyPoints),
+        points: parseNumber(updatedProfile.points, points),
         totalOrders: parseNumber(updatedProfile.total_orders, totalOrders),
         memberSince: updatedProfile.created_at || loyalty?.memberSince || '',
         memberId: updatedProfile.id ? `WK-${String(updatedProfile.id).padStart(4, '0')}` : memberCode,
@@ -396,7 +404,14 @@ const ProfilePage = () => {
       <main className="mx-auto mt-10 max-w-7xl px-6 lg:px-8">
         <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
           <UserIdentity
-            profile={profile || { username: displayName, email: displayEmail, phone: displayPhone, membershipStatus: memberTier }}
+            profile={
+              profile || {
+                username: displayName,
+                email: displayEmail,
+                phone: displayPhone,
+                membershipStatus: memberTier,
+              }
+            }
             loading={false}
             onSave={handleSaveProfile}
           />

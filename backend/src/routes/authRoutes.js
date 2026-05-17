@@ -21,7 +21,7 @@ router.post('/login', async (req, res) => {
     // Ambil data user beserta role-nya
     const [rows] = await withTimeout(
       db.query(
-        'SELECT id, username, email, password, role, points, phone, membership_status FROM users WHERE email = ?',
+        'SELECT id, username, email, password, role, points, phone, membership_status, created_at FROM users WHERE email = ?',
         [email]
       )
     );
@@ -43,6 +43,7 @@ router.post('/login', async (req, res) => {
         points: user.points,
         phone: user.phone,
         membership_status: user.membership_status, // Ini yang akan dibaca LoginPage.jsx
+        created_at: user.created_at,
       },
       token: "dummy-token-ahsan" // Sesuaikan dengan JWT jika kamu pakai
     });

@@ -45,12 +45,14 @@ const LoginPage = () => {
       const userRole = user.role
 
       const authUser = {
+        username: user.username,
         name: user.username,
         role: userRole,
         email: user.email,
         phone: user.phone || '',
         membership_status: user.membership_status || '',
         points: user.points || 0,
+        created_at: user.created_at || '',
         mode: 'login',
         loggedInAt: new Date().toISOString(),
       }

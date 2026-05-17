@@ -23,6 +23,15 @@ const defaultMembership = {
 
 const normalizeText = (value) => String(value ?? '').trim()
 
+const formatMemberSince = (value) => {
+  if (!value) return 'Baru bergabung'
+
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return normalizeText(value)
+
+  return date.toLocaleDateString('id-ID', { year: 'numeric', month: 'long' })
+}
+
 const parseNumber = (value, fallback = 0) => {
   const parsed = Number(value)
   return Number.isFinite(parsed) ? parsed : fallback
@@ -71,11 +80,17 @@ const MemberPage = () => {
         membershipSource?.points > 0
       )
   )
-  const displayName = normalizeText(authUser?.name || account?.name || 'Tamu Warung Kopi')
+  const displayName = normalizeText(authUser?.username || authUser?.name || account?.name || 'Tamu Warung Kopi')
   const displayEmail = normalizeText(authUser?.email || account?.email || 'Belum login')
-  const loyaltyPoints = parseNumber(membershipSource?.points, defaultMembership.points)
-  const memberTier = membershipSource?.tier || tierFromPoints(loyaltyPoints)
-  const memberSince = normalizeText(membershipSource?.memberSince || membershipSource?.startedAt || '')
+  const points = parseNumber(membershipSource?.points, defaultMembership.points)
+  const memberTier = membershipSource?.tier || tierFromPoints(points)
+  const memberSince = formatMemberSince(
+    membershipSource?.created_at ||
+      authUser?.created_at ||
+      membershipSource?.memberSince ||
+      membershipSource?.startedAt ||
+      ''
+  )
   const validThrough = normalizeText(membershipSource?.validThrough || membershipSource?.expiresAt || '')
   const memberCode = normalizeText(membershipSource?.memberId || membershipSource?.memberCode || '')
 
@@ -84,11 +99,11 @@ const MemberPage = () => {
       name: displayName,
       email: displayEmail,
       tier: memberTier,
-      points: loyaltyPoints,
-      pointsTarget: Math.max(loyaltyPoints + 910, 3250),
+      points,
+      pointsTarget: Math.max(points + 910, 3250),
       totalOrders: parseNumber(membershipSource?.totalOrders, defaultMembership.totalOrders),
       rewardsUsed: parseNumber(membershipSource?.rewardsUsed, defaultMembership.rewardsUsed),
-      memberSince: memberSince || 'Baru bergabung',
+      memberSince,
       validThrough: validThrough || 'Tidak ada tanggal kedaluwarsa',
       memberCode: memberCode || 'WK-NEW',
       initials: displayName
@@ -101,7 +116,7 @@ const MemberPage = () => {
     [
       displayEmail,
       displayName,
-      loyaltyPoints,
+      points,
       memberCode,
       memberSince,
       memberTier,
@@ -114,7 +129,7 @@ const MemberPage = () => {
   const heroStats = useMemo(
     () => [
       { label: 'Total Orders', value: memberInfo.totalOrders, icon: Wallet },
-      { label: 'Loyalty Points', value: memberInfo.points, icon: Star },
+      { label: 'Points', value: memberInfo.points, icon: Star },
       { label: 'Rewards Used', value: memberInfo.rewardsUsed, icon: Ticket },
     ],
     [memberInfo.points, memberInfo.rewardsUsed, memberInfo.totalOrders]

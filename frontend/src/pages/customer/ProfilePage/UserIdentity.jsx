@@ -23,8 +23,23 @@ const UserIdentity = ({ profile, loading = false, onSave }) => {
   const [formData, setFormData] = useState({ username: '', email: '', phone: '' })
 
   const membershipLabel = useMemo(() => {
-    return profile?.membershipStatus || profile?.membership_status || 'Bronze Member'
-  }, [profile?.membershipStatus, profile?.membership_status])
+    const status =
+      profile?.membershipStatus ||
+      profile?.membership_status ||
+      profile?.tier ||
+      profile?.role ||
+      ''
+
+    if (status) {
+      return status
+    }
+
+    const points = Number(profile?.points || 0)
+    if (points >= 3000) return 'Platinum Member'
+    if (points >= 1500) return 'Gold Member'
+    if (points >= 500) return 'Silver Member'
+    return 'Bronze Member'
+  }, [profile?.membershipStatus, profile?.membership_status, profile?.points, profile?.role, profile?.tier])
 
   useEffect(() => {
     setFormData({
@@ -165,6 +180,9 @@ const UserIdentity = ({ profile, loading = false, onSave }) => {
             <span className="inline-flex items-center gap-2 rounded-full bg-[#c9a96e] px-3 py-1 text-xs font-bold text-[#3a2a1e]">
               {membershipLabel}
             </span>
+            <p className="mt-2 text-[11px] leading-5 text-[#8c7661]">
+              Points: {Number(profile?.points || 0).toLocaleString('id-ID')}
+            </p>
           </div>
         </div>
       )}
