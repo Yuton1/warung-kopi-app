@@ -163,7 +163,7 @@ const ProfilePage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#F8F9FA] font-['Fredoka'] p-4 sm:p-6 lg:p-10 space-y-8 max-w-7xl mx-auto">
+    <div className="min-h-screen bg-[#F8F9FA] font-['Fredoka'] p-4 sm:p-6 lg:p-10 space-y-8 mx-auto">
       
       {/* 1. SEKTOR HEADER: Menggunakan Komponen Utama Profile Cokelat Premium */}
       <Profile
