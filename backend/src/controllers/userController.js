@@ -2,6 +2,10 @@ const {
   listUsers,
   getUserProfile,
   updateUserProfile,
+  listUserAddresses,
+  addUserAddress,
+  setDefaultUserAddress,
+  deleteUserAddress,
 } = require('../services/userService');
 
 const getUsers = async (req, res) => {
@@ -55,8 +59,84 @@ const updateCurrentUserProfile = async (req, res) => {
   }
 };
 
+const getUserAddresses = async (req, res) => {
+  try {
+    const addresses = await listUserAddresses({
+      userId: req.query.userId || req.body?.userId,
+      userEmail: req.query.email || req.body?.email,
+      userName: req.query.userName || req.body?.userName,
+    });
+
+    return res.json(addresses);
+  } catch (error) {
+    return res.status(error.statusCode || 500).json({ message: error.message });
+  }
+};
+
+const createUserAddress = async (req, res) => {
+  try {
+    const address = await addUserAddress({
+      userId: req.body?.userId || req.query?.userId,
+      userEmail: req.body?.email || req.query?.email,
+      userName: req.body?.userName || req.query?.userName,
+      label: req.body?.label,
+      type: req.body?.type,
+      address: req.body?.address,
+      phone: req.body?.phone,
+      isDefault: req.body?.is_default ?? req.body?.isDefault,
+    });
+
+    return res.status(201).json({
+      message: 'Alamat berhasil disimpan',
+      address,
+    });
+  } catch (error) {
+    return res.status(error.statusCode || 500).json({ message: error.message });
+  }
+};
+
+const updateDefaultUserAddress = async (req, res) => {
+  try {
+    const result = await setDefaultUserAddress({
+      addressId: req.params.addressId,
+      userId: req.body?.userId || req.query?.userId,
+      userEmail: req.body?.email || req.query?.email,
+      userName: req.body?.userName || req.query?.userName,
+    });
+
+    return res.json({
+      message: 'Alamat default berhasil diperbarui',
+      address: result,
+    });
+  } catch (error) {
+    return res.status(error.statusCode || 500).json({ message: error.message });
+  }
+};
+
+const removeUserAddress = async (req, res) => {
+  try {
+    const result = await deleteUserAddress({
+      addressId: req.params.addressId,
+      userId: req.body?.userId || req.query?.userId,
+      userEmail: req.body?.email || req.query?.email,
+      userName: req.body?.userName || req.query?.userName,
+    });
+
+    return res.json({
+      message: 'Alamat berhasil dihapus',
+      address: result,
+    });
+  } catch (error) {
+    return res.status(error.statusCode || 500).json({ message: error.message });
+  }
+};
+
 module.exports = {
   getUsers,
   getCurrentUserProfile,
   updateCurrentUserProfile,
+  getUserAddresses,
+  createUserAddress,
+  updateDefaultUserAddress,
+  removeUserAddress,
 };

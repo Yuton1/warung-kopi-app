@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Loader2 } from 'lucide-react'
 import { STORAGE_KEYS, readStoredValue, writeStoredValue } from '../../data/customerStorage'
+import { getApiBaseUrl } from '../../utils/apiBaseUrl'
 
 // IMPORT SUB-KOMPONEN DARI FOLDER ProfilePage
 import Profile from './ProfilePage/Profile'
@@ -12,11 +13,17 @@ import MembershipCard from './ProfilePage/MembershipCard'
 
 const defaultAccount = { mode: 'login', name: '', email: '', phone: '', address: '', city: 'Malang' }
 const defaultLoyalty = { points: 0, rewardsUsed: 0, totalOrders: 0, memberSince: '', memberId: '', tier: 'Bronze' }
+const API_BASE_URL = getApiBaseUrl()
 
 const normalizeText = (value) => String(value ?? '').trim()
 const parseNumber = (value, fallback = 0) => {
   const parsed = Number(value)
   return Number.isFinite(parsed) ? parsed : fallback
+}
+
+const apiUrl = (path) => {
+  if (!API_BASE_URL) return path
+  return `${API_BASE_URL}${path.startsWith('/') ? path : `/${path}`}`
 }
 
 const ProfilePage = () => {
@@ -51,7 +58,7 @@ const ProfilePage = () => {
     if (!userId) return
     try {
       setLoadingAddresses(true)
-      const response = await fetch(`/api/users/addresses?userId=${userId}`)
+      const response = await fetch(apiUrl(`/api/users/addresses?userId=${userId}`))
       if (response.ok) {
         const data = await response.json()
         setAddresses(data)
@@ -75,7 +82,7 @@ const ProfilePage = () => {
 
       try {
         setLoading(true)
-        const response = await fetch(`/api/users/me?email=${encodeURIComponent(email)}`)
+        const response = await fetch(apiUrl(`/api/users/me?email=${encodeURIComponent(email)}`))
 
         if (response.status === 401 || response.status === 404) {
           window.localStorage.removeItem(STORAGE_KEYS.auth)
@@ -176,7 +183,7 @@ const ProfilePage = () => {
   // ACTION HANDLERS INTERAKSI DATABASE
   const handleSaveProfile = async ({ username, email, phone }) => {
     try {
-      const response = await fetch('/api/users/me', {
+      const response = await fetch(apiUrl('/api/users/me'), {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId: profile?.id, email, username, phone }),
@@ -199,7 +206,7 @@ const ProfilePage = () => {
 
   const handleAddAddress = async (addressForm) => {
     try {
-      const response = await fetch('/api/users/addresses', {
+      const response = await fetch(apiUrl('/api/users/addresses'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...addressForm, userId: profile?.id })
@@ -214,7 +221,7 @@ const ProfilePage = () => {
 
   const handleSetDefaultAddress = async (addressId) => {
     try {
-      const response = await fetch(`/api/users/addresses/${addressId}/default`, {
+      const response = await fetch(apiUrl(`/api/users/addresses/${addressId}/default`), {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId: profile?.id })
@@ -228,7 +235,7 @@ const ProfilePage = () => {
 
   const handleDeleteAddress = async (addressId) => {
     try {
-      const response = await fetch(`/api/users/addresses/${addressId}`, {
+      const response = await fetch(apiUrl(`/api/users/addresses/${addressId}`), {
         method: 'DELETE'
       })
       if (!response.ok) throw new Error('Gagal menghapus alamat')

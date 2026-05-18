@@ -7,6 +7,21 @@ const iconMap = {
   other: MapPin,
 }
 
+const formatCreatedAt = (value) => {
+  if (!value) return ''
+
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return String(value)
+
+  return new Intl.DateTimeFormat('id-ID', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  }).format(date)
+}
+
 const AddressItem = ({ address, onSetDefault, onDelete }) => {
   const Icon = iconMap[address.type] || MapPin
   const [showMenu, setShowMenu] = useState(false)
@@ -76,6 +91,12 @@ const AddressItem = ({ address, onSetDefault, onDelete }) => {
         <Phone className="h-3.5 w-3.5 text-[#6b4a34]" />
         {address.phone}
       </div>
+
+      {address.created_at ? (
+        <p className="mt-3 text-[11px] text-gray-400">
+          Disimpan {formatCreatedAt(address.created_at)}
+        </p>
+      ) : null}
     </div>
   )
 }
