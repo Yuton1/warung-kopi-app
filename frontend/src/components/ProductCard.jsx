@@ -1,3 +1,4 @@
+import { Heart } from 'lucide-react';
 import { formatRupiah } from '../utils/formatRupiah';
 
 const ProductCard = ({
@@ -39,23 +40,26 @@ const ProductCard = ({
           )}
         </div>
 
-        {/* --- TOMBOL FAVORIT LOVE (Kanan Atas) --- */}
+        {/* --- TOMBOL FAVORIT LOVE LUCIDE (Kanan Atas) --- */}
         <button
           type="button"
           onClick={(e) => {
             e.stopPropagation(); // Mencegah terpicunya fungsi navigasi onViewDetail card utama
             onToggleFavorite(product.id);
           }}
-          className="absolute top-5 right-5 z-20 bg-white/40 backdrop-blur-md hover:bg-white/60 p-2.5 rounded-full transition-all duration-300 hover:scale-110 active:scale-90 shadow-md border border-white/20 group/fav"
+          className="absolute top-5 right-5 z-20 p-2.5 transition-all duration-300 hover:scale-110 active:scale-90 shadow-mdgroup/fav flex items-center justify-center"
           title={isFavorite ? "Hapus dari Favorit" : "Tambah ke Favorit"}
         >
-          <i 
-            className={`fa-solid fa-heart text-2xl drop-shadow-sm transition-all duration-300 ${
+          <Heart 
+            size={24}
+            className={`transition-all duration-300 drop-shadow-sm ${
               isFavorite 
                 ? 'text-[#FF0000] scale-105' 
-                : 'text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)] group-hover/fav:text-red-400'
+                : 'text-white group-hover/fav:text-red-400'
             }`}
-          ></i>
+            fill={isFavorite ? '#FF0000' : 'transparent'}
+            strokeWidth={isFavorite ? 0 : 2.5}
+          />
         </button>
 
         {/* Gambar Menu */}
