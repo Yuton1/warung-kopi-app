@@ -4,7 +4,7 @@ const Recommendations = ({ items = [] }) => {
   const safeItems = Array.isArray(items) ? items : [];
 
   // Tetap terjaga agar komponen tidak hilang jika data di bawah 6
-  if (safeItems.length < 1) return null;
+  if (safeItems.length < 6) return null;
 
   return (
     // SOLUSI TERLALU KE TENGAH: px disesuaikan agar serasi dengan layout utama tanpa batasan max-w kaku

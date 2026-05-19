@@ -373,17 +373,33 @@ const MenuView = () => {
               emptyMessage={emptyMessage}
             />
           </section>
+          {/* FIX UI/UX ASTETIK: Menghilangkan grid menyamping, diganti berderet ke bawah dengan max-w proporsional */}
+          <section className="w-full bg-transparent pb-20 mt-16" id="tools">
+            <div className="pl-4 mb-10 border-l-4 border-[#FF6E00]">
+              <span className="text-xs font-semibold text-[#FF6E00] uppercase tracking-widest block mb-1">
+                Exclusive Utilities
+              </span>
+              <h2 className="text-3xl md:text-4xl font-black text-[#4A3728] tracking-tight">
+                Fitur Spesial
+              </h2>
+            </div>
 
-          {/* FIX KUNCI: px-6 lg:px-12 dihapus dari sini karena sudah ditangani global oleh CustomerLayout */}
-          {/* FIX KUNCI: Class "panel" dihapus dan diganti bg-transparent agar latar putih/krem raksasa hilang total */}
-          <section className="w-full bg-transparent pb-20 mt-10" id="tools">
-            <h2 className="text-3xl font-bold mb-10 text-[#4A3728] pl-4 border-l-4 border-[#FF6E00]">
-              Fitur Spesial
-            </h2>
-            
-            {/* Grid disesuaikan menjadi 1 kolom di mobile dan 2 kolom seimbang di desktop */}
-            <div className="tools-grid grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <div className="w-full">
+            {/* Inject style animasi smooth khusus untuk deretan kartu fitur */}
+            <style>{`
+              @keyframes featureSlideUp {
+                from { opacity: 0; transform: translateY(20px); }
+                to { opacity: 1; transform: translateY(0); }
+              }
+              .fitur-item-wrapper {
+                animation: featureSlideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+              }
+            `}</style>
+
+            {/* Kontainer Utama: Berderet ke bawah, rapi, dan seimbang */}
+            <div className="w-full flex flex-col gap-8 px-2">
+
+              {/* 1. Pre-Order Section */}
+              <div className="fitur-item-wrapper bg-white rounded-[2.5rem] shadow-[0_4px_25px_-5px_rgba(74,52,46,0.06)] hover:shadow-[0_15px_35px_-5px_rgba(74,52,46,0.12)] transition-all duration-300 hover:-translate-y-1 overflow-hidden" style={{ animationDelay: '100ms' }}>
                 <PreOrderSection 
                   hasCart={cart.length > 0} 
                   preOrder={preOrder} 
@@ -391,8 +407,9 @@ const MenuView = () => {
                   onCancel={cancelPreOrder} 
                 />
               </div>
-                 
-              <div className="w-full">
+
+              {/* 2. Group Order Section */}
+              <div className="fitur-item-wrapper bg-white rounded-[2.5rem] shadow-[0_4px_25px_-5px_rgba(74,52,46,0.06)] hover:shadow-[0_15px_35px_-5px_rgba(74,52,46,0.12)] transition-all duration-300 hover:-translate-y-1 overflow-hidden" style={{ animationDelay: '200ms' }}>
                 <GroupOrderSection 
                   groupOrder={groupOrder} 
                   hasCart={cart.length > 0}
@@ -402,7 +419,8 @@ const MenuView = () => {
                 />
               </div>
             
-              <div className="w-full">
+              {/* 3. Coffee Subscription */}
+              <div className="fitur-item-wrapper bg-white rounded-[2.5rem] shadow-[0_4px_25px_-5px_rgba(74,52,46,0.06)] hover:shadow-[0_15px_35px_-5px_rgba(74,52,46,0.12)] transition-all duration-300 hover:-translate-y-1 overflow-hidden" style={{ animationDelay: '300ms' }}>
                 <CoffeeSubscription 
                   plans={subscriptionPlans} 
                   activeId={activeSub?.id} 
@@ -410,13 +428,15 @@ const MenuView = () => {
                 />
               </div>
             
-              <div className="w-full">
+              {/* 4. Analytics Dashboard */}
+              <div className="fitur-item-wrapper bg-white rounded-[2.5rem] shadow-[0_4px_25px_-5px_rgba(74,52,46,0.06)] hover:shadow-[0_15px_35px_-5px_rgba(74,52,46,0.12)] transition-all duration-300 hover:-translate-y-1 overflow-hidden" style={{ animationDelay: '400ms' }}>
                 <AnalyticsDashboard 
                   monthlySpend={monthlySpend} 
                   favoriteCoffee={favoriteCoffee} 
                   planStatus={planStatus} 
                 />
               </div>
+            
             </div>
           </section>
         </main>
