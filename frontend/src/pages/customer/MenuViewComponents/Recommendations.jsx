@@ -1,42 +1,61 @@
+import React from 'react';
+
 const Recommendations = ({ items = [] }) => {
   const safeItems = Array.isArray(items) ? items : [];
 
-  // Sesuai permintaan Anda: Jika menu kurang dari 6, jangan tampilkan apa pun
-  if (safeItems.length < 6) return null;
+  // Tetap terjaga agar komponen tidak hilang jika data di bawah 6
+  if (safeItems.length < 1) return null;
 
   return (
-    // Mengubah px-6 menjadi px-2 (atau px-0 jika ingin nempel rata) agar tidak terlalu menjorok ke tengah
-    <section className="w-full px-2 py-10 font-['Fredoka']">
+    // SOLUSI TERLALU KE TENGAH: px disesuaikan agar serasi dengan layout utama tanpa batasan max-w kaku
+    <section className="w-full px-4 md:px-8 py-10 font-fredoka">
       <div className="w-full">
-        {/* Header Section - Rata kiri selaras dengan pembungkus luarnya */}
-        <div className="mb-8 pl-2">
-          <span className="text-[12px] font-medium text-gray-400 uppercase tracking-widest block mb-1">
-            Personal Suggestions
+        
+        {/* Header Section - Rata Kiri Estetik */}
+        <div className="mb-8 pl-1">
+          <span className="text-xs font-semibold text-[#a6a6a6] uppercase tracking-widest block mb-2">
+          Personal Suggestions
           </span>
-          <h2 className="text-3xl md:text-4xl font-extrabold text-[#4A3728] tracking-tight">
+          <h2 className="text-3xl md:text-4xl font-black text-[#4a342e] tracking-tight">
             Rekomendasi Untuk Kamu
           </h2>
         </div>
 
-        {/* Grid Display - Responsif: 1 kolom di HP, 2 di tablet, 3 di desktop */}
+        {/* Tag Inject Styles: Animasi Smooth murni bebas bug config */}
+        <style>{`
+          @keyframes estetikFadeInUp {
+            0% {
+              opacity: 0;
+              transform: translateY(24px) scale(0.98);
+            }
+            100% {
+              opacity: 1;
+              transform: translateY(0) scale(1);
+            }
+          }
+          .kartu-rekomendasi {
+            animation: estetikFadeInUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+          }
+        `}</style>
+
+        {/* Grid Display - Responsif Sempurna & Full Width */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {safeItems.slice(0, 6).map((item, index) => (
             <div 
               key={item.id} 
-              className="flex items-center p-5 bg-[#fdf5ed] rounded-[2rem] border border-orange-50 shadow-sm transition-all duration-300 hover:shadow-md hover:-translate-y-1 group cursor-pointer animate-[fadeInUp_0.5s_ease-out_forwards]"
-              // TRIK UTAMA: Efek animasi satu per satu menggunakan delay bertahap berdasarkan index item
+              className="kartu-rekomendasi flex items-center p-4 bg-[#fdf5ed] rounded-[2rem] border border-orange-100/50 shadow-[0_4px_20px_-4px_rgba(74,52,46,0.05)] transition-all duration-300 hover:shadow-[0_12px_30px_-6px_rgba(255,110,0,0.15)] hover:-translate-y-1.5 group cursor-pointer"
               style={{ 
-                animationDelay: `${index * 150}ms`,
-                opacity: 0 // Menghindari kedipan sebelum animasi dimulai
+                animationDelay: `${index * 120}ms`,
+                opacity: 0 
               }}
             >
-              {/* Menu Image / Art Box */}
-              <div className="w-20 h-20 bg-[#4a342e] rounded-2xl overflow-hidden flex-shrink-0 shadow-inner">
+              {/* Menu Image Box */}
+              <div className="w-20 h-20 bg-[#4a342e] rounded-2xl overflow-hidden flex-shrink-0 shadow-md relative">
                 {item.image_url ? (
                   <img 
                     src={item.image_url} 
                     alt={item.name} 
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 ease-out"
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-white/30 text-2xl">
@@ -46,20 +65,34 @@ const Recommendations = ({ items = [] }) => {
               </div>
 
               {/* Menu Details */}
-              <div className="ml-5">
-                <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">
+              <div className="ml-5 flex-1 min-w-0">
+                {/* Badge Kategori Mini */}
+                <span className="inline-block text-[10px] font-bold text-gray-400 bg-white/60 px-2.5 py-0.5 rounded-full uppercase tracking-wider mb-1">
                   {item.category}
                 </span>
-                <h3 className="text-xl font-extrabold text-gray-800 leading-tight mt-0.5 group-hover:text-[#FF6E00] transition-colors">
+                
+                {/* Nama Produk */}
+                <h3 className="text-lg font-extrabold text-[#4a342e] leading-tight truncate group-hover:text-[#FF6E00] transition-colors duration-200">
                   {item.name}
                 </h3>
-                <p className="text-md font-semibold text-[#FF6E00] mt-1">
+                
+                {/* Harga dengan skema warna matching ikon Beli */}
+                <p className="text-base font-black text-[#FF6E00] mt-1.5">
                   Rp {new Intl.NumberFormat('id-ID').format(item.price)}
                 </p>
               </div>
+
+              {/* Aksesoris Panah Kanan Estetik pas di-hover */}
+              <div className="text-gray-300 group-hover:text-[#FF6E00] group-hover:translate-x-1 transition-all duration-300 pr-2">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-5 h-5">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                </svg>
+              </div>
+
             </div>
           ))}
         </div>
+
       </div>
     </section>
   );

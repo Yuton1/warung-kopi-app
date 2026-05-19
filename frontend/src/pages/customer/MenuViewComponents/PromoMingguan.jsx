@@ -45,10 +45,10 @@ const PromoMingguan = () => {
     }
   };
 
-  // State Loading Premium Shimmer Effect (Feedback UX Indah)
+  // State Loading Premium Shimmer Effect (Diberi margin juga agar tidak bergeser saat loading selesai)
   if (loading) {
     return (
-      <div className="w-full bg-[#1A120B]/50 backdrop-blur-md rounded-[2rem] p-6 border border-white/5 animate-pulse">
+      <div className="w-full mt-10 md:mt-12 bg-[#1A120B]/50 backdrop-blur-md rounded-[2rem] p-6 border border-white/5 animate-pulse">
         <div className="h-6 bg-white/10 rounded w-1/4 mb-4"></div>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 h-48 bg-white/5 rounded-2xl"></div>
@@ -63,8 +63,11 @@ const PromoMingguan = () => {
   const railPromos = safePromos.slice(1);
 
   return (
-    <div className="w-full bg-gradient-to-br from-[#1A120B] to-[#2C1E12] rounded-[2.5rem] p-6 md:p-8 relative overflow-hidden">
-      <div className="absolute top-0 left-0 w-72 h-72 bg-orange-500/10 rounded-full blur-[80px] -pointer-events-none"></div>
+    // 🛠️ PERBAIKAN: Menambahkan mt-10 md:mt-12 untuk memberikan jarak pas dari Banner atas
+    <div className="w-full mt-10 md:mt-12 bg-gradient-to-br from-[#1A120B] to-[#2C1E12] rounded-[2.5rem] p-6 md:p-8 relative overflow-hidden">
+      
+      {/* 🛠️ PERBAIKAN UX: Memperbaiki salah ketik dari "-pointer-events-none" menjadi "pointer-events-none" */}
+      <div className="absolute top-0 left-0 w-72 h-72 bg-orange-500/10 rounded-full blur-[80px] pointer-events-none"></div>
 
       <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4 relative z-10">
         <div>
@@ -77,7 +80,7 @@ const PromoMingguan = () => {
         </div>
         <Link 
           to="/promo" 
-          className="text-xs font-bold text-orange-400 bg-white/100 hover:bg-orange-500 hover:text-white px-5 py-2.5 rounded-full transition-all duration-300 border border-white/10 hover:border-transparent active:scale-95"
+          className="text-xs font-bold text-orange-400 bg-white hover:bg-orange-500 hover:text-white px-5 py-2.5 rounded-full transition-all duration-300 border border-white/10 hover:border-transparent active:scale-95"
         >
           Lihat Semua Promo →
         </Link>
