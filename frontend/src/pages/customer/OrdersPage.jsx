@@ -25,7 +25,6 @@ const mapStatusToStep = (statusString) => {
   return 2 
 }
 
-// Badge status disesuaikan dengan warna aksen di gambar (Orange pekat & Hijau terang)
 const statusTone = (status) => {
   const normalized = normalizeStatus(status)
   if (['proses', 'processing', 'diproses'].includes(normalized)) return 'bg-[#ff7b00] text-white'
@@ -112,16 +111,16 @@ const normalizeOrder = (order) => {
   }
 }
 
-// Timeline tracker horizontal dengan warna senada dashboard pengelola (TiDB)
+// 🛠️ PERBAIKAN: Box diubah menjadi cokelat espresso solid agar kontras tinggi & premium
 const Timeline = ({ currentStep }) => {
   return (
-    <div className="px-2 pt-6 sm:px-4 bg-[#1e140f]/40 rounded-2xl p-4 border border-white/5 mb-4">
+    <div className="px-2 pt-6 sm:px-4 bg-[#1c120c] rounded-2xl p-5 border border-white/10 mb-4 shadow-inner">
       <div className="relative">
         
         {/* DESKTOP TIMELINE */}
-        <div className="hidden md:block absolute left-8 right-8 top-[9px] h-1.5 rounded-full bg-[#ff7b00]/20" />
+        <div className="hidden md:block absolute left-8 right-8 top-[9px] h-1.5 rounded-full bg-white/10" />
         <div
-          className="hidden md:block absolute left-8 top-[9px] h-1.5 rounded-full bg-gradient-to-r from-[#ff7b00] to-[#9ef06b] transition-all duration-1000 ease-out line-wave-loading shadow-[0_0_10px_rgba(255,123,0,0.4)]"
+          className="hidden md:block absolute left-8 top-[9px] h-1.5 rounded-full bg-gradient-to-r from-[#ff7b00] via-[#ffd60a] to-[#9ef06b] transition-all duration-1000 ease-out line-wave-loading shadow-[0_0_15px_rgba(255,123,0,0.7)]"
           style={{ width: `calc(${(currentStep / (ORDER_STEPS.length - 1)) * 100}% - 4rem)` }}
         />
 
@@ -133,27 +132,27 @@ const Timeline = ({ currentStep }) => {
             return (
               <div key={label} className="flex flex-row md:flex-col items-center gap-4 md:gap-2 md:w-24 group">
                 {/* Bulatan Node */}
-                <div className={`h-6 w-6 rounded-full border-4 border-[#241710] z-10 flex items-center justify-center text-[10px] font-black transition-all duration-500
+                <div className={`h-6 w-6 rounded-full border-4 border-[#1c120c] z-10 flex items-center justify-center text-[10px] font-black transition-all duration-500
                   ${isCompleted 
                     ? 'bg-[#9ef06b] text-[#1c130f] shadow-md' 
                     : isCurrent 
                       ? 'bg-[#ff7b00] text-white step-active-glow' 
-                      : 'bg-[#38261c] text-white/30'}`}
+                      : 'bg-[#4a3525] text-white/40'}`}
                 >
                   {isCompleted ? '✓' : index + 1}
                 </div>
                 
-                {/* Teks Deskripsi */}
+                {/* Teks Deskripsi Status di dalam box */}
                 <div className="text-left md:text-center">
-                  <p className={`text-xs font-black transition-all duration-300 ${isCurrent ? 'text-[#ff7b00] scale-105' : isCompleted ? 'text-white' : 'text-white/50'}`}>
+                  <p className={`text-xs font-black tracking-wide transition-all duration-300 ${isCurrent ? 'text-[#ff7b00] scale-105' : isCompleted ? 'text-[#9ef06b]' : 'text-white/40'}`}>
                     {label}
                   </p>
                 </div>
 
                 {/* MOBILE TIMELINE */}
                 {index < ORDER_STEPS.length - 1 && (
-                  <div className="md:hidden absolute left-[11px] ml-[-1px] w-[2px] h-6 bg-[#ff7b00]/20 mt-7 -z-10">
-                    <div className={`w-full h-full bg-[#ff7b00] transition-all duration-500 ${index < currentStep ? 'h-full' : 'h-0'}`}></div>
+                  <div className="md:hidden absolute left-[11px] ml-[-1px] w-[2px] h-6 bg-white/10 mt-7 -z-10">
+                    <div className={`w-full bg-[#ff7b00] transition-all duration-500 ${index < currentStep ? 'h-full' : 'h-0'}`}></div>
                   </div>
                 )}
               </div>
@@ -214,7 +213,6 @@ const OrderCard = ({ order, expanded, onToggle, showTracking = true }) => {
       : 'Sabar yaaa!! pesanan kamu masih di proses oleh baristaa')
 
   return (
-    // Menggunakan warna krem background utama (#fffaf0) agar menyatu dengan bagian bawah UI kamu
     <article className="group rounded-[2rem] bg-[#fffaf0] p-4 shadow-[0_4px_20px_rgba(30,20,15,0.05)] hover:shadow-[0_12px_30px_rgba(30,20,15,0.1)] transition-all duration-300 border border-black/[0.03]">
       <button
         type="button"
@@ -237,20 +235,21 @@ const OrderCard = ({ order, expanded, onToggle, showTracking = true }) => {
         <div className="mt-2 pt-2 border-t border-[#1e140f]/5 animate-fadeIn">
           <Timeline currentStep={order.currentStep} />
 
-          <div className="px-2 pt-2 text-center">
-            <p className="mx-auto max-w-[480px] text-xs italic font-medium text-white/90">
+          {/* 🛠️ PERBAIKAN: Warna teks deskripsi & metadata diganti dari putih pudar ke cokelat gelap kontras agar terbaca di card krem */}
+          <div className="px-2 pt-1 text-center">
+            <p className="mx-auto max-w-[480px] text-xs italic font-bold text-[#4a3525]">
               "{note}"
             </p>
           </div>
 
-          <div className="flex justify-between items-end mt-4 pt-3 border-t border-white/10 px-1 text-[10px] text-white/60 font-medium">
+          <div className="flex justify-between items-end mt-4 pt-3 border-t border-[#1e140f]/10 px-1 text-[10px] text-[#241710]/60 font-bold tracking-wide">
             <div>
               <span className="block text-[8px] uppercase tracking-wider opacity-60">Waktu Transaksi</span>
-              <span className="font-bold text-white">{order.infoTime}</span>
+              <span className="font-extrabold text-[#241710] text-[11px]">{order.infoTime}</span>
             </div>
             <div className="text-right">
               <span className="block text-[8px] uppercase tracking-wider opacity-60">Tanggal</span>
-              <span className="font-bold text-white">{order.infoDate}</span>
+              <span className="font-extrabold text-[#241710] text-[11px]">{order.infoDate}</span>
             </div>
           </div>
         </div>
@@ -259,7 +258,6 @@ const OrderCard = ({ order, expanded, onToggle, showTracking = true }) => {
   )
 }
 
-// Shell Box diubah menjadi Cokelat Tua Gelap Pekat (#241710) sesuai kontainer utama Promo Minggu Ini
 const SectionShell = ({ title, icon: Icon, children }) => (
   <section className="w-full rounded-[2.5rem] bg-[#241710] p-6 md:p-8 shadow-[0_15px_35px_rgba(30,20,15,0.2)] border border-white/[0.02]">
     <div className="flex items-center gap-2.5 mb-6">
@@ -326,7 +324,7 @@ const OrdersPage = () => {
           setOrders([])
           setError('Gagal menarik data antrean terbaru.')
         }
-      } finally {
+      } fill/0.1ly {
         if (!cancelled) setLoading(false)
       }
     }
@@ -352,14 +350,13 @@ const OrdersPage = () => {
   }
 
   return (
-    // Background utama halaman dibuat off-white bersih agar kontras dengan card cokelat gelap
     <div className="min-h-screen w-full px-4 py-8 text-[#241710] sm:px-6 lg:px-8 bg-[#faf6f0]">
       
-      {/* INJECT ANIMASI CSS */}
+      {/* 🛠️ PERBAIKAN ANIMASI: Pola arsiran diubah menjadi warna kuning cerah agar efek gerak loading-nya terlihat kontras & jelas */}
       <style>{`
         @keyframes pulseGlow {
-          0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255,123,0, 0.5); }
-          50% { transform: scale(1.1); box-shadow: 0 0 12px 4px rgba(255,123,0, 0); }
+          0%, 100% { transform: scale(1); box-shadow: 0 0 10px 1px rgba(255,123,0, 0.6); }
+          50% { transform: scale(1.08); box-shadow: 0 0 18px 5px rgba(255,123,0, 0.3); }
         }
         @keyframes waveMove {
           from { background-position: 0 0; }
@@ -369,11 +366,20 @@ const OrdersPage = () => {
           from { opacity: 0; transform: translateY(-4px); }
           to { opacity: 1; transform: translateY(0); }
         }
-        .step-active-glow { animation: pulseGlow 2s infinite; }
+        .step-active-glow { animation: pulseGlow 1.8s infinite; }
         .line-wave-loading {
-          background-image: linear-gradient(45deg, rgba(255,255,255,0.1) 25%, transparent 25%, transparent 50%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.1) 75%, transparent 75%, transparent);
+          background-image: linear-gradient(
+            45deg, 
+            rgba(255, 214, 10, 0.4) 25%, 
+            transparent 25%, 
+            transparent 50%, 
+            rgba(255, 214, 10, 0.4) 50%, 
+            rgba(255, 214, 10, 0.4) 75%, 
+            transparent 75%, 
+            transparent
+          );
           background-size: 1rem 1rem;
-          animation: waveMove 1s linear infinite;
+          animation: waveMove 1.2s linear infinite;
         }
         .animate-fadeIn { animation: fadeIn 0.3s ease-out forwards; }
       `}</style>
@@ -422,7 +428,9 @@ const OrdersPage = () => {
               ))}
             </div>
           ) : (
-            <EmptyState title="Riwayat Masih Kosong" description="Selesaikan pesanan pertamamu untuk melihat riwayat belanja." />
+            <div className="p-1">
+              <EmptyState title="Riwayat Masih Kosong" description="Selesaikan pesanan pertamamu untuk melihat riwayat belanja." />
+            </div>
           )}
         </SectionShell>
 
