@@ -81,7 +81,7 @@ const OrderCard = ({ order, onMoveStatus, updatingOrderId }) => {
   const getNextStatus = () => {
     if (statusCode === ORDER_STATUS.PENDING) return ORDER_STATUS.PROCESSING
     if (statusCode === ORDER_STATUS.PROCESSING) return ORDER_STATUS.READY
-    if (statusCode === ORDER_STATUS.READY) return 'selesai' // Dikirim ke DB & pindah ke riwayat bawah
+    if (statusCode === ORDER_STATUS.READY) return 'completed'
     return null
   }
 
