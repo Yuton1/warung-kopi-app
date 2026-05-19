@@ -4,7 +4,8 @@ const AnalyticsDashboard = ({ monthlySpend, favoriteCoffee, planStatus, subscrip
   const percentage = (subscriptionData.remaining / subscriptionData.total) * 100;
 
   return (
-    <article className="w-full bg-white rounded-[2.5rem] p-8 md:p-12 shadow-xl border border-gray-100 relative overflow-hidden">
+    /* FIX KUNCI: shadow-xl diganti dengan shadow rgba presisi agar lengkungan sudut putih bersih total */
+    <article className="w-full bg-white rounded-[2.5rem] p-8 md:p-12 shadow-[0_20px_40px_-15px_rgba(0,0,0,0.15)] border border-gray-100 relative overflow-hidden">
       {/* Background Element */}
       <div className="absolute top-0 right-0 w-40 h-40 bg-orange-50 rounded-full -mr-20 -mt-20 opacity-50"></div>
 

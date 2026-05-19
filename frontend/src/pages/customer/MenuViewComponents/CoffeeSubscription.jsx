@@ -4,7 +4,8 @@ const CoffeeSubscription = ({ plans, activeId, onActivate }) => {
   const safePlans = Array.isArray(plans) ? plans : [];
 
   return (
-    <article className="w-full bg-[#1A120B] rounded-[2.5rem] p-8 md:p-12 shadow-2xl relative overflow-hidden">
+    /* FIX KUNCI: shadow-2xl diubah menjadi custom black rgba shadow agar tidak bocor krem */
+    <article className="w-full bg-[#1A120B] rounded-[2.5rem] p-8 md:p-12 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.5)] relative overflow-hidden">
       {/* Background Decor */}
       <div className="absolute top-0 right-0 w-64 h-64 bg-white opacity-[0.03] rounded-full -mr-20 -mt-20"></div>
       

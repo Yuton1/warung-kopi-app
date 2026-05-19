@@ -229,11 +229,11 @@ const MenuView = () => {
   )
 
   return (
-    <div className="page-shell min-h-screen bg-white">
+    <div className="page-shell min-h-screen">
       <div className="banner-wrapper-floating">
         <Banner />
       </div>
-      <div className="w-full bg-white shadow-sm py-2 px-2">
+      <div className="w-full py-2 px-2">
         <PromoMingguan />
       </div>
 
@@ -243,7 +243,7 @@ const MenuView = () => {
             <Recommendations items={recommendations} />
           </div>
           
-          <section className="w-full px-6 lg:px-12">
+          <section className="w-full">
             <MenuGrid 
               menu={visibleMenu} 
               loading={loadingMenu}
@@ -259,49 +259,54 @@ const MenuView = () => {
             />
           </section>
 
-          <section className="panel px-6 lg:px-12 pb-20" id="tools">
+          {/* FIX KUNCI: px-6 lg:px-12 dihapus dari sini karena sudah ditangani global oleh CustomerLayout */}
+          {/* FIX KUNCI: Class "panel" dihapus dan diganti bg-transparent agar latar putih/krem raksasa hilang total */}
+          <section className="w-full bg-transparent pb-20 mt-10" id="tools">
             <h2 className="text-3xl font-bold mb-10 text-[#4A3728] pl-4 border-l-4 border-[#FF6E00]">
               Fitur Spesial
             </h2>
-            <div className="tools-grid grid grid-cols-1 md:grid-cols-2 gap-8">
-               <div className="md:col-span-2">
+            
+            {/* Grid disesuaikan menjadi 1 kolom di mobile dan 2 kolom seimbang di desktop */}
+            <div className="tools-grid grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <div className="w-full">
                 <PreOrderSection 
-                   hasCart={cart.length > 0} 
-                   preOrder={preOrder} 
-                   onSave={savePreOrder} 
-                   onCancel={cancelPreOrder} 
+                  hasCart={cart.length > 0} 
+                  preOrder={preOrder} 
+                  onSave={savePreOrder} 
+                  onCancel={cancelPreOrder} 
                 />
-               </div>
-               
-               <div className="md:col-span-2">
+              </div>
+                 
+              <div className="w-full">
                 <GroupOrderSection 
-                   groupOrder={groupOrder} 
-                   hasCart={cart.length > 0}
-                   onUpdateMembers={updateGroupMembers}
-                   onAddCart={addCartToGroup}
-                   onConfirm={confirmGroupPayment}
+                  groupOrder={groupOrder} 
+                  hasCart={cart.length > 0}
+                  onUpdateMembers={updateGroupMembers}
+                  onAddCart={addCartToGroup}
+                  onConfirm={confirmGroupPayment}
                 />
-               </div>
-
-               <div className="md:col-span-2">
+              </div>
+            
+              <div className="w-full">
                 <CoffeeSubscription 
-                   plans={subscriptionPlans} 
-                   activeId={activeSub?.id} 
-                   onActivate={activatePlan} 
+                  plans={subscriptionPlans} 
+                  activeId={activeSub?.id} 
+                  onActivate={activatePlan} 
                 />
-               </div>
-
-               <div className="md:col-span-2">
+              </div>
+            
+              <div className="w-full">
                 <AnalyticsDashboard 
-                   monthlySpend={monthlySpend} 
-                   favoriteCoffee={favoriteCoffee} 
-                   planStatus={planStatus} 
+                  monthlySpend={monthlySpend} 
+                  favoriteCoffee={favoriteCoffee} 
+                  planStatus={planStatus} 
                 />
-               </div>
+              </div>
             </div>
           </section>
         </main>
       </section>
+
       {cart.length > 0 && (
         <CartFloating
           cart={cart}

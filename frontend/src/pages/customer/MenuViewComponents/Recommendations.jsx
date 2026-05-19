@@ -6,7 +6,7 @@ const Recommendations = ({ items = [] }) => {
   if (safeItems.length < 6) return null;
 
   return (
-    <section className="w-full bg-white px-6 py-10">
+    <section className="w-full px-6 py-10">
       <div className="max-w-7xl mx-auto">
         {/* Header Section */}
         <div className="mb-8">
