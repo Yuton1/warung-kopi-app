@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { ArrowLeft, Store, Utensils, BagShopping, MugHot, Ticket, CreditCard, Receipt } from 'lucide-react'
 import { formatRupiah } from '../../utils/formatRupiah'
 import { createCheckoutOrder, fetchCart } from '../../services/cartService'
 
@@ -22,7 +23,7 @@ const ConfirmPesanan = () => {
         setCartItems(snapshot.items || [])
       } catch (error) {
         console.error('Gagal memuat cart untuk checkout:', error)
-        setErrorMessage('Gagal memuat data keranjang. Coba login ulang atau muat ulang halaman.')
+        setErrorMessage('Gagal memuat data keranjang. Coba muat ulang halaman.')
       } finally {
         setLoading(false)
       }
@@ -84,169 +85,226 @@ const ConfirmPesanan = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#FDF7F2] font-['Fredoka'] pb-10 text-[#4A3728]">
-      <div className="bg-white p-8 rounded-b-[3rem] shadow-sm flex items-center gap-6">
+    <div className="min-h-screen bg-[#FDF8F4] font-['Fredoka'] pb-20 text-[#241710]">
+      {/* Tombol Back & Header Atas */}
+      <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-16 pt-8 flex items-center gap-4">
         <button
           onClick={() => navigate(-1)}
-          className="w-12 h-12 rounded-full bg-[#FDF7F2] flex items-center justify-center text-xl hover:bg-gray-100 transition-all"
+          className="w-10 h-10 rounded-full bg-white flex items-center justify-center text-[#241710] shadow-md hover:bg-[#ff7b00] hover:text-white transition-all duration-300 active:scale-90"
           type="button"
         >
-          <i className="fa-solid fa-chevron-left"></i>
+          <ArrowLeft className="w-5 h-5" />
         </button>
-        <h1 className="text-3xl font-bold">Konfirmasi Pesanan</h1>
       </div>
 
-      <div className="max-w-2xl mx-auto px-6 mt-8 space-y-6">
-        {errorMessage ? (
-          <div className="rounded-[1.5rem] border border-red-200 bg-red-50 px-5 py-4 text-sm font-semibold text-red-600">
-            {errorMessage}
+      {/* Main Container dengan Skema Warna Gelap Warkop */}
+      <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-16 mt-6">
+        
+        {errorMessage && (
+          <div className="rounded-3xl border border-red-200 bg-red-50 px-6 py-4 text-sm font-bold text-red-600 mb-6 max-w-5xl animate-bounce">
+            ⚠️ {errorMessage}
           </div>
-        ) : null}
+        )}
 
-        <section className="bg-white p-6 rounded-[2rem] shadow-sm">
-          <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-            <i className="fa-solid fa-store text-[#FF6E00]"></i> Tipe Pesanan
-          </h2>
-          <div className="grid grid-cols-2 gap-4">
-            <button
-              type="button"
-              onClick={() => setOrderType('dine-in')}
-              className={`py-4 rounded-2xl font-semibold border-2 transition-all ${
-                orderType === 'dine-in'
-                  ? 'border-[#FF6E00] bg-orange-50 text-[#FF6E00]'
-                  : 'border-gray-100 text-gray-400'
-              }`}
-            >
-              <i className="fa-solid fa-utensils mr-2"></i> Makan di Sini
-            </button>
-            <button
-              type="button"
-              onClick={() => setOrderType('takeaway')}
-              className={`py-4 rounded-2xl font-semibold border-2 transition-all ${
-                orderType === 'takeaway'
-                  ? 'border-[#FF6E00] bg-orange-50 text-[#FF6E00]'
-                  : 'border-gray-100 text-gray-400'
-              }`}
-            >
-              <i className="fa-solid fa-bag-shopping mr-2"></i> Bawa Pulang
-            </button>
-          </div>
-        </section>
-
-        <section className="bg-white p-6 rounded-[2rem] shadow-sm">
-          <h2 className="text-xl font-bold mb-4">Item Pesanan</h2>
-          {loading ? (
-            <div className="rounded-2xl bg-[#FDF7F2] px-4 py-5 text-sm text-gray-500">
-              Memuat item keranjang...
+        {/* BUNGKUSAN UTAMA: Blok Cokelat Gelap Besar Sesuai Layout Keranjang Belanja */}
+        <div className="bg-[#241710] p-6 sm:p-10 rounded-[3rem] shadow-xl text-white grid grid-cols-1 lg:grid-cols-3 gap-8 items-start relative overflow-hidden">
+          
+          {/* SEKTOR KIRI & TENGAH: Input & Manifest (2/3 Lebar) */}
+          <div className="lg:col-span-2 space-y-8">
+            
+            {/* Header Judul di Dalam Blok Cokelat */}
+            <div className="flex items-center gap-3">
+              <div className="w-2.5 h-6 bg-[#ff7b00] rounded-full"></div>
+              <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-[#FFFBF5]">
+                Konfirmasi Pesanan Anda
+              </h1>
             </div>
-          ) : cartItems.length > 0 ? (
+
+            {/* 1. Tipe Pemesanan Kopi */}
             <div className="space-y-4">
-              {cartItems.map((item) => (
-                <div key={item.id} className="flex justify-between items-center border-b border-gray-50 pb-4">
-                  <div className="flex gap-4">
-                    <div className="w-16 h-16 bg-[#4A3728] rounded-2xl flex items-center justify-center overflow-hidden">
-                      {item.imageUrl ? (
-                        <img src={item.imageUrl} alt={item.name} className="w-full h-full object-cover" />
-                      ) : (
-                        <i className="fa-solid fa-mug-hot text-white/30 text-2xl"></i>
-                      )}
-                    </div>
-                    <div>
-                      <h4 className="font-bold text-lg">{item.name}</h4>
-                      <p className="text-sm text-gray-400">
-                        {item.size?.label || 'Normal'} x {item.qty}
-                      </p>
-                    </div>
-                  </div>
-                  <p className="font-bold text-lg">
-                    {formatRupiah((Number(item.price ?? item.unitPrice ?? 0) || 0) * (Number(item.qty) || 0))}
-                  </p>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="rounded-2xl bg-[#FDF7F2] px-4 py-5 text-sm text-gray-500">
-              Keranjang masih kosong. Tambahkan menu dulu sebelum checkout.
-            </div>
-          )}
-        </section>
-
-        <section className="bg-white p-6 rounded-[2rem] shadow-sm space-y-6">
-          <div>
-            <h2 className="text-lg font-bold mb-3 flex items-center gap-2">
-              <i className="fa-solid fa-ticket text-[#FF6E00]"></i> Gunakan Promo
-            </h2>
-            <div className="flex gap-3">
-              <input
-                type="text"
-                placeholder="Masukkan kode promo..."
-                className="flex-1 bg-[#FDF7F2] border-none rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#FF6E00] outline-none"
-                value={promoCode}
-                onChange={(e) => setPromoCode(e.target.value)}
-              />
-            </div>
-          </div>
-
-          <hr className="border-gray-50" />
-
-          <div>
-            <h2 className="text-lg font-bold mb-3">Metode Pembayaran</h2>
-            <div className="space-y-3">
-              {['Cashier', 'E-Wallet (QRIS)', 'Transfer Bank'].map((method) => (
-                <label
-                  key={method}
-                  className="flex items-center justify-between p-4 bg-[#FDF7F2] rounded-xl cursor-pointer hover:bg-orange-50 transition-all border border-transparent has-[:checked]:border-[#FF6E00]"
+              <h2 className="text-lg font-bold flex items-center gap-2 text-[#FFFBF5]/90">
+                <Store className="w-5 h-5 text-[#ff7b00]" /> Pilih Opsi Penyajian
+              </h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <button
+                  type="button"
+                  onClick={() => setOrderType('dine-in')}
+                  className={`flex items-center justify-center gap-3 py-4 rounded-2xl font-black text-sm uppercase tracking-wider border-2 transition-all duration-300 active:scale-95 ${
+                    orderType === 'dine-in'
+                      ? 'border-[#ff7b00] bg-[#ff7b00] text-white'
+                      : 'border-white/10 bg-white/5 text-white/50 hover:border-white/20 hover:text-white'
+                  }`}
                 >
-                  <div className="flex items-center gap-3">
-                    <div className="w-6 h-6 rounded-full border-2 border-orange-200 flex items-center justify-center">
+                  <Utensils className="w-4 h-4" /> Makan di Sini
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setOrderType('takeaway')}
+                  className={`flex items-center justify-center gap-3 py-4 rounded-2xl font-black text-sm uppercase tracking-wider border-2 transition-all duration-300 active:scale-95 ${
+                    orderType === 'takeaway'
+                      ? 'border-[#ff7b00] bg-[#ff7b00] text-white'
+                      : 'border-white/10 bg-white/5 text-white/50 hover:border-white/20 hover:text-white'
+                  }`}
+                >
+                  <BagShopping className="w-4 h-4" /> Bawa Pulang
+                </button>
+              </div>
+            </div>
+
+            {/* 2. List Menu (Menggunakan Desain Pillow Krem Terang khas Warkop) */}
+            <div className="space-y-4">
+              <h2 className="text-lg font-bold flex items-center gap-2 text-[#FFFBF5]/90">
+                <Receipt className="w-5 h-5 text-[#ff7b00]" /> Item Yang Akan Dimasak
+              </h2>
+              
+              {loading ? (
+                <div className="rounded-3xl bg-[#FFFBF5] text-[#241710] px-6 py-8 text-center font-bold">
+                  Menyelaraskan manifest menu...
+                </div>
+              ) : cartItems.length > 0 ? (
+                <div className="space-y-3">
+                  {cartItems.map((item) => (
+                    <div 
+                      key={item.id} 
+                      className="bg-[#FFFBF5] text-[#241710] p-4 sm:p-5 rounded-[2rem] flex justify-between items-center shadow-md transition-all duration-300 hover:translate-x-1"
+                    >
+                      <div className="flex gap-4 items-center">
+                        <div className="w-16 h-16 bg-[#241710] rounded-2xl flex items-center justify-center overflow-hidden flex-shrink-0 border border-[#241710]/10">
+                          {item.imageUrl ? (
+                            <img src={item.imageUrl} alt={item.name} className="w-full h-full object-cover" />
+                          ) : (
+                            <MugHot className="w-6 h-6 text-white/20" />
+                          )}
+                        </div>
+                        <div>
+                          <span className="text-[10px] bg-[#ff7b00]/10 text-[#ff7b00] px-2 py-0.5 rounded-full font-black uppercase tracking-wider">
+                            {item.category || 'COFFEE'}
+                          </span>
+                          <h4 className="font-black text-base sm:text-lg tracking-tight mt-0.5">{item.name}</h4>
+                          <p className="text-xs font-bold text-gray-400 mt-0.5">
+                            Varian: <span className="text-[#ff7b00]">{item.size?.label || 'Normal'}</span>
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="text-right flex flex-col items-end gap-1">
+                        <span className="text-xs bg-[#241710] text-white px-2.5 py-0.5 rounded-full font-bold">
+                          {item.qty}x
+                        </span>
+                        <p className="font-black text-base sm:text-lg text-[#241710] mt-1">
+                          {formatRupiah((Number(item.price ?? item.unitPrice ?? 0) || 0) * (Number(item.qty) || 0))}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="rounded-[2rem] bg-[#FFFBF5] text-[#241710] px-6 py-8 text-center font-bold">
+                  Keranjang belanja kosong.
+                </div>
+              )}
+            </div>
+
+            {/* 3. Voucher Promo & Pilihan Metode Pembayaran */}
+            <div className="space-y-6 pt-2">
+              {/* Input Kode Kupon */}
+              <div>
+                <h2 className="text-base font-bold mb-3 flex items-center gap-2 text-[#FFFBF5]/90">
+                  <Ticket className="w-4 h-4 text-[#ff7b00]" /> Masukkan Kupon Potongan (Opsional)
+                </h2>
+                <input
+                  type="text"
+                  placeholder="Contoh: WARKOPBERKAH"
+                  className="w-full max-w-md bg-white/5 border border-white/10 font-bold text-sm rounded-xl px-5 py-3.5 focus:ring-2 focus:ring-[#ff7b00] focus:bg-white focus:text-[#241710] outline-none transition-all placeholder:text-white/30"
+                  value={promoCode}
+                  onChange={(e) => setPromoCode(e.target.value)}
+                />
+              </div>
+
+              {/* Radio Group Pembayaran */}
+              <div>
+                <h2 className="text-base font-bold mb-3 flex items-center gap-2 text-[#FFFBF5]/90">
+                  <CreditCard className="w-4 h-4 text-[#ff7b00]" /> Pilih Alur Pembayaran
+                </h2>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  {['Cashier', 'E-Wallet (QRIS)', 'Transfer Bank'].map((method) => (
+                    <label
+                      key={method}
+                      className={`flex items-center gap-3 p-4 rounded-xl cursor-pointer border transition-all duration-300 ${
+                        paymentMethod === method 
+                          ? 'border-[#ff7b00] bg-[#ff7b00]/10 text-white' 
+                          : 'border-white/10 bg-white/5 text-white/60 hover:bg-white/10'
+                      }`}
+                    >
                       <input
                         type="radio"
                         name="payment"
-                        className="w-3 h-3 appearance-none checked:bg-[#FF6E00] rounded-full transition-all"
+                        className="w-4 h-4 accent-[#ff7b00] cursor-pointer"
                         checked={paymentMethod === method}
                         onChange={() => setPaymentMethod(method)}
                       />
-                    </div>
-                    <span className="font-semibold">{method}</span>
-                  </div>
-                  <i className="fa-solid fa-chevron-right text-gray-300 text-sm"></i>
-                </label>
-              ))}
+                      <span className="font-bold text-xs uppercase tracking-wide">{method}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
             </div>
-          </div>
-        </section>
 
-        <section className="bg-[#4A3728] p-8 rounded-[2.5rem] text-white shadow-2xl">
-          <div className="space-y-3 mb-8 text-white/70">
-            <div className="flex justify-between">
-              <span>Subtotal</span>
-              <span className="font-bold text-white">{formatRupiah(subtotal)}</span>
-            </div>
-            <div className="flex justify-between">
-              <span>Pajak & Layanan (10%)</span>
-              <span className="font-bold text-white">{formatRupiah(tax)}</span>
-            </div>
-            <hr className="border-white/10 my-4" />
-            <div className="flex justify-between items-center">
-              <span className="text-xl font-bold text-white">Total Bayar</span>
-              <span className="text-3xl font-bold text-[#FF6E00]">{formatRupiah(total)}</span>
-            </div>
           </div>
 
-          <button
-            className="w-full bg-[#FF6E00] py-5 rounded-2xl font-bold text-xl shadow-xl hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-4 disabled:opacity-70 disabled:cursor-not-allowed"
-            onClick={handleCheckout}
-            disabled={submitting || loading || cartItems.length === 0}
-            type="button"
-          >
-            <i className="fa-solid fa-receipt"></i>
-            {submitting ? 'Memproses...' : 'Buat Pesanan Sekarang'}
-          </button>
+          {/* SEKTOR KANAN: Kotak Billing Summary Berwarna Kontras (1/3 Lebar) */}
+          <div className="lg:sticky lg:top-6 bg-[#1a100a] p-6 sm:p-8 rounded-[2.5rem] border border-white/[0.03] space-y-6">
+            <h3 className="text-sm font-black uppercase tracking-widest border-b border-white/10 pb-3 text-white/50">
+              Kalkulasi Nota
+            </h3>
 
-          <p className="text-center mt-4 text-white/40 text-sm italic">
-            *Ingin bagi tagihan? Aktifkan fitur <b>Split Bill</b> di sesi grup Anda.
-          </p>
-        </section>
+            <div className="space-y-3 text-sm font-medium text-white/70">
+              <div className="flex justify-between">
+                <span>Subtotal Items</span>
+                <span className="font-bold text-white">{formatRupiah(subtotal)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Pajak Resto (10%)</span>
+                <span className="font-bold text-white">{formatRupiah(tax)}</span>
+              </div>
+              
+              <div className="border-t border-white/5 my-4 pt-4 flex justify-between items-center">
+                <span className="text-base font-bold text-white">Total Tagihan</span>
+                <span className="text-[#ffd60a] text-2xl font-black tracking-tight">
+                  {formatRupiah(total)}
+                </span>
+              </div>
+            </div>
+
+            {/* Tombol Pay dengan Animasi Efek Kilat / Shine Taktil */}
+            <button
+              type="button"
+              onClick={handleCheckout}
+              disabled={submitting || loading || cartItems.length === 0}
+              className="w-full relative overflow-hidden bg-gradient-to-r from-[#ff7b00] to-[#ff9500] hover:brightness-110 disabled:from-gray-700 disabled:to-gray-800 disabled:opacity-40 disabled:cursor-not-allowed text-white py-4 px-6 rounded-2xl font-black uppercase tracking-widest transition-all duration-300 shadow-lg flex items-center justify-center gap-3 active:scale-[0.97] border-b-4 border-[#cc6200] disabled:border-transparent active:border-b-0 active:translate-y-[4px] group"
+            >
+              {/* Efek Kilatan Sinar */}
+              <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-shine" />
+
+              <style>{`
+                @keyframes shine {
+                  100% { transform: translateX(100%); }
+                }
+                .animate-shine { animation: shine 0.7s ease-out; }
+              `}</style>
+
+              <span className="tracking-wider text-sm">
+                {submitting ? 'Memproses...' : 'Buat Pesanan Sekarang'}
+              </span>
+            </button>
+
+            <p className="text-center text-white/30 text-[11px] font-medium italic mt-2">
+              *Ingin bagi tagihan? Aktifkan fitur <b>Split Bill</b> di sesi grup Anda.
+            </p>
+          </div>
+
+        </div>
+
       </div>
     </div>
   )
