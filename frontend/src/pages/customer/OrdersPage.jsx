@@ -421,15 +421,19 @@ const OrdersPage = () => {
         </SectionShell>
 
         {/* SECTION 2: RIWAYAT PESANAN */}
+        {/* SECTION 2: RIWAYAT PESANAN */}
         <SectionShell title="Riwayat Pesanan" icon={CheckCircle2}>
           {loading ? (
             <EmptyState title="Memuat Riwayat..." description="Sedang memanggil riwayat transaksi kamu." isLoading />
           ) : historyOrders.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            
+            /* ✅ SEKARANG SUDAH SAMA: Menggunakan flex-col & w-full agar kontainer putihnya melar penuh */
+            <div className="w-full flex flex-col gap-4">
               {historyOrders.map((order) => (
                 <OrderCard key={order.id} order={order} expanded={false} showTracking={false} />
               ))}
             </div>
+        
           ) : (
             <div className="p-1">
               <EmptyState title="Riwayat Masih Kosong" description="Selesaikan pesanan pertamamu untuk melihat riwayat belanja." />
