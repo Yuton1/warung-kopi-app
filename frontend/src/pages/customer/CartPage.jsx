@@ -157,7 +157,7 @@ const CartPage = () => {
             <h2 className="text-xl sm:text-2xl font-black text-[#241710] tracking-tight">Keranjangmu Masih Kosong</h2>
             <p className="mt-1 text-xs text-[#241710]/50 font-bold uppercase tracking-wider">Ayo isi dengan kopi favoritmu!</p>
             <button
-              onClick={() => navigate('/menu')}
+              onClick={() => navigate('/home')}
               className="mt-6 bg-[#241710] text-[#fffaf0] px-6 py-3 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-[#ff7b00] active:scale-95 transition-all duration-300 shadow-md"
             >
               Lihat Menu Warkop
