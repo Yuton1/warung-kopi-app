@@ -77,7 +77,7 @@ const OrderAktif = ({ orders = [] }) => {
                 <div className="flex gap-4 items-center">
                   <div className="w-16 h-16 bg-[#2B1E16] rounded-2xl overflow-hidden shadow-inner border border-white/15 flex-shrink-0">
                     <img 
-                      src={order.image || "/placeholder-kopi.jpg"} 
+                      src={order.imageUrl || order.image || "/Logo_Warkop_Nav.png"} 
                       alt={order.name} 
                       className="w-full h-full object-cover" 
                     />

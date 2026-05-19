@@ -25,7 +25,7 @@ const RiwayatPesanan = ({ history = [] }) => {
                 {/* Thumbnail Produk */}
                 <div className="w-[62px] h-[62px] bg-[#1e140f] rounded-2xl overflow-hidden flex-none shadow-md border border-black/10">
                   <img 
-                    src={item.image || "/Logo_Warkop_Nav.png"} 
+                    src={item.imageUrl || item.image || "/Logo_Warkop_Nav.png"} 
                     alt={item.name} 
                     className="w-full h-full object-cover" 
                     loading="lazy"

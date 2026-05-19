@@ -9,9 +9,9 @@ import LocationPage from './pages/customer/LocationPage'
 import MenuView from './pages/customer/MenuView'
 import MinumanPage from './pages/customer/MinumanPage'
 import MemberPage from './pages/customer/MemberPage'
-import OrdersPage from './pages/customer/OrdersPage'
 import ProfilePage from './pages/customer/ProfilePage'
 import PromoPage from './pages/customer/PromoPage'
+import PesananPage from './pages/customer/Pesanan/PesananPage'
 import AdminDashboard from './pages/admin/AdminDashboard'
 import MenuManagement from './pages/admin/MenuManagement'
 import MenuEdit from './pages/admin/MenuEdit/MenuEdit'
@@ -56,7 +56,7 @@ function App() {
           <Route path="menu/cemilan" element={<CemilanPage />} />
           <Route path="member" element={<MemberPage />} />
           <Route path="akun" element={<ProfilePage />} />
-          <Route path="pesanan" element={<OrdersPage />} />
+          <Route path="pesanan" element={<PesananPage />} />
           <Route path="confirm-pesanan" element={<ConfirmPesanan />} />
           <Route path="confirmpesanan" element={<ConfirmPesanan />} />
           <Route path="promo" element={<PromoPage />} />

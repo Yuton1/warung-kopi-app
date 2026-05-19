@@ -65,6 +65,7 @@ const formatOrderDate = (value) => {
 const resolveImage = (value) => {
   const image = normalizeText(value)
   if (!image) return FALLBACK_IMAGE
+  if (['null', 'undefined', 'none'].includes(image.toLowerCase())) return FALLBACK_IMAGE
   if (image.startsWith('http://') || image.startsWith('https://') || image.startsWith('/')) return image
   return `/${image.replace(/^\/+/, '')}`
 }
@@ -77,7 +78,7 @@ const normalizeOrderItem = (item) => {
     productId: item?.productId ?? item?.product_id ?? null,
     name: normalizeText(item?.name ?? item?.productName) || 'Menu',
     category: normalizeText(item?.category ?? item?.productCategory) || 'Menu',
-    imageUrl: resolveImage(item?.imageUrl ?? item?.image_url ?? item?.productImage),
+    imageUrl: resolveImage(item?.imageUrl ?? item?.image_url ?? item?.productImage ?? item?.product_image ?? item?.image),
     quantity,
     priceAtTime,
     notes: normalizeText(item?.notes),
@@ -86,8 +87,9 @@ const normalizeOrderItem = (item) => {
 }
 
 const normalizeOrder = (order) => {
-  const items = Array.isArray(order?.items) ? order.items.map(normalizeOrderItem) : []
-  const primaryItem = normalizeOrderItem(order?.primaryItem || items || {})
+  const rawItems = Array.isArray(order?.items) ? order.items : []
+  const items = rawItems.map(normalizeOrderItem)
+  const primaryItem = normalizeOrderItem(order?.primaryItem || rawItems[0] || items[0] || {})
   const totalQuantity = parseNumber(order?.totalQuantity, items.reduce((sum, item) => sum + parseNumber(item.quantity), 0))
   const dbStatus = normalizeText(order?.status || order?.statusLabel || 'Proses')
 
@@ -167,13 +169,14 @@ const Timeline = ({ currentStep }) => {
 
 const OrderSummary = ({ order }) => {
   const primaryItem = order.primaryItem || {}
+  const thumbnailImage = resolveImage(primaryItem.imageUrl || primaryItem.image_url || primaryItem.productImage || order.imageUrl)
 
   return (
     <div className="flex items-center justify-between gap-4 p-1">
       <div className="flex min-w-0 items-center gap-4">
         <div className="h-[62px] w-[62px] flex-none overflow-hidden rounded-2xl bg-[#1e140f] shadow-md border border-black/10">
           <img
-            src={resolveImage(primaryItem.imageUrl)}
+            src={thumbnailImage}
             alt={primaryItem.name || 'Menu'}
             className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
             loading="lazy"
