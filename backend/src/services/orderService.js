@@ -254,6 +254,7 @@ const groupOrders = (rows) => {
       ...order,
       totalQuantity: totalQuantity || parseNumber(primaryItem.quantity, 0),
       primaryItem,
+      imageUrl: primaryItem.imageUrl || FALLBACK_IMAGE,
       infoTime: formatOrderTime(order.pickupTime || order.createdAt),
       infoDate: formatOrderDate(order.createdAt || order.pickupTime),
     };
@@ -352,6 +353,7 @@ const groupBaristaOrders = (rows) => {
       ...order,
       totalQuantity: totalQuantity || parseNumber(primaryItem.quantity, 0),
       primaryItem,
+      imageUrl: primaryItem.imageUrl || FALLBACK_IMAGE,
       infoTime: formatOrderTime(order.pickupTime || order.createdAt),
       infoDate: formatOrderDate(order.createdAt || order.pickupTime),
     };

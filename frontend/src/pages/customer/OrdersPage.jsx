@@ -92,6 +92,7 @@ const normalizeOrder = (order) => {
   const primaryItem = normalizeOrderItem(order?.primaryItem || rawItems[0] || items[0] || {})
   const totalQuantity = parseNumber(order?.totalQuantity, items.reduce((sum, item) => sum + parseNumber(item.quantity), 0))
   const dbStatus = normalizeText(order?.status || order?.statusLabel || 'Proses')
+  const imageUrl = resolveImage(order?.imageUrl || order?.primaryImageUrl || primaryItem.imageUrl)
 
   return {
     id: order?.id ?? order?.orderId ?? order?.order_id ?? null,
@@ -108,6 +109,7 @@ const normalizeOrder = (order) => {
     pickupTime: order?.pickupTime ?? order?.pickup_time ?? null,
     pickupNote: normalizeText(order?.pickupNote || order?.pickup_note),
     createdAt: order?.createdAt ?? order?.created_at ?? null,
+    imageUrl,
     primaryItem,
     items,
   }
