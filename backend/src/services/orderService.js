@@ -408,7 +408,9 @@ const updateOrderStatus = async ({ orderId, status }) => {
   }
 
   const nextStatus = normalizeStatusCode(status);
-  if (![ORDER_STATUS.PENDING, ORDER_STATUS.PROCESSING, ORDER_STATUS.READY].includes(nextStatus)) {
+  
+  // TAMBAHKAN ORDER_STATUS.COMPLETED DI DALAM ARRAY BERIKUT:
+  if (![ORDER_STATUS.PENDING, ORDER_STATUS.PROCESSING, ORDER_STATUS.READY, ORDER_STATUS.COMPLETED].includes(nextStatus)) {
     const error = new Error('Status pesanan tidak valid');
     error.statusCode = 400;
     throw error;
