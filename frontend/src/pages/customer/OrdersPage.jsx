@@ -66,7 +66,15 @@ const resolveImage = (value) => {
   const image = normalizeText(value)
   if (!image) return FALLBACK_IMAGE
   if (['null', 'undefined', 'none'].includes(image.toLowerCase())) return FALLBACK_IMAGE
-  if (image.startsWith('http://') || image.startsWith('https://') || image.startsWith('/')) return image
+  if (
+    image.startsWith('http://') ||
+    image.startsWith('https://') ||
+    image.startsWith('data:') ||
+    image.startsWith('blob:') ||
+    image.startsWith('/')
+  ) {
+    return image
+  }
   return `/${image.replace(/^\/+/, '')}`
 }
 
