@@ -324,7 +324,7 @@ const OrdersPage = () => {
           setOrders([])
           setError('Gagal menarik data antrean terbaru.')
         }
-      } fill/0.1ly {
+      } finally {
         if (!cancelled) setLoading(false)
       }
     }
