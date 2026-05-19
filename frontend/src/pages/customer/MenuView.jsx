@@ -10,6 +10,8 @@ import CoffeeSubscription from './MenuViewComponents/CoffeeSubscription';
 import AnalyticsDashboard from './MenuViewComponents/AnalyticsDashboard';
 import CartFloating from '../../components/CartFloating';
 import { coffeeSeed, subscriptionPlans as subscriptionSeed } from '../../data/menuSeed';
+import { STORAGE_KEYS, readStoredValue, writeStoredValue } from '../../data/customerStorage';
+import { getApiBaseUrl } from '../../utils/apiBaseUrl';
 import {
   addCartItem,
   clearCart as clearStoredCart,
@@ -19,11 +21,28 @@ import {
   setCartItemQuantity,
 } from '../../services/cartService';
 
+const API_BASE_URL = getApiBaseUrl()
+
+const apiUrl = (path) => {
+  if (!API_BASE_URL) return path
+  return `${API_BASE_URL}${path.startsWith('/') ? path : `/${path}`}`
+}
+
+const normalizeFavoriteIds = (values = []) =>
+  Array.from(
+    new Set(
+      (Array.isArray(values) ? values : [])
+        .map((value) => Number(value))
+        .filter((value) => Number.isFinite(value) && value > 0)
+    )
+  )
+
 const MenuView = () => {
   const [allProducts, setAllProducts] = useState(coffeeSeed);
   const [loadingMenu, setLoadingMenu] = useState(true);
   const [cart, setCart] = useState(() => getStoredCart().items || []);
-  const [favoriteIdSet, setFavoriteIdSet] = useState(new Set());
+  const [authUser, setAuthUser] = useState(() => readStoredValue(STORAGE_KEYS.auth, null));
+  const [favoriteIdSet, setFavoriteIdSet] = useState(() => new Set(normalizeFavoriteIds(readStoredValue(STORAGE_KEYS.favorites, []))));
   const [tableNumber, setTableNumber] = useState('');
   const [pickupTime, setPickupTime] = useState('');
   const [orderNote, setOrderNote] = useState('');
@@ -114,6 +133,54 @@ const MenuView = () => {
   }, [])
 
   useEffect(() => {
+    const syncAuth = () => {
+      setAuthUser(readStoredValue(STORAGE_KEYS.auth, null))
+    }
+
+    window.addEventListener('storage', syncAuth)
+    window.addEventListener('warungkopi-state-changed', syncAuth)
+
+    return () => {
+      window.removeEventListener('storage', syncAuth)
+      window.removeEventListener('warungkopi-state-changed', syncAuth)
+    }
+  }, [])
+
+  useEffect(() => {
+    const syncFavorites = async () => {
+      const storedAuth = readStoredValue(STORAGE_KEYS.auth, null)
+
+      if (!storedAuth?.email) {
+        const localFavoriteIds = normalizeFavoriteIds(readStoredValue(STORAGE_KEYS.favorites, []))
+        setFavoriteIdSet(new Set(localFavoriteIds))
+        return
+      }
+
+      try {
+        const response = await fetch(apiUrl(`/api/users/favorites?userEmail=${encodeURIComponent(storedAuth.email)}`))
+
+        if (!response.ok) {
+          throw new Error('Gagal memuat favorit')
+        }
+
+        const data = await response.json()
+        const favoriteIds = normalizeFavoriteIds(
+          Array.isArray(data) ? data.map((item) => item.product_id) : []
+        )
+
+        setFavoriteIdSet(new Set(favoriteIds))
+        writeStoredValue(STORAGE_KEYS.favorites, favoriteIds)
+      } catch (error) {
+        console.warn('Gagal memuat favorit dari backend, fallback ke localStorage:', error)
+        const localFavoriteIds = normalizeFavoriteIds(readStoredValue(STORAGE_KEYS.favorites, []))
+        setFavoriteIdSet(new Set(localFavoriteIds))
+      }
+    }
+
+    syncFavorites()
+  }, [authUser?.email])
+
+  useEffect(() => {
     if (!searchQuery) return
 
     requestAnimationFrame(() => {
@@ -144,11 +211,59 @@ const MenuView = () => {
 
   const visibleMenu = normalizedSearchQuery ? filteredMenu : filteredMenu.slice(0, 12)
 
-  const toggleFavorite = (id) => {
-    const newFavs = new Set(favoriteIdSet);
-    if (newFavs.has(id)) newFavs.delete(id);
-    else newFavs.add(id);
-    setFavoriteIdSet(newFavs);
+  const persistLocalFavorites = (ids = []) => {
+    const normalized = normalizeFavoriteIds(ids)
+    writeStoredValue(STORAGE_KEYS.favorites, normalized)
+    window.dispatchEvent(new Event('warungkopi-state-changed'))
+    return new Set(normalized)
+  }
+
+  const toggleFavorite = async (id) => {
+    const productId = Number(id)
+    if (!Number.isFinite(productId) || productId <= 0) return
+
+    const previousFavorites = new Set(favoriteIdSet)
+    const nextFavorites = new Set(favoriteIdSet)
+    const wasFavorite = nextFavorites.has(productId)
+
+    if (wasFavorite) nextFavorites.delete(productId)
+    else nextFavorites.add(productId)
+
+    if (!authUser?.email) {
+      setFavoriteIdSet(persistLocalFavorites([...nextFavorites]))
+      return
+    }
+
+    setFavoriteIdSet(nextFavorites)
+
+    try {
+      const response = await fetch(
+        apiUrl(wasFavorite ? `/api/users/favorites/${productId}` : '/api/users/favorites'),
+        {
+          method: wasFavorite ? 'DELETE' : 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            userEmail: authUser.email,
+            userName: authUser.name,
+            productId,
+          }),
+        }
+      )
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData?.message || 'Gagal memperbarui favorit')
+      }
+
+      const nextFavoriteIds = Array.from(nextFavorites)
+      setFavoriteIdSet(persistLocalFavorites(nextFavoriteIds))
+    } catch (error) {
+      console.error('Gagal menyimpan favorit:', error)
+      setFavoriteIdSet(previousFavorites)
+      alert(error.message || 'Gagal menyimpan favorit')
+    }
   };
 
   const addToCart = async (item) => {

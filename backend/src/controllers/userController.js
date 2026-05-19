@@ -6,6 +6,9 @@ const {
   addUserAddress,
   setDefaultUserAddress,
   deleteUserAddress,
+  listUserFavorites,
+  addUserFavorite,
+  removeUserFavorite,
 } = require('../services/userService');
 
 const getUsers = async (req, res) => {
@@ -131,6 +134,56 @@ const removeUserAddress = async (req, res) => {
   }
 };
 
+const getUserFavorites = async (req, res) => {
+  try {
+    const favorites = await listUserFavorites({
+      userId: req.query.userId || req.body?.userId,
+      userEmail: req.query.email || req.body?.email || req.query.userEmail || req.body?.userEmail,
+      userName: req.query.userName || req.body?.userName,
+    });
+
+    return res.json(favorites);
+  } catch (error) {
+    return res.status(error.statusCode || 500).json({ message: error.message });
+  }
+};
+
+const createUserFavorite = async (req, res) => {
+  try {
+    const favorite = await addUserFavorite({
+      userId: req.body?.userId || req.query?.userId,
+      userEmail: req.body?.email || req.query?.email || req.body?.userEmail || req.query?.userEmail,
+      userName: req.body?.userName || req.query?.userName,
+      productId: req.body?.productId,
+    });
+
+    return res.status(201).json({
+      message: 'Favorit berhasil disimpan',
+      favorite,
+    });
+  } catch (error) {
+    return res.status(error.statusCode || 500).json({ message: error.message });
+  }
+};
+
+const removeUserFavoriteByProduct = async (req, res) => {
+  try {
+    const favorite = await removeUserFavorite({
+      userId: req.body?.userId || req.query?.userId,
+      userEmail: req.body?.email || req.query?.email || req.body?.userEmail || req.query?.userEmail,
+      userName: req.body?.userName || req.query?.userName,
+      productId: req.params.productId,
+    });
+
+    return res.json({
+      message: favorite.deleted ? 'Favorit berhasil dihapus' : 'Favorit tidak ditemukan',
+      favorite,
+    });
+  } catch (error) {
+    return res.status(error.statusCode || 500).json({ message: error.message });
+  }
+};
+
 module.exports = {
   getUsers,
   getCurrentUserProfile,
@@ -139,4 +192,7 @@ module.exports = {
   createUserAddress,
   updateDefaultUserAddress,
   removeUserAddress,
+  getUserFavorites,
+  createUserFavorite,
+  removeUserFavoriteByProduct,
 };

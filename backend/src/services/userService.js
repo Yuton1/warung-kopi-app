@@ -527,6 +527,136 @@ const deleteUserAddress = async ({ addressId, userId, userEmail, userName } = {}
   }
 };
 
+const buildFavoriteRow = (row) => {
+  if (!row) return null;
+
+  return {
+    id: row.id,
+    user_id: row.user_id,
+    product_id: row.product_id,
+    created_at: row.created_at || null,
+  };
+};
+
+const listUserFavorites = async ({ userId, userEmail, userName } = {}) => {
+  const resolvedUserId = await resolveUserId({ userId, userEmail, userName });
+  if (!resolvedUserId) {
+    return [];
+  }
+
+  const [rows] = await withTimeout(
+    db.execute(
+      `
+      SELECT
+        id,
+        user_id,
+        product_id,
+        created_at
+      FROM favorites
+      WHERE user_id = ?
+      ORDER BY created_at DESC, id DESC
+      `,
+      [resolvedUserId]
+    )
+  );
+
+  return rows.map(buildFavoriteRow);
+};
+
+const addUserFavorite = async ({ userId, userEmail, userName, productId } = {}) => {
+  const resolvedUserId = await resolveUserId({ userId, userEmail, userName });
+  if (!resolvedUserId) {
+    const error = new Error('User tidak ditemukan');
+    error.statusCode = 404;
+    throw error;
+  }
+
+  const numericProductId = Number.parseInt(productId, 10);
+  if (!Number.isFinite(numericProductId) || numericProductId <= 0) {
+    const error = new Error('productId wajib diisi');
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const connection = await db.getConnection();
+
+  try {
+    await connection.beginTransaction();
+
+    const [existingRows] = await withTimeout(
+      connection.execute(
+        'SELECT id FROM favorites WHERE user_id = ? AND product_id = ? LIMIT 1',
+        [resolvedUserId, numericProductId]
+      )
+    );
+
+    if (existingRows.length > 0) {
+      await connection.commit();
+      return {
+        id: existingRows[0].id,
+        user_id: resolvedUserId,
+        product_id: numericProductId,
+        created_at: null,
+        is_favorite: true,
+      };
+    }
+
+    const [result] = await withTimeout(
+      connection.execute(
+        `
+        INSERT INTO favorites (user_id, product_id)
+        VALUES (?, ?)
+        `,
+        [resolvedUserId, numericProductId]
+      )
+    );
+
+    await connection.commit();
+
+    return {
+      id: result.insertId,
+      user_id: resolvedUserId,
+      product_id: numericProductId,
+      created_at: new Date().toISOString(),
+      is_favorite: true,
+    };
+  } catch (error) {
+    await connection.rollback();
+    throw error;
+  } finally {
+    connection.release();
+  }
+};
+
+const removeUserFavorite = async ({ userId, userEmail, userName, productId } = {}) => {
+  const resolvedUserId = await resolveUserId({ userId, userEmail, userName });
+  if (!resolvedUserId) {
+    const error = new Error('User tidak ditemukan');
+    error.statusCode = 404;
+    throw error;
+  }
+
+  const numericProductId = Number.parseInt(productId, 10);
+  if (!Number.isFinite(numericProductId) || numericProductId <= 0) {
+    const error = new Error('productId wajib diisi');
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const [result] = await withTimeout(
+    db.execute('DELETE FROM favorites WHERE user_id = ? AND product_id = ?', [
+      resolvedUserId,
+      numericProductId,
+    ])
+  );
+
+  return {
+    user_id: resolvedUserId,
+    product_id: numericProductId,
+    deleted: result.affectedRows > 0,
+  };
+};
+
 module.exports = {
   listUsers,
   registerUser,
@@ -536,4 +666,7 @@ module.exports = {
   addUserAddress,
   setDefaultUserAddress,
   deleteUserAddress,
+  listUserFavorites,
+  addUserFavorite,
+  removeUserFavorite,
 };

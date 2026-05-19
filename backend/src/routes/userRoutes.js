@@ -8,6 +8,9 @@ const {
   createUserAddress,
   updateDefaultUserAddress,
   removeUserAddress,
+  getUserFavorites,
+  createUserFavorite,
+  removeUserFavoriteByProduct,
 } = require('../controllers/userController');
 
 router.get('/', getUsers);
@@ -17,5 +20,8 @@ router.get('/addresses', getUserAddresses);
 router.post('/addresses', createUserAddress);
 router.patch('/addresses/:addressId/default', updateDefaultUserAddress);
 router.delete('/addresses/:addressId', removeUserAddress);
+router.get('/favorites', getUserFavorites);
+router.post('/favorites', createUserFavorite);
+router.delete('/favorites/:productId', removeUserFavoriteByProduct);
 
 module.exports = router;
