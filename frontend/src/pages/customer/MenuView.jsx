@@ -47,7 +47,16 @@ const MenuView = () => {
   const [pickupTime, setPickupTime] = useState('');
   const [orderNote, setOrderNote] = useState('');
   const [preOrder, setPreOrder] = useState(null);
-  const [groupOrder, setGroupOrder] = useState({ members: 4, items: [], status: 'idle' });
+  
+  // Modifikasi state groupOrder agar menyimpan data relasi database yang realistis
+  const [groupOrder, setGroupOrder] = useState({ 
+    id: null, 
+    code: "GRP-D64J", 
+    members: 4, 
+    items: [], 
+    status: 'idle' 
+  });
+  
   const [subscriptionPlans, setSubscriptionPlans] = useState(subscriptionSeed);
   const [activeSub, setActiveSub] = useState({ id: null });
   const [searchParams] = useSearchParams();
@@ -82,7 +91,6 @@ const MenuView = () => {
     const fetchData = async () => {
       try {
         setLoadingMenu(true);
-        // Kita panggil API secara paralel agar cepat
         const [prodRes, subRes] = await Promise.all([
           fetch('/api/products'),
           fetch('/api/subscriptions')
@@ -106,6 +114,31 @@ const MenuView = () => {
     };
     fetchData();
   }, []);
+
+  // Ambil data session group jika user tergabung dalam group order tertentu saat masuk halaman
+  useEffect(() => {
+    const checkActiveGroupSession = async () => {
+      if (!authUser?.id) return;
+      try {
+        const response = await fetch(apiUrl(`/api/group-sessions/active?userId=${authUser.id}`));
+        if (response.ok) {
+          const activeSession = await response.json();
+          if (activeSession) {
+            setGroupOrder({
+              id: activeSession.id,
+              code: activeSession.group_code,
+              members: activeSession.members || 1,
+              status: activeSession.status,
+              items: []
+            });
+          }
+        }
+      } catch (err) {
+        console.warn("Gagal sinkronisasi sesi grup aktif dari server:", err);
+      }
+    };
+    checkActiveGroupSession();
+  }, [authUser?.id]);
 
   useEffect(() => {
     const syncCart = async () => {
@@ -274,7 +307,32 @@ const MenuView = () => {
       console.error('Gagal menambahkan menu ke keranjang:', error)
     }
   };
-  const addToGroup = (item) => console.log("Grup add:", item);
+
+  // 1. Tombol "+" Tambah ke group langsung dari Grid Menu
+  const addToGroup = async (item) => {
+    if (!authUser) {
+      alert("Silakan login terlebih dahulu untuk menggunakan fitur grup.");
+      return;
+    }
+    try {
+      const response = await fetch(apiUrl('/api/group-cart/items'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          group_code: groupOrder.code,
+          user_id: authUser.id,
+          product_id: item.id,
+          quantity: 1
+        })
+      });
+      if (response.ok) {
+        alert(`${item.name} berhasil ditambahkan langsung ke Keranjang Grup!`);
+      }
+    } catch (error) {
+      console.error("Gagal menambahkan item langsung ke grup:", error);
+    }
+  };
+
   const viewDetail = (productId) => {
     const product = (Array.isArray(allProducts) ? allProducts : []).find(
       (item) => String(item.id) === String(productId)
@@ -286,6 +344,7 @@ const MenuView = () => {
       },
     });
   };
+
   const savePreOrder = (data = {}) =>
     setPreOrder({
       status: 'Tersimpan',
@@ -295,14 +354,83 @@ const MenuView = () => {
       items: cart,
       tableNumber,
     });
+
   const cancelPreOrder = () => {
     setPreOrder(null);
     setPickupTime('');
     setOrderNote('');
   };
-  const updateGroupMembers = (members) => setGroupOrder({...groupOrder, members});
-  const addCartToGroup = () => console.log("Sync group cart");
-  const confirmGroupPayment = () => alert("Group payment confirmed!");
+
+  // 2. Mengubah jumlah anggota group session
+  const updateGroupMembers = async (members) => {
+    setGroupOrder(prev => ({ ...prev, members }));
+    try {
+      await fetch(apiUrl(`/api/group-sessions/update-members`), {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          group_code: groupOrder.code,
+          members: members
+        })
+      });
+    } catch (error) {
+      console.error("Gagal mengupdate jumlah anggota ke server:", error);
+    }
+  };
+
+  // 3. Memasukkan isi cart lokal ke dalam group_cart_items di database
+  const addCartToGroup = async () => {
+    if (cart.length === 0) return;
+    if (!authUser) {
+      alert("Silakan login terlebih dahulu.");
+      return;
+    }
+
+    try {
+      const response = await fetch(apiUrl('/api/group-cart/sync-local'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          group_code: groupOrder.code,
+          user_id: authUser.id,
+          items: cart.map(item => ({
+            product_id: item.id || item.product_id,
+            quantity: item.qty || item.quantity || 1
+          }))
+        })
+      });
+
+      if (response.ok) {
+        alert("Keranjang belanja lokal Anda berhasil digabungkan ke grup!");
+        handleClearCart(); // Kosongkan keranjang pribadi setelah sukses dilempar ke grup
+      } else {
+        alert("Gagal menyinkronkan keranjang ke grup.");
+      }
+    } catch (error) {
+      console.error("Error sync keranjang ke grup:", error);
+    }
+  };
+
+  // 4. Konfirmasi pembayaran grup (Mengunci sesi & redirect ke split bill checkout)
+  const confirmGroupPayment = async () => {
+    try {
+      const response = await fetch(apiUrl(`/api/group-sessions/lock`), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ group_code: groupOrder.code })
+      });
+
+      if (response.ok) {
+        // Alihkan halaman ke komponen ringkasan split bill untuk proses pembayaran individual
+        navigate(`/checkout/group?code=${groupOrder.code}&table=${tableNumber}`);
+      } else {
+        alert("Gagal melakukan konfirmasi transaksi grup.");
+      }
+    } catch (error) {
+      console.error("Error konfirmasi grup:", error);
+    }
+  };
+
   const activatePlan = (planId) => setActiveSub({ id: planId });
 
   const updateCartQuantity = async (itemId, nextQuantity) => {
@@ -373,7 +501,7 @@ const MenuView = () => {
               emptyMessage={emptyMessage}
             />
           </section>
-          {/* FIX UI/UX ASTETIK: Menghilangkan grid menyamping, diganti berderet ke bawah dengan max-w proporsional */}
+
           <section className="w-full bg-transparent pb-20 mt-16" id="tools">
             <div className="pl-4 mb-10 border-l-4 border-[#FF6E00]">
               <span className="text-xs font-semibold text-[#FF6E00] uppercase tracking-widest block mb-1">
@@ -384,7 +512,6 @@ const MenuView = () => {
               </h2>
             </div>
 
-            {/* Inject style animasi smooth khusus untuk deretan kartu fitur */}
             <style>{`
               @keyframes featureSlideUp {
                 from { opacity: 0; transform: translateY(20px); }
@@ -395,9 +522,7 @@ const MenuView = () => {
               }
             `}</style>
 
-            {/* Kontainer Utama: Berderet ke bawah, rapi, dan seimbang */}
             <div className="w-full flex flex-col gap-8 px-2">
-
               {/* 1. Pre-Order Section */}
               <div className="fitur-item-wrapper bg-white rounded-[2.5rem] shadow-[0_4px_25px_-5px_rgba(74,52,46,0.06)] hover:shadow-[0_15px_35px_-5px_rgba(74,52,46,0.12)] transition-all duration-300 hover:-translate-y-1 overflow-hidden" style={{ animationDelay: '100ms' }}>
                 <PreOrderSection 
@@ -436,7 +561,6 @@ const MenuView = () => {
                   planStatus={planStatus} 
                 />
               </div>
-            
             </div>
           </section>
         </main>
