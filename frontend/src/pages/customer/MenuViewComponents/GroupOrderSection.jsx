@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 
 const GroupOrderSection = ({ groupOrder, hasCart, onUpdateMembers, onAddCart, onConfirm }) => {
-  const groupCode = groupOrder?.code || "GRP-D64J";
+  const hasActiveSession = Boolean(groupOrder?.id && groupOrder?.code);
+  const groupCode = hasActiveSession ? groupOrder.code : 'Belum ada sesi aktif';
   const [copied, setCopied] = useState(false);
 
   const handleCopy = () => {
+    if (!hasActiveSession) return;
     navigator.clipboard.writeText(groupCode);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000); // Reset status animasi tombol salin
@@ -26,8 +28,12 @@ const GroupOrderSection = ({ groupOrder, hasCart, onUpdateMembers, onAddCart, on
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
               </span>
-              <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2.5 py-0.5 rounded-full uppercase tracking-wider">
-                Sesi Grup Aktif
+              <span className={`text-xs font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider ${
+                hasActiveSession
+                  ? 'text-emerald-600 bg-emerald-50'
+                  : 'text-amber-700 bg-amber-50'
+              }`}>
+                {hasActiveSession ? 'Sesi Grup Aktif' : 'Sesi Belum Aktif'}
               </span>
             </div>
             <h2 className="text-2xl md:text-3xl font-black text-[#1A120B] tracking-tight">
@@ -76,14 +82,17 @@ const GroupOrderSection = ({ groupOrder, hasCart, onUpdateMembers, onAddCart, on
             <button 
               onClick={handleCopy}
               className={`px-6 py-3.5 rounded-2xl font-bold text-sm shadow-md transition-all duration-300 active:scale-95 flex items-center gap-2 ${
-                copied 
+                !hasActiveSession
+                  ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                  : copied 
                   ? 'bg-emerald-600 text-white shadow-emerald-100' 
                   : 'bg-[#1A120B] text-white hover:bg-black'
               }`}
+              disabled={!hasActiveSession}
               type="button"
             >
               <i className={`fa-solid ${copied ? 'fa-circle-check animate-bounce' : 'fa-share-nodes'}`}></i>
-              {copied ? 'Tersalin ke Clipboard!' : 'Bagikan Link / Kode Grup'}
+              {hasActiveSession ? (copied ? 'Tersalin ke Clipboard!' : 'Bagikan Link / Kode Grup') : 'Belum Ada Sesi'}
             </button>
           </div>
         </div>
@@ -102,12 +111,12 @@ const GroupOrderSection = ({ groupOrder, hasCart, onUpdateMembers, onAddCart, on
           {/* Button 1: Tambah ke Keranjang Grup */}
           <button 
             className={`w-full py-4 rounded-2xl font-bold text-sm transition-all duration-300 shadow-sm active:scale-[0.97] flex items-center justify-center gap-3 border-b-4 ${
-              !hasCart 
+              !hasCart || !hasActiveSession
                 ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed' 
                 : 'bg-[#FF6E00] text-white hover:brightness-110 border-orange-700 active:border-b-0 active:translate-y-[4px]'
             }`}
             onClick={onAddCart}
-            disabled={!hasCart}
+            disabled={!hasCart || !hasActiveSession}
             type="button"
           >
             <i className="fa-solid fa-cart-plus"></i>
@@ -116,8 +125,13 @@ const GroupOrderSection = ({ groupOrder, hasCart, onUpdateMembers, onAddCart, on
           
           {/* Button 2: Konfirmasi Pembayaran */}
           <button 
-            className="w-full py-4 bg-white border-2 border-gray-200 hover:border-[#1A120B] text-[#1A120B] rounded-2xl font-bold text-sm shadow-sm hover:bg-gray-50 transition-all duration-300 active:scale-[0.97] flex items-center justify-center gap-3 group"
+            className={`w-full py-4 bg-white border-2 rounded-2xl font-bold text-sm shadow-sm transition-all duration-300 active:scale-[0.97] flex items-center justify-center gap-3 group ${
+              hasActiveSession
+                ? 'border-gray-200 hover:border-[#1A120B] hover:bg-gray-50 text-[#1A120B]'
+                : 'border-gray-200 text-gray-400 cursor-not-allowed'
+            }`}
             onClick={onConfirm}
+            disabled={!hasActiveSession}
             type="button"
           >
             <i className="fa-solid fa-file-invoice-dollar text-[#FF6E00] group-hover:animate-pulse"></i>

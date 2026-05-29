@@ -51,8 +51,8 @@ const MenuView = () => {
   // Modifikasi state groupOrder agar menyimpan data relasi database yang realistis
   const [groupOrder, setGroupOrder] = useState({ 
     id: null, 
-    code: "GRP-D64J", 
-    members: 4, 
+    code: '', 
+    members: 1, 
     items: [], 
     status: 'idle' 
   });
@@ -131,6 +131,14 @@ const MenuView = () => {
               status: activeSession.status,
               items: []
             });
+          } else {
+            setGroupOrder({
+              id: null,
+              code: '',
+              members: 1,
+              status: 'idle',
+              items: [],
+            })
           }
         }
       } catch (err) {
@@ -314,6 +322,10 @@ const MenuView = () => {
       alert("Silakan login terlebih dahulu untuk menggunakan fitur grup.");
       return;
     }
+    if (!groupOrder?.code || !groupOrder?.id) {
+      alert("Sesi grup belum aktif. Tunggu sinkronisasi grup atau muat ulang halaman.");
+      return;
+    }
     try {
       const response = await fetch(apiUrl('/api/group-cart/items'), {
         method: 'POST',
@@ -321,6 +333,7 @@ const MenuView = () => {
         body: JSON.stringify({
           group_code: groupOrder.code,
           user_id: authUser.id,
+          user_email: authUser.email,
           product_id: item.id,
           quantity: 1
         })
@@ -363,6 +376,10 @@ const MenuView = () => {
 
   // 2. Mengubah jumlah anggota group session
   const updateGroupMembers = async (members) => {
+    if (!groupOrder?.code) {
+      alert("Sesi grup belum aktif.");
+      return;
+    }
     setGroupOrder(prev => ({ ...prev, members }));
     try {
       await fetch(apiUrl(`/api/group-sessions/update-members`), {
@@ -370,6 +387,8 @@ const MenuView = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           group_code: groupOrder.code,
+          user_id: authUser?.id,
+          user_email: authUser?.email,
           members: members
         })
       });
@@ -380,23 +399,43 @@ const MenuView = () => {
 
   // 3. Memasukkan isi cart lokal ke dalam group_cart_items di database
   const addCartToGroup = async () => {
-    if (cart.length === 0) return;
+    if (cart.length === 0) {
+      alert("Keranjang belanja kosong!");
+      return;
+    }
     if (!authUser) {
       alert("Silakan login terlebih dahulu.");
+      return;
+    }
+    if (!groupOrder?.code || !groupOrder?.id) {
+      alert("Sesi grup belum aktif.");
+      return;
+    }
+
+    const formattedItems = cart
+      .map((item) => ({
+        product_id: Number(item.productId || item.product_id || item.productID || item.id),
+        quantity: Number(item.qty || item.quantity || 1),
+      }))
+      .filter((item) => Number.isFinite(item.product_id) && item.product_id > 0 && Number.isFinite(item.quantity) && item.quantity > 0);
+
+    if (!formattedItems.length) {
+      alert("Tidak ada item valid untuk disinkronkan ke grup.");
       return;
     }
 
     try {
       const response = await fetch(apiUrl('/api/group-cart/sync-local'), {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
         body: JSON.stringify({
           group_code: groupOrder.code,
           user_id: authUser.id,
-          items: cart.map(item => ({
-            product_id: item.id || item.product_id,
-            quantity: item.qty || item.quantity || 1
-          }))
+          user_email: authUser.email,
+          items: formattedItems,
         })
       });
 
@@ -404,20 +443,31 @@ const MenuView = () => {
         alert("Keranjang belanja lokal Anda berhasil digabungkan ke grup!");
         handleClearCart(); // Kosongkan keranjang pribadi setelah sukses dilempar ke grup
       } else {
-        alert("Gagal menyinkronkan keranjang ke grup.");
+        const errorData = await response.json().catch(() => ({}))
+        console.error('Gagal sinkronisasi group cart:', response.status, errorData)
+        alert(errorData?.message || "Gagal menyinkronkan keranjang ke grup.");
       }
     } catch (error) {
       console.error("Error sync keranjang ke grup:", error);
+      alert("Gagal menyinkronkan keranjang ke grup.");
     }
   };
 
   // 4. Konfirmasi pembayaran grup (Mengunci sesi & redirect ke split bill checkout)
   const confirmGroupPayment = async () => {
+    if (!groupOrder?.code) {
+      alert("Sesi grup belum aktif.");
+      return;
+    }
     try {
       const response = await fetch(apiUrl(`/api/group-sessions/lock`), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ group_code: groupOrder.code })
+        body: JSON.stringify({
+          group_code: groupOrder.code,
+          user_id: authUser?.id,
+          user_email: authUser?.email,
+        })
       });
 
       if (response.ok) {
