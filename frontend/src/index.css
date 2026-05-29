@@ -81,3 +81,14 @@ img {
 ::selection {
   background: rgba(166, 123, 91, 0.26);
 }
+
+.banner-wrapper-floating {
+  /* Menarik paksa konten ke atas untuk menetralkan padding vertikal layout utama */
+  margin-top: -1.5rem; /* Menetralkan py-6 (1.5rem) */
+}
+
+@media (min-width: 768px) {
+  .banner-wrapper-floating {
+    margin-top: -2.5rem; /* Menetralkan md:py-10 (2.5rem) */
+  }
+}

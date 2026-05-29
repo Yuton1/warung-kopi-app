@@ -38,11 +38,13 @@ const createSession = async (req, res) => {
   }
 };
 
-const getIdentity = (req) => ({
-  userId: req.query.userId || req.body.userId,
-  userEmail: req.query.userEmail || req.query.email || req.body.userEmail || req.body.email,
-  userName: req.query.userName || req.query.username || req.body.userName || req.body.username,
-});
+const getIdentity = (req) => {
+  return {
+    userId: req.query.userId || req.body.userId || req.query.user_id || req.body.user_id || null,
+    userEmail: req.query.userEmail || req.query.email || req.body.userEmail || req.body.email || null,
+    userName: req.query.userName || req.query.username || req.body.userName || req.body.username || null,
+  };
+};
 
 const getActiveSession = async (req, res) => {
   try {
@@ -110,10 +112,21 @@ const addCartItem = async (req, res) => {
 
 const syncLocalCart = async (req, res) => {
   try {
+    const identity = getIdentity(req);
+    const groupCode = req.body.group_code || req.body.groupCode || req.query.groupCode || req.query.group_code;
+    const items = req.body.items;
+
+    // Validasi pencegah Error 500
+    if (!groupCode) {
+      return res.status(400).json({
+        message: 'Gagal menyinkronkan keranjang: group_code / kode undangan wajib disertakan.',
+      });
+    }
+
     const result = await syncLocalCartToGroup({
-      ...getIdentity(req),
-      groupCode: req.body.group_code || req.body.groupCode,
-      items: req.body.items,
+      ...identity,
+      groupCode,
+      items: items || [],
     });
 
     res.status(201).json(result);
