@@ -45,6 +45,7 @@ const LoginPage = () => {
       const userRole = user.role
 
       const authUser = {
+        id: user.id,
         username: user.username,
         name: user.username,
         role: userRole,

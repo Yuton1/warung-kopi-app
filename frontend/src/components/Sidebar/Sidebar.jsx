@@ -16,7 +16,7 @@ const Sidebar = ({ role }) => {
   };
 
   return (
-    <aside className="w-72 bg-[#2c1b0e] h-screen fixed top-0 left-0 flex flex-col p-6 text-white shadow-2xl z-50 overflow-y-auto">
+    <aside className="relative z-50 flex h-auto w-full flex-col overflow-y-visible bg-[#2c1b0e] p-6 text-white shadow-2xl lg:fixed lg:left-0 lg:top-0 lg:h-screen lg:w-72 lg:overflow-y-auto">
       {/* Brand Logo */}
       <div className="flex items-center gap-3 mb-10 px-2">
         <div className="h-8 w-8 bg-[#e39b4f] rounded-lg rotate-12 flex items-center justify-center shadow-lg">
@@ -54,7 +54,7 @@ const Sidebar = ({ role }) => {
       </div>
 
       {/* Bottom Actions */}
-      <div className="pt-6 border-t border-[#3d2b1d]">
+      <div className="mt-6 border-t border-[#3d2b1d] pt-6">
         <SidebarItem icon={Settings} label="Settings" path="/settings" />
         <button 
           onClick={handleLogout}

@@ -174,10 +174,10 @@ const BannerManagement = () => {
   }
 
   return (
-    <div className="flex h-screen bg-[#F8F9FA] overflow-hidden">
+    <div className="flex min-h-screen flex-col bg-[#F8F9FA] overflow-hidden lg:flex-row">
       <Sidebar role="admin" />
 
-      <main className="flex-1 p-8 overflow-y-auto">
+      <main className="w-full flex-1 overflow-y-auto p-4 sm:p-6 lg:ml-72 lg:p-8">
         <header className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between mb-8">
           <div>
             <h1 className="text-3xl font-extrabold text-[#2c1b0e]">Banner Management</h1>

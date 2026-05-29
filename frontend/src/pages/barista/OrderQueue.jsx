@@ -263,10 +263,10 @@ const OrderQueue = () => {
   }
 
   return (
-    <div className="flex min-h-screen overflow-hidden bg-[#faf8f5] text-[#2c1b0e]">
+    <div className="flex min-h-screen flex-col overflow-hidden bg-[#faf8f5] text-[#2c1b0e] lg:flex-row">
       <Sidebar role="barista" />
 
-      <main className="flex-1 overflow-y-auto p-6 md:p-8">
+      <main className="w-full flex-1 overflow-y-auto p-4 sm:p-6 md:p-8 lg:ml-72">
         
         {/* HEADER UTAMA */}
         <header className="mb-8 flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between border-b border-black/[0.04] pb-6">

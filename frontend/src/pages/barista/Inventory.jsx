@@ -142,10 +142,10 @@ const Inventory = () => {
   }
 
   return (
-    <div className="flex h-screen overflow-hidden bg-[#F8F9FA] font-['Fredoka']">
+    <div className="flex min-h-screen flex-col overflow-hidden bg-[#F8F9FA] font-['Fredoka'] lg:flex-row">
       <Sidebar role="barista" />
 
-      <main className="flex-1 overflow-y-auto p-8">
+      <main className="w-full flex-1 overflow-y-auto p-4 sm:p-6 lg:ml-72 lg:p-8">
         <header className="mb-6 flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
           <div>
             <h1 className="text-3xl font-extrabold text-[#2c1b0e]">Menu Inventory</h1>

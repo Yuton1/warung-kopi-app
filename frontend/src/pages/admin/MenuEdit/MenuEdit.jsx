@@ -166,9 +166,9 @@ const MenuEdit = () => {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen bg-[#f8f4ee]">
+      <div className="flex min-h-screen flex-col bg-[#f8f4ee] lg:flex-row">
         <Sidebar role="admin" />
-        <main className="flex-1 p-8">
+        <main className="w-full flex-1 p-4 sm:p-6 lg:ml-72 lg:p-8">
           <div className="rounded-[32px] border border-[#e7d7c8] bg-white p-8 shadow-sm">
             <p className="text-lg font-semibold text-[#4a3728]">Memuat data menu...</p>
           </div>
@@ -179,9 +179,9 @@ const MenuEdit = () => {
 
   if (error && !form.name) {
     return (
-      <div className="flex min-h-screen bg-[#f8f4ee]">
+      <div className="flex min-h-screen flex-col bg-[#f8f4ee] lg:flex-row">
         <Sidebar role="admin" />
-        <main className="flex-1 p-8">
+        <main className="w-full flex-1 p-4 sm:p-6 lg:ml-72 lg:p-8">
           <div className="rounded-[32px] border border-[#e7d7c8] bg-white p-8 shadow-sm">
             <div className="mb-6 flex items-center justify-between">
               <Link to="/admin/menu" className="inline-flex items-center gap-2 text-sm font-semibold text-[#8b5e34] hover:underline">
@@ -197,10 +197,10 @@ const MenuEdit = () => {
   }
 
   return (
-    <div className="flex min-h-screen bg-[#f8f4ee]">
+    <div className="flex min-h-screen flex-col bg-[#f8f4ee] lg:flex-row">
       <Sidebar role="admin" />
 
-      <main className="flex-1 overflow-y-auto p-8">
+      <main className="w-full flex-1 overflow-y-auto p-4 sm:p-6 lg:ml-72 lg:p-8">
         <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
           <div>
             <Link

@@ -118,9 +118,14 @@ const MenuView = () => {
   // Ambil data session group jika user tergabung dalam group order tertentu saat masuk halaman
   useEffect(() => {
     const checkActiveGroupSession = async () => {
-      if (!authUser?.id) return;
+      if (!authUser?.id && !authUser?.email) return;
       try {
-        const response = await fetch(apiUrl(`/api/group-sessions/active?userId=${authUser.id}`));
+        const query = new URLSearchParams()
+        if (authUser?.id) query.set('userId', authUser.id)
+        if (authUser?.email) query.set('userEmail', authUser.email)
+        if (authUser?.name) query.set('userName', authUser.name)
+
+        const response = await fetch(apiUrl(`/api/group-sessions/active?${query.toString()}`));
         if (response.ok) {
           const activeSession = await response.json();
           if (activeSession) {
@@ -318,7 +323,7 @@ const MenuView = () => {
 
   // 1. Tombol "+" Tambah ke group langsung dari Grid Menu
   const addToGroup = async (item) => {
-    if (!authUser) {
+    if (!authUser?.email && !authUser?.id) {
       alert("Silakan login terlebih dahulu untuk menggunakan fitur grup.");
       return;
     }
@@ -334,6 +339,7 @@ const MenuView = () => {
           group_code: groupOrder.code,
           user_id: authUser.id,
           user_email: authUser.email,
+          user_name: authUser.name,
           product_id: item.id,
           quantity: 1
         })
@@ -389,6 +395,7 @@ const MenuView = () => {
           group_code: groupOrder.code,
           user_id: authUser?.id,
           user_email: authUser?.email,
+          user_name: authUser?.name,
           members: members
         })
       });
@@ -435,6 +442,7 @@ const MenuView = () => {
           group_code: groupOrder.code,
           user_id: authUser.id,
           user_email: authUser.email,
+          user_name: authUser.name,
           items: formattedItems,
         })
       });
@@ -467,6 +475,7 @@ const MenuView = () => {
           group_code: groupOrder.code,
           user_id: authUser?.id,
           user_email: authUser?.email,
+          user_name: authUser?.name,
         })
       });
 
