@@ -1,10 +1,42 @@
 const {
   addGroupCartItem,
+  createGroupSessionFromHost,
   ensureActiveSessionForUser,
   lockGroupSession,
   syncLocalCartToGroup,
   updateGroupMembers,
 } = require('../services/groupService');
+
+const createSession = async (req, res) => {
+  try {
+    const hostId = req.body.host_id ?? req.body.hostId ?? req.body.user_id ?? req.body.userId;
+
+    if (!hostId) {
+      return res.status(400).json({
+        message: 'host_id wajib diisi',
+      });
+    }
+
+    const session = await createGroupSessionFromHost({
+      hostId,
+      userId: req.body.user_id ?? req.body.userId,
+      userEmail: req.body.user_email || req.body.userEmail || req.body.email,
+      userName: req.body.user_name || req.body.userName || req.body.username,
+    });
+
+    return res.status(201).json({
+      id: session.id,
+      group_code: session.group_code,
+      host_id: session.host_id,
+      status: session.status,
+    });
+  } catch (error) {
+    res.status(error.statusCode || 500).json({
+      message: 'Gagal membuat sesi grup',
+      error: error.message,
+    });
+  }
+};
 
 const getIdentity = (req) => ({
   userId: req.query.userId || req.body.userId,
@@ -95,6 +127,7 @@ const syncLocalCart = async (req, res) => {
 
 module.exports = {
   addCartItem,
+  createSession,
   getActiveSession,
   lockSession,
   syncLocalCart,

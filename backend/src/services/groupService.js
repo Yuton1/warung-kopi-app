@@ -12,6 +12,8 @@ const withTimeout = (operation, timeoutMs = 5000) => {
 };
 
 const FALLBACK_IMAGE = '/Logo_Warkop_Nav.png';
+const GROUP_CODE_LENGTH = 8;
+const GROUP_CODE_CHARSET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 
 const parseNumber = (value, fallback = 0) => {
   const parsed = Number(value);
@@ -51,7 +53,53 @@ const resolveUserId = async ({ userId, userEmail, userName }) => {
   return null;
 };
 
-const generateGroupCode = () => `GRP-${crypto.randomBytes(3).toString('hex').toUpperCase()}`;
+const generateGroupCode = (length = GROUP_CODE_LENGTH) => {
+  const bytes = crypto.randomBytes(length);
+  let code = '';
+
+  for (let index = 0; index < length; index += 1) {
+    code += GROUP_CODE_CHARSET[bytes[index] % GROUP_CODE_CHARSET.length];
+  }
+
+  return code;
+};
+
+const isDuplicateKeyError = (error) =>
+  error?.code === 'ER_DUP_ENTRY' ||
+  error?.code === 'ER_DUP_KEY' ||
+  error?.errno === 1062;
+
+const groupCodeExists = async (connection, groupCode) => {
+  const code = normalizeText(groupCode);
+  if (!code) return false;
+
+  const [rows] = await withTimeout(
+    connection.execute(
+      `
+      SELECT id
+      FROM group_sessions
+      WHERE group_code = ?
+      LIMIT 1
+      `,
+      [code]
+    )
+  );
+
+  return rows.length > 0;
+};
+
+const generateUniqueGroupCode = async (connection, attempts = 20) => {
+  for (let index = 0; index < attempts; index += 1) {
+    const code = generateGroupCode();
+    if (!(await groupCodeExists(connection, code))) {
+      return code;
+    }
+  }
+
+  const error = new Error('Gagal membuat kode grup unik');
+  error.statusCode = 500;
+  throw error;
+};
 
 const mapSession = (row) => ({
   id: row.id,
@@ -115,24 +163,65 @@ const hasMembersColumn = async (connection) => {
 };
 
 const createGroupSession = async (connection, userId) => {
-  const groupCode = generateGroupCode();
-  const [result] = await withTimeout(
-    connection.execute(
-      `
-      INSERT INTO group_sessions (group_code, host_id, status)
-      VALUES (?, ?, 'active')
-      `,
-      [groupCode, userId]
-    )
-  );
+  const numericUserId = parseNumber(userId, 0);
+  if (numericUserId <= 0) {
+    const error = new Error('host_id wajib diisi');
+    error.statusCode = 400;
+    throw error;
+  }
 
-  return mapSession({
-    id: result.insertId,
-    group_code: groupCode,
-    host_id: userId,
-    status: 'active',
-    created_at: new Date().toISOString(),
-  });
+  for (let attempt = 0; attempt < 10; attempt += 1) {
+    const groupCode = await generateUniqueGroupCode(connection);
+
+    try {
+      const [result] = await withTimeout(
+        connection.execute(
+          `
+          INSERT INTO group_sessions (group_code, host_id, status)
+          VALUES (?, ?, 'active')
+          `,
+          [groupCode, numericUserId]
+        )
+      );
+
+      return mapSession({
+        id: result.insertId,
+        group_code: groupCode,
+        host_id: numericUserId,
+        status: 'active',
+        created_at: new Date().toISOString(),
+      });
+    } catch (error) {
+      if (!isDuplicateKeyError(error)) {
+        throw error;
+      }
+    }
+  }
+
+  const error = new Error('Gagal membuat sesi grup baru');
+  error.statusCode = 500;
+  throw error;
+};
+
+const createGroupSessionFromHost = async ({ hostId, userId, userEmail, userName }) => {
+  const resolvedHostId = Number.parseInt(hostId ?? userId, 10);
+  const fallbackResolvedHostId = Number.isFinite(resolvedHostId) && resolvedHostId > 0
+    ? resolvedHostId
+    : await resolveUserId({ userId, userEmail, userName });
+
+  if (!fallbackResolvedHostId) {
+    const error = new Error('host_id wajib diisi');
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const connection = await db.getConnection();
+
+  try {
+    return await createGroupSession(connection, fallbackResolvedHostId);
+  } finally {
+    connection.release();
+  }
 };
 
 const ensureActiveSessionForUser = async ({ userId, userEmail, userName }) => {
@@ -428,6 +517,7 @@ const lockGroupSession = async ({ userId, userEmail, userName, groupCode }) => {
 
 module.exports = {
   addGroupCartItem,
+  createGroupSessionFromHost,
   ensureActiveSessionForUser,
   getActiveGroupSessionByUserId,
   getGroupSessionByCode,
