@@ -51,10 +51,10 @@ const MenuView = () => {
   // Modifikasi state groupOrder agar menyimpan data relasi database yang realistis
   const [groupOrder, setGroupOrder] = useState({ 
     id: null, 
-    code: '', 
+    code: 'GRP-D64J', 
     members: 1, 
     items: [], 
-    status: 'idle' 
+    status: 'active' 
   });
   
   const [subscriptionPlans, setSubscriptionPlans] = useState(subscriptionSeed);
