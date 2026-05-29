@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-const GroupOrderSection = ({ groupOrder, hasCart, onUpdateMembers, onAddCart, onConfirm }) => {
+const GroupOrderSection = ({ groupOrder, hasCart, onUpdateMembers, onAddCart, onConfirm, onCreateGroup }) => {
   const hasActiveSession = Boolean(groupOrder?.id && groupOrder?.code);
   const groupCode = hasActiveSession ? groupOrder.code : 'Belum ada sesi aktif';
   const [copied, setCopied] = useState(false);
@@ -25,8 +25,8 @@ const GroupOrderSection = ({ groupOrder, hasCart, onUpdateMembers, onAddCart, on
           <div>
             <div className="flex items-center gap-2 mb-2">
               <span className="flex h-3 w-3 relative">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+                <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${hasActiveSession ? 'bg-emerald-400' : 'bg-amber-400'}`}></span>
+                <span className={`relative inline-flex rounded-full h-3 w-3 ${hasActiveSession ? 'bg-emerald-500' : 'bg-amber-500'}`}></span>
               </span>
               <span className={`text-xs font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider ${
                 hasActiveSession
@@ -57,7 +57,8 @@ const GroupOrderSection = ({ groupOrder, hasCart, onUpdateMembers, onAddCart, on
                   min="1" 
                   value={groupOrder.members || 1} 
                   onChange={(e) => onUpdateMembers(parseInt(e.target.value) || 1)}
-                  className="w-full bg-transparent border-none p-0 text-xl font-bold text-[#1A120B] focus:ring-0 outline-none"
+                  disabled={!hasActiveSession}
+                  className={`w-full bg-transparent border-none p-0 text-xl font-bold focus:ring-0 outline-none ${!hasActiveSession ? 'text-gray-400 cursor-not-allowed' : 'text-[#1A120B]'}`}
                 />
                 <span className="text-sm font-bold text-gray-400 ml-2">Orang</span>
               </div>
@@ -69,31 +70,39 @@ const GroupOrderSection = ({ groupOrder, hasCart, onUpdateMembers, onAddCart, on
                 <i className="fa-solid fa-key text-[#FF6E00]"></i> Kode Undangan
               </label>
               <div className="flex items-center justify-between">
-                <span className="text-lg font-mono font-black text-[#4A3728] tracking-widest">
+                <span className={`text-lg font-mono font-black tracking-widest ${hasActiveSession ? 'text-[#4A3728]' : 'text-gray-400'}`}>
                   {groupCode}
                 </span>
-                <div className="w-2 h-2 rounded-full bg-orange-300 animate-pulse" />
+                {hasActiveSession && <div className="w-2 h-2 rounded-full bg-orange-300 animate-pulse" />}
               </div>
             </div>
           </div>
           
-          {/* Tombol Salin Undangan */}
+          {/* Tombol Aksi Kiri (Dinamis: Buat Grup Baru / Bagikan Kode) */}
           <div className="pt-2">
-            <button 
-              onClick={handleCopy}
-              className={`px-6 py-3.5 rounded-2xl font-bold text-sm shadow-md transition-all duration-300 active:scale-95 flex items-center gap-2 ${
-                !hasActiveSession
-                  ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                  : copied 
-                  ? 'bg-emerald-600 text-white shadow-emerald-100' 
-                  : 'bg-[#1A120B] text-white hover:bg-black'
-              }`}
-              disabled={!hasActiveSession}
-              type="button"
-            >
-              <i className={`fa-solid ${copied ? 'fa-circle-check animate-bounce' : 'fa-share-nodes'}`}></i>
-              {hasActiveSession ? (copied ? 'Tersalin ke Clipboard!' : 'Bagikan Link / Kode Grup') : 'Belum Ada Sesi'}
-            </button>
+            {hasActiveSession ? (
+              <button 
+                onClick={handleCopy}
+                className={`px-6 py-3.5 rounded-2xl font-bold text-sm shadow-md transition-all duration-300 active:scale-95 flex items-center gap-2 ${
+                  copied 
+                    ? 'bg-emerald-600 text-white shadow-emerald-100' 
+                    : 'bg-[#1A120B] text-white hover:bg-black'
+                }`}
+                type="button"
+              >
+                <i className={`fa-solid ${copied ? 'fa-circle-check animate-bounce' : 'fa-share-nodes'}`}></i>
+                {copied ? 'Tersalin ke Clipboard!' : 'Bagikan Link / Kode Grup'}
+              </button>
+            ) : (
+              <button 
+                onClick={onCreateGroup}
+                className="px-6 py-3.5 bg-[#FF6E00] text-white hover:bg-[#E05B00] font-bold text-sm shadow-md shadow-orange-100 rounded-2xl transition-all duration-300 active:scale-95 flex items-center gap-2 border-b-4 border-orange-700 active:border-b-0 active:translate-y-[4px]"
+                type="button"
+              >
+                <i className="fa-solid fa-circle-plus"></i>
+                <span>Buat Group Order Baru</span>
+              </button>
+            )}
           </div>
         </div>
 

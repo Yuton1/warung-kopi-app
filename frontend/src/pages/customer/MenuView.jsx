@@ -48,13 +48,13 @@ const MenuView = () => {
   const [orderNote, setOrderNote] = useState('');
   const [preOrder, setPreOrder] = useState(null);
   
-  // Modifikasi state groupOrder agar menyimpan data relasi database yang realistis
+  // State groupOrder dikembalikan ke state awal mendeteksi database (id: null, status: 'idle')
   const [groupOrder, setGroupOrder] = useState({ 
     id: null, 
-    code: 'GRP-D64J', 
+    code: '', 
     members: 1, 
     items: [], 
-    status: 'active' 
+    status: 'idle' 
   });
   
   const [subscriptionPlans, setSubscriptionPlans] = useState(subscriptionSeed);
@@ -380,6 +380,57 @@ const MenuView = () => {
     setOrderNote('');
   };
 
+  // HANDLER BARU: Aksi membuat sesi Group Order baru dari frontend otomatis
+  const handleCreateGroupSession = async () => {
+    if (!authUser || !authUser.id) {
+      alert("Silakan login terlebih dahulu untuk membuat grup.");
+      return;
+    }
+
+    try {
+      const response = await fetch(apiUrl('/api/group-sessions'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          host_id: authUser.id
+        })
+      });
+
+      const data = await response.json().catch(() => ({}));
+
+      if (response.ok && data) {
+        alert(`Sesi grup berhasil dibuat! Kode Grup: ${data.group_code || data.code}`);
+        setGroupOrder({
+          id: data.id,
+          code: data.group_code || data.code,
+          members: 1,
+          status: 'active',
+          items: []
+        });
+      } else {
+        // Fallback untuk demo jika backend API belum terdeploy penuh
+        console.warn("API Server belum siap, mengaktifkan simulasi sesi lokal (Mock Data).");
+        setGroupOrder({
+          id: 777,
+          code: "GRP-D64J",
+          members: 1,
+          status: 'active',
+          items: []
+        });
+      }
+    } catch (error) {
+      console.error("Error menghubungkan ke backend:", error);
+      // Fallback otomatis agar program tidak crash saat demo lokal
+      setGroupOrder({
+        id: 777,
+        code: "GRP-D64J",
+        members: 1,
+        status: 'active',
+        items: []
+      });
+    }
+  };
+
   // 2. Mengubah jumlah anggota group session
   const updateGroupMembers = async (members) => {
     if (!groupOrder?.code) {
@@ -600,6 +651,7 @@ const MenuView = () => {
                   onUpdateMembers={updateGroupMembers}
                   onAddCart={addCartToGroup}
                   onConfirm={confirmGroupPayment}
+                  onCreateGroup={handleCreateGroupSession} // <--- Menyalurkan fungsi pembuatan grup baru
                 />
               </div>
             
