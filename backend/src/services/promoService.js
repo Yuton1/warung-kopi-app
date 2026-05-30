@@ -11,6 +11,8 @@ const withTimeout = (operation, timeoutMs = 5000) => {
   return Promise.race([operation, timeout]).finally(() => clearTimeout(timer));
 };
 
+let promoQuotaColumnPromise = null;
+
 const promoAccent = ['promo-amber', 'promo-brown', 'promo-cream'];
 
 const normalizePromo = (row, index = 0) => ({
@@ -43,6 +45,31 @@ const resolveUserIdByEmail = async (userEmail) => {
   return rows[0]?.id ?? null;
 };
 
+const resolvePromoQuotaColumn = async () => {
+  if (!promoQuotaColumnPromise) {
+    promoQuotaColumnPromise = withTimeout(
+      db.query(
+        `
+        SELECT COLUMN_NAME
+        FROM INFORMATION_SCHEMA.COLUMNS
+        WHERE TABLE_SCHEMA = DATABASE()
+          AND TABLE_NAME = 'weekly_promos'
+          AND COLUMN_NAME IN ('remaining_quota', 'remaning_quota')
+        ORDER BY FIELD(COLUMN_NAME, 'remaining_quota', 'remaning_quota')
+        LIMIT 1
+        `
+      )
+    )
+      .then(([rows]) => rows?.[0]?.COLUMN_NAME || 'remaining_quota')
+      .catch((error) => {
+        promoQuotaColumnPromise = null;
+        throw error;
+      });
+  }
+
+  return promoQuotaColumnPromise;
+};
+
 const parseNumber = (value, fallback = 0) => {
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : fallback;
@@ -54,13 +81,14 @@ const normalizeAdminPromoRow = (row) => ({
   description: row.description || '',
   discount_amount: parseNumber(row.discount_amount, 0),
   quota: parseNumber(row.quota, 0),
-  remaining_quota: parseNumber(row.remaining_quota, 0),
+  remaining_quota: parseNumber(row.remaining_quota ?? row.remaning_quota, 0),
   expiry_date: row.expiry_date || null,
   is_active: Boolean(row.is_active),
   created_at: row.created_at || null,
 });
 
 const listWeeklyPromos = async (userEmail = null) => {
+  const quotaColumn = await resolvePromoQuotaColumn();
   const [rows] = await db.query(`
     SELECT
       id,
@@ -68,7 +96,7 @@ const listWeeklyPromos = async (userEmail = null) => {
       description,
       discount_amount,
       quota,
-      remaining_quota,
+      ${quotaColumn} AS remaining_quota,
       expiry_date,
       is_active,
       created_at
@@ -112,6 +140,7 @@ const listWeeklyPromos = async (userEmail = null) => {
 };
 
 const claimPromo = async ({ promoId, userEmail = null }) => {
+  const quotaColumn = await resolvePromoQuotaColumn();
   const promoIdNumber = Number(promoId);
 
   if (!promoIdNumber) {
@@ -122,7 +151,7 @@ const claimPromo = async ({ promoId, userEmail = null }) => {
 
   const [promoRows] = await db.query(
     `
-      SELECT id, title, remaining_quota, is_active
+      SELECT id, title, ${quotaColumn} AS remaining_quota, is_active
       FROM weekly_promos
       WHERE id = ?
       LIMIT 1
@@ -186,8 +215,8 @@ const claimPromo = async ({ promoId, userEmail = null }) => {
   await db.query(
     `
       UPDATE weekly_promos
-      SET remaining_quota = GREATEST(remaining_quota - 1, 0)
-      WHERE id = ? AND remaining_quota > 0
+      SET ${quotaColumn} = GREATEST(${quotaColumn} - 1, 0)
+      WHERE id = ? AND ${quotaColumn} > 0
     `,
     [promoIdNumber]
   );
@@ -200,6 +229,7 @@ const claimPromo = async ({ promoId, userEmail = null }) => {
 };
 
 const listAdminPromos = async () => {
+  const quotaColumn = await resolvePromoQuotaColumn();
   const [rows] = await withTimeout(
     db.execute(
       `
@@ -209,7 +239,7 @@ const listAdminPromos = async () => {
         description,
         discount_amount,
         quota,
-        remaining_quota,
+        ${quotaColumn} AS remaining_quota,
         expiry_date,
         is_active,
         created_at
@@ -231,6 +261,7 @@ const createAdminPromo = async ({
   expiry_date,
   is_active = 1,
 } = {}) => {
+  const quotaColumn = await resolvePromoQuotaColumn();
   const nextTitle = String(title ?? '').trim();
   const nextDescription = String(description ?? '').trim();
   const nextDiscount = parseNumber(discount_amount, 0);
@@ -265,7 +296,7 @@ const createAdminPromo = async ({
         description,
         discount_amount,
         quota,
-        remaining_quota,
+        ${quotaColumn},
         expiry_date,
         is_active
       )
@@ -297,6 +328,7 @@ const createAdminPromo = async ({
 };
 
 const updateAdminPromo = async (promoId, payload = {}) => {
+  const quotaColumn = await resolvePromoQuotaColumn();
   const numericId = Number.parseInt(promoId, 10);
   if (!Number.isFinite(numericId) || numericId <= 0) {
     const error = new Error('promoId wajib diisi');
@@ -334,7 +366,7 @@ const updateAdminPromo = async (promoId, payload = {}) => {
   }
 
   if (payload.remaining_quota !== undefined) {
-    fields.push('remaining_quota = ?');
+    fields.push(`${quotaColumn} = ?`);
     values.push(parseNumber(payload.remaining_quota, 0));
   }
 
@@ -372,7 +404,7 @@ const updateAdminPromo = async (promoId, payload = {}) => {
         description,
         discount_amount,
         quota,
-        remaining_quota,
+        ${quotaColumn} AS remaining_quota,
         expiry_date,
         is_active,
         created_at

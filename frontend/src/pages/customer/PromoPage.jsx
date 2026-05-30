@@ -4,24 +4,34 @@ import axios from 'axios';
 import { Ticket, Copy, Check, Info, ArrowLeft } from 'lucide-react';
 import { promoSeed } from '../../data/promoSeed';
 import { STORAGE_KEYS, readStoredValue } from '../../data/customerStorage';
+import { getApiBaseUrl } from '../../utils/apiBaseUrl';
+
+const apiUrl = (path) => {
+  const baseUrl = getApiBaseUrl();
+  if (!baseUrl) return path;
+  return `${baseUrl}${path.startsWith('/') ? path : `/${path}`}`;
+};
 
 const PromoPage = () => {
   const [promos, setPromos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [claimLoadingId, setClaimLoadingId] = useState(null);
   const [copiedId, setCopiedId] = useState(null);
+  const [error, setError] = useState('');
   const [authUser] = useState(() => readStoredValue(STORAGE_KEYS.auth, null));
 
   const fetchPromos = async () => {
     try {
-      const response = await axios.get('/api/promos/weekly', {
+      setError('');
+      const response = await axios.get(apiUrl('/api/promos/weekly'), {
         params: authUser?.email ? { userEmail: authUser.email } : {},
       });
       const data = response.data;
       setPromos(Array.isArray(data) && data.length > 0 ? data : promoSeed);
     } catch (error) {
       console.error("Gagal mengambil daftar promo:", error);
-      setPromos(promoSeed); 
+      setError(error.response?.data?.error || error.response?.data?.message || error.message || 'Gagal mengambil promo');
+      setPromos(promoSeed);
     } finally {
       setLoading(false);
     }
@@ -38,7 +48,7 @@ const PromoPage = () => {
     }
     setClaimLoadingId(promoId);
     try {
-      const response = await axios.post('/api/promos/claim', {
+      const response = await axios.post(apiUrl('/api/promos/claim'), {
         promoId,
         userEmail: authUser.email,
       });
@@ -78,6 +88,11 @@ const PromoPage = () => {
 
   return (
     <div className="w-full pt-4 pb-12 animate-fade-in">
+      {error ? (
+        <div className="mb-5 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-700">
+          {error}
+        </div>
+      ) : null}
       
       {/* 🌟 HERO SECTION - Meniru spesifikasi premium MenuDetail */}
       <section className="relative bg-[#4A3728] rounded-[32px] p-6 md:p-8 text-white shadow-[0_20px_50px_rgba(74,55,40,0.08)] mb-8 flex flex-col md:flex-row justify-between items-center gap-6 overflow-hidden">
