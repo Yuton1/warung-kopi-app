@@ -49,11 +49,11 @@ const CartFloating = ({
         />
       )}
 
-      {/* --- UTAMA: PANEL KERANJANG (Sidebar Desktop / Slide-up Sheet Mobile) --- */}
+      {/* --- UTAMA: PANEL KERANJANG (Full width desktop / Slide-up sheet mobile) --- */}
       <aside 
         className={`
           fixed bottom-0 left-0 right-0 z-50 max-h-[85vh] overflow-y-auto rounded-t-[2.5rem] bg-gradient-to-b from-[#2B1B17] to-[#1A120B] p-6 text-white shadow-2xl border-t border-white/10 transition-transform duration-500 ease-out
-          md:sticky md:top-24 md:z-10 md:max-h-[calc(100vh-8rem)] md:w-[400px] md:min-w-[380px] md:flex-shrink-0 md:rounded-[2.5rem] md:border md:p-8
+          md:relative md:top-auto md:z-10 md:max-h-none md:w-full md:max-w-none md:flex-none md:rounded-[2.5rem] md:border md:p-8 md:overflow-visible
           ${isOpenMobile ? 'translate-y-0' : 'translate-y-full md:translate-y-0'}
         `}
       >
@@ -128,7 +128,7 @@ const CartFloating = ({
         </div>
 
         {/* --- DAFTAR ITEM DI KERANJANG --- */}
-        <div className="space-y-3 max-h-[180px] overflow-y-auto pr-1 mb-6 scrollbar-thin">
+        <div className="space-y-3 max-h-[180px] overflow-y-auto pr-1 mb-6 scrollbar-thin md:max-h-[260px]">
           {cart.length === 0 ? (
             <div className="text-center py-6 px-4 rounded-2xl border border-dashed border-white/10 bg-white/[0.02]">
               <strong className="text-sm font-bold block text-gray-400 mb-1">Keranjang Kosong</strong>
@@ -188,34 +188,32 @@ const CartFloating = ({
         </div>
 
         {/* --- TOMBOL AKSI UTAMA --- */}
-        <div className="space-y-2.5 mb-6">
+        <div className="space-y-2.5 mb-6 md:grid md:grid-cols-3 md:gap-3 md:space-y-0">
           <button 
             type="button" 
             onClick={onCheckout} 
             disabled={!cart.length}
-            className="w-full bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-[#1A120B] disabled:from-gray-800 disabled:to-gray-800 disabled:text-gray-500 font-black py-3.5 rounded-xl text-xs tracking-wider uppercase shadow-lg active:scale-[0.98] transition-all disabled:cursor-not-allowed"
+            className="w-full bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-[#1A120B] disabled:from-gray-800 disabled:to-gray-800 disabled:text-gray-500 font-black py-3.5 rounded-xl text-xs tracking-wider uppercase shadow-lg active:scale-[0.98] transition-all disabled:cursor-not-allowed md:col-span-3"
           >
             ☕ Pesan Sekarang
           </button>
 
-          <div className="grid grid-cols-2 gap-2">
-            <button 
-              type="button" 
-              onClick={onSavePreOrder} 
-              disabled={!cart.length}
-              className="py-2.5 px-3 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 disabled:opacity-20 text-[11px] font-bold tracking-wide text-gray-200 active:scale-95 transition-all disabled:cursor-not-allowed"
-            >
-              Simpan Pre-order
-            </button>
-            <button 
-              type="button" 
-              onClick={onCancelPreOrder} 
-              disabled={!preOrder}
-              className="py-2.5 px-3 rounded-xl border border-red-500/20 bg-red-500/5 hover:bg-red-500/10 disabled:opacity-20 text-[11px] font-bold tracking-wide text-red-400 active:scale-95 transition-all disabled:cursor-not-allowed"
-            >
-              Batalkan
-            </button>
-          </div>
+          <button 
+            type="button" 
+            onClick={onSavePreOrder} 
+            disabled={!cart.length}
+            className="py-2.5 px-3 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 disabled:opacity-20 text-[11px] font-bold tracking-wide text-gray-200 active:scale-95 transition-all disabled:cursor-not-allowed"
+          >
+            Simpan Pre-order
+          </button>
+          <button 
+            type="button" 
+            onClick={onCancelPreOrder} 
+            disabled={!preOrder}
+            className="py-2.5 px-3 rounded-xl border border-red-500/20 bg-red-500/5 hover:bg-red-500/10 disabled:opacity-20 text-[11px] font-bold tracking-wide text-red-400 active:scale-95 transition-all disabled:cursor-not-allowed"
+          >
+            Batalkan
+          </button>
         </div>
 
         {/* --- KARTU STATUS PRE-ORDER --- */}
