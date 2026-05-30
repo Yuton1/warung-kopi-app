@@ -10,6 +10,8 @@ const withTimeout = (operation, timeoutMs = 5000) => {
   return Promise.race([operation, timeout]).finally(() => clearTimeout(timer))
 }
 
+let orderDateColumnPromise = null
+
 const normalizePeriod = (value) => {
   const period = String(value || 'Daily').toLowerCase()
 
@@ -19,36 +21,72 @@ const normalizePeriod = (value) => {
   return 'Daily'
 }
 
-const getPeriodConfig = (period) => {
+const resolveOrderDateColumn = async () => {
+  if (!orderDateColumnPromise) {
+    orderDateColumnPromise = withTimeout(
+      db.execute(
+        `
+        SELECT COLUMN_NAME
+        FROM INFORMATION_SCHEMA.COLUMNS
+        WHERE TABLE_SCHEMA = DATABASE()
+          AND TABLE_NAME = 'orders'
+          AND COLUMN_NAME IN ('created_at', 'pickup_time')
+        ORDER BY FIELD(COLUMN_NAME, 'created_at', 'pickup_time')
+        LIMIT 1
+        `
+      )
+    )
+      .then(([rows]) => rows?.[0]?.COLUMN_NAME || null)
+      .catch((error) => {
+        orderDateColumnPromise = null
+        throw error
+      })
+  }
+
+  return orderDateColumnPromise
+}
+
+const getOrderDateExpressions = (period, columnName) => {
+  if (!columnName) {
+    return {
+      dateExpr: 'DATE(NOW())',
+      labelExpr: "DATE_FORMAT(NOW(), '%d %b')",
+      rangeExpr: '1=1',
+      orderByExpr: 'o.id DESC',
+    }
+  }
+
+  const orderDateExpr = `o.${columnName}`
+
   switch (period) {
     case 'Weekly':
       return {
-        dateExpr: `DATE_SUB(DATE(o.created_at), INTERVAL WEEKDAY(o.created_at) DAY)`,
-        labelExpr: `DATE_FORMAT(DATE_SUB(DATE(o.created_at), INTERVAL WEEKDAY(o.created_at) DAY), '%d %b')`,
-        rangeExpr: `o.created_at >= DATE_SUB(CURDATE(), INTERVAL 28 DAY)`,
-        limit: 8,
+        dateExpr: `DATE_SUB(DATE(${orderDateExpr}), INTERVAL WEEKDAY(${orderDateExpr}) DAY)`,
+        labelExpr: `DATE_FORMAT(DATE_SUB(DATE(${orderDateExpr}), INTERVAL WEEKDAY(${orderDateExpr}) DAY), '%d %b')`,
+        rangeExpr: `${orderDateExpr} >= DATE_SUB(CURDATE(), INTERVAL 28 DAY)`,
+        orderByExpr: `${orderDateExpr} DESC, o.id DESC`,
       }
     case 'Monthly':
       return {
-        dateExpr: `DATE_FORMAT(o.created_at, '%Y-%m-01')`,
-        labelExpr: `DATE_FORMAT(o.created_at, '%b %Y')`,
-        rangeExpr: `o.created_at >= DATE_SUB(CURDATE(), INTERVAL 6 MONTH)`,
-        limit: 6,
+        dateExpr: `DATE_FORMAT(${orderDateExpr}, '%Y-%m-01')`,
+        labelExpr: `DATE_FORMAT(${orderDateExpr}, '%b %Y')`,
+        rangeExpr: `${orderDateExpr} >= DATE_SUB(CURDATE(), INTERVAL 6 MONTH)`,
+        orderByExpr: `${orderDateExpr} DESC, o.id DESC`,
       }
     case 'Yearly':
       return {
-        dateExpr: `DATE_FORMAT(o.created_at, '%Y-01-01')`,
-        labelExpr: `DATE_FORMAT(o.created_at, '%Y')`,
-        rangeExpr: `o.created_at >= DATE_SUB(CURDATE(), INTERVAL 5 YEAR)`,
-        limit: 5,
+        dateExpr: `DATE_FORMAT(${orderDateExpr}, '%Y-01-01')`,
+        labelExpr: `DATE_FORMAT(${orderDateExpr}, '%Y')`,
+        rangeExpr: `${orderDateExpr} >= DATE_SUB(CURDATE(), INTERVAL 5 YEAR)`,
+        orderByExpr: `${orderDateExpr} DESC, o.id DESC`,
       }
     case 'Daily':
     default:
       return {
-        dateExpr: `DATE(o.created_at)`,
-        labelExpr: `DATE_FORMAT(o.created_at, '%d %b')`,
-        rangeExpr: `o.created_at >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)`,
-        limit: 7,
+        dateExpr: `DATE(${orderDateExpr})`,
+        labelExpr: `DATE_FORMAT(${orderDateExpr}, '%d %b')`,
+        rangeExpr: `${orderDateExpr} >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)`,
+        orderByExpr: `${orderDateExpr} DESC, o.id DESC`,
       }
   }
 }
@@ -57,14 +95,16 @@ const money = (value) => Number(value || 0)
 
 const getDashboardSummary = async (periodInput = 'Daily') => {
   const period = normalizePeriod(periodInput)
-  const config = getPeriodConfig(period)
+  const orderDateColumn = await resolveOrderDateColumn()
+  const dateConfig = getOrderDateExpressions(period, orderDateColumn)
+  const orderDateSelect = orderDateColumn ? `o.${orderDateColumn}` : 'NULL'
 
   const [revenueRows] = await withTimeout(
     db.execute(
       `
       SELECT COALESCE(SUM(total_amount), 0) AS total_earnings
       FROM orders
-      WHERE ${config.rangeExpr}
+      WHERE ${dateConfig.rangeExpr}
         AND LOWER(COALESCE(status, '')) NOT IN ('dibatalkan', 'cancelled')
       `
     )
@@ -92,7 +132,7 @@ const getDashboardSummary = async (periodInput = 'Daily') => {
       SELECT COUNT(*) AS total_orders,
              SUM(CASE WHEN LOWER(COALESCE(status, '')) NOT IN ('dibatalkan', 'cancelled') THEN 1 ELSE 0 END) AS processed_orders
       FROM orders
-      WHERE ${config.rangeExpr}
+      WHERE ${dateConfig.rangeExpr}
       `
     )
   )
@@ -112,16 +152,15 @@ const getDashboardSummary = async (periodInput = 'Daily') => {
     db.execute(
       `
       SELECT
-        ${config.dateExpr} AS period_date,
-        ${config.labelExpr} AS period_label,
+        ${dateConfig.dateExpr} AS period_date,
+        ${dateConfig.labelExpr} AS period_label,
         COALESCE(SUM(o.total_amount), 0) AS total_value,
         COUNT(*) AS order_count
       FROM orders o
-      WHERE ${config.rangeExpr}
+      WHERE ${dateConfig.rangeExpr}
         AND LOWER(COALESCE(o.status, '')) NOT IN ('dibatalkan', 'cancelled')
       GROUP BY period_date, period_label
       ORDER BY period_date ASC
-      LIMIT ${config.limit}
       `
     )
   )
@@ -133,12 +172,12 @@ const getDashboardSummary = async (periodInput = 'Daily') => {
         o.id,
         o.total_amount,
         o.status,
-        o.created_at,
+        ${orderDateSelect} AS created_at,
         u.username,
         u.email
       FROM orders o
       LEFT JOIN users u ON u.id = o.user_id
-      ORDER BY o.created_at DESC, o.id DESC
+      ORDER BY ${dateConfig.orderByExpr}
       LIMIT 6
       `
     )
