@@ -53,7 +53,7 @@ const CartFloating = ({
       <aside 
         className={`
           fixed bottom-0 left-0 right-0 z-50 max-h-[85vh] overflow-y-auto rounded-t-[2.5rem] bg-gradient-to-b from-[#2B1B17] to-[#1A120B] p-6 text-white shadow-2xl border-t border-white/10 transition-transform duration-500 ease-out
-          md:sticky md:top-24 md:z-10 md:max-h-[calc(100vh-8rem)] md:w-[380px] md:rounded-[2.5rem] md:border md:p-8
+          md:sticky md:top-24 md:z-10 md:max-h-[calc(100vh-8rem)] md:w-[400px] md:min-w-[380px] md:flex-shrink-0 md:rounded-[2.5rem] md:border md:p-8
           ${isOpenMobile ? 'translate-y-0' : 'translate-y-full md:translate-y-0'}
         `}
       >
@@ -78,7 +78,7 @@ const CartFloating = ({
           </button>
         </div>
 
-        {/* --- INPUT FEILDS (Meja & Jam) --- */}
+        {/* --- INPUT FIELDS (Meja & Jam) --- */}
         <div className="grid grid-cols-2 gap-4 mb-6">
           <label className="flex flex-col gap-1.5">
             <span className="text-[10px] font-black uppercase tracking-wider text-gray-400">Nomor Meja</span>
