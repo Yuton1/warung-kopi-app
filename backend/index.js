@@ -14,6 +14,7 @@ const cartRoutes = require('./src/routes/cartRoutes');
 const groupCartRoutes = require('./src/routes/groupCartRoutes');
 const groupSessionRoutes = require('./src/routes/groupSessionRoutes');
 const adminRoutes = require('./src/routes/adminRoutes');
+const baristaReportRoutes = require('./src/routes/baristaReportRoutes');
 const ensureProductImageColumn = require('./src/migrations/ensureProductImageColumn');
 const ensureUserProfileColumns = require('./src/migrations/ensureUserProfileColumns');
 const ensureOrderTypeColumn = require('./src/migrations/ensureOrderTypeColumn');
@@ -42,6 +43,7 @@ app.use('/api/cart', cartRoutes);
 app.use('/api/group-cart', groupCartRoutes);
 app.use('/api/group-sessions', groupSessionRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/barista', baristaReportRoutes);
 
 app.get('/api', (req, res) => {
     res.json({
