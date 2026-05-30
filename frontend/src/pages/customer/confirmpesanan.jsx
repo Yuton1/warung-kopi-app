@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { formatRupiah } from '../../utils/formatRupiah'
 import { createCheckoutOrder, fetchCart } from '../../services/cartService'
+import { STORAGE_KEYS, readStoredValue, writeStoredValue } from '../../data/customerStorage'
 
 const ConfirmPesanan = () => {
   const navigate = useNavigate()
@@ -9,6 +10,7 @@ const ConfirmPesanan = () => {
   const [paymentMethod, setPaymentMethod] = useState('Cashier')
   const [promoCode, setPromoCode] = useState('')
   const [cartItems, setCartItems] = useState([])
+  const [preOrder, setPreOrder] = useState(() => readStoredValue(STORAGE_KEYS.preorder, null))
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
@@ -30,13 +32,21 @@ const ConfirmPesanan = () => {
 
     loadCart()
 
+    const syncPreOrder = () => {
+      setPreOrder(readStoredValue(STORAGE_KEYS.preorder, null))
+    }
+
     const handleCartChange = () => loadCart()
     window.addEventListener('warungkopi-state-changed', handleCartChange)
     window.addEventListener('storage', handleCartChange)
+    window.addEventListener('warungkopi-state-changed', syncPreOrder)
+    window.addEventListener('storage', syncPreOrder)
 
     return () => {
       window.removeEventListener('warungkopi-state-changed', handleCartChange)
       window.removeEventListener('storage', handleCartChange)
+      window.removeEventListener('warungkopi-state-changed', syncPreOrder)
+      window.removeEventListener('storage', syncPreOrder)
     }
   }, [])
 
@@ -61,8 +71,12 @@ const ConfirmPesanan = () => {
         orderType,
         paymentMethod,
         promoCode,
+        pickupTime: preOrder?.pickupTime || preOrder?.time || '',
+        pickupNote: preOrder?.note || '',
+        isPreorder: Boolean(preOrder),
       })
 
+      writeStoredValue(STORAGE_KEYS.preorder, null)
       window.dispatchEvent(new Event('warungkopi-state-changed'))
       navigate('/pesanan', {
         replace: true,
@@ -203,6 +217,16 @@ const ConfirmPesanan = () => {
 
             {/* 3. Promo & Pembayaran */}
             <section className="bg-white p-5 md:p-6 rounded-[2rem] shadow-sm space-y-6 transition-all duration-300 hover:shadow-md">
+              {preOrder ? (
+                <div className="rounded-2xl border border-orange-100 bg-orange-50 px-4 py-3 text-sm text-[#4A3728]">
+                  <strong className="block text-xs uppercase tracking-widest text-[#FF6E00] mb-1">
+                    Pre-order aktif
+                  </strong>
+                  Ambil pukul <strong>{preOrder.pickupTime || preOrder.time}</strong>
+                  {preOrder.note ? ` • ${preOrder.note}` : ''}
+                </div>
+              ) : null}
+
               <div>
                 <h2 className="text-base md:text-lg font-bold mb-3 flex items-center gap-2">
                   <i className="fa-solid fa-ticket text-[#FF6E00]"></i> Gunakan Promo
@@ -224,7 +248,7 @@ const ConfirmPesanan = () => {
                 <h2 className="text-base md:text-lg font-bold mb-3 flex items-center gap-2">
                   <i className="fa-solid fa-credit-card text-[#FF6E00]"></i> Metode Pembayaran
                 </h2>
-                <div className="space-y-2.5">
+              <div className="space-y-2.5">
                   {['Cashier', 'E-Wallet (QRIS)', 'Transfer Bank'].map((method) => (
                     <label
                       key={method}

@@ -46,7 +46,7 @@ const MenuView = () => {
   const [tableNumber, setTableNumber] = useState('');
   const [pickupTime, setPickupTime] = useState('');
   const [orderNote, setOrderNote] = useState('');
-  const [preOrder, setPreOrder] = useState(null);
+  const [preOrder, setPreOrder] = useState(() => readStoredValue(STORAGE_KEYS.preorder, null));
   
   // State groupOrder dikembalikan ke state awal mendeteksi database (id: null, status: 'idle')
   const [groupOrder, setGroupOrder] = useState({ 
@@ -365,19 +365,26 @@ const MenuView = () => {
   };
 
   const savePreOrder = (data = {}) =>
-    setPreOrder({
-      status: 'Tersimpan',
-      time: data.time || pickupTime,
-      pickupTime: data.time || pickupTime,
-      note: data.note || orderNote,
-      items: cart,
-      tableNumber,
-    });
+    {
+      const nextPreOrder = {
+        status: 'Tersimpan',
+        isPreorder: true,
+        time: data.time || pickupTime,
+        pickupTime: data.time || pickupTime,
+        note: data.note || orderNote,
+        items: cart,
+        tableNumber,
+      };
+
+      setPreOrder(nextPreOrder);
+      writeStoredValue(STORAGE_KEYS.preorder, nextPreOrder);
+    };
 
   const cancelPreOrder = () => {
     setPreOrder(null);
     setPickupTime('');
     setOrderNote('');
+    writeStoredValue(STORAGE_KEYS.preorder, null);
   };
 
   // HANDLER BARU: Aksi membuat sesi Group Order baru dari frontend otomatis

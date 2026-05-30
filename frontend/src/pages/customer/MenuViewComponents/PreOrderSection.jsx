@@ -32,17 +32,18 @@ const PreOrderSection = ({ hasCart, preOrder, onSave, onCancel }) => {
             </p>
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-4">
-            {/* Input Jam */}
-            <div className="flex flex-col gap-2">
-              <label className="text-[10px] font-black uppercase text-gray-400">Jam Ambil</label>
-              <input 
-                type="time"
-                value={time}
-                onChange={(e) => setTime(e.target.value)}
-                className="bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-orange-500 transition-all font-bold"
-              />
-            </div>
+            <div className="flex flex-col sm:flex-row gap-4">
+              {/* Input Jam */}
+              <div className="flex flex-col gap-2">
+                <label className="text-[10px] font-black uppercase text-gray-400">Jam Ambil</label>
+                <input 
+                  type="time"
+                  required
+                  value={time}
+                  onChange={(e) => setTime(e.target.value)}
+                  className="bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-orange-500 transition-all font-bold"
+                />
+              </div>
             {/* Input Catatan */}
             <div className="flex flex-col gap-2 flex-1">
               <label className="text-[10px] font-black uppercase text-gray-400">Catatan Pengambilan</label>
@@ -61,12 +62,12 @@ const PreOrderSection = ({ hasCart, preOrder, onSave, onCancel }) => {
         <div className="flex flex-col gap-3 w-full lg:w-72">
           <button 
             className={`w-full py-4 rounded-2xl font-bold text-sm transition-all shadow-lg active:scale-95 ${
-              !hasCart 
+              !hasCart || !time
               ? 'bg-gray-700 text-gray-400 cursor-not-allowed' 
               : 'bg-[#1A120B] text-white hover:bg-black border border-white/10'
             }`}
-            onClick={() => onSave({ time, note })}
-            disabled={!hasCart}
+            onClick={() => onSave({ time, note, isPreorder: true })}
+            disabled={!hasCart || !time}
           >
             Simpan Pre-order
           </button>
