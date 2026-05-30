@@ -6,31 +6,27 @@ import { STORAGE_KEYS, readStoredValue } from '../../data/customerStorage'
 import { getApiBaseUrl } from '../../utils/apiBaseUrl'
 import { formatRupiah } from '../../utils/formatRupiah'
 import {
-  ArrowRight,
   BarChart3,
   Edit3,
   Gift,
   Loader2,
+  Plus,
   Search,
   Star,
+  Trash2,
   Trophy,
   Users,
   Wallet,
-  Plus,
-  X
+  X,
 } from 'lucide-react'
 
 const POINT_VALUE = 1000
 
-// ==========================================
-// UTILITY / HELPER FUNCTIONS (DITAROH DI ATAS)
-// ==========================================
 const totalNumber = (value) => Number(value || 0).toLocaleString('id-ID')
 
 const apiUrl = (path) => {
   const baseUrl = getApiBaseUrl()
-  if (!baseUrl) return path
-  return `${baseUrl}${path.startsWith('/') ? path : `/${path}`}`
+  return baseUrl ? `${baseUrl}${path.startsWith('/') ? path : `/${path}`}` : path
 }
 
 const parseNumber = (value, fallback = 0) => {
@@ -60,27 +56,45 @@ const normalizeProduct = (product) => ({
   badge: normalizeText(product?.badge),
 })
 
-// ==========================================
-// MAIN COMPONENT
-// ==========================================
+const normalizePromo = (promo) => ({
+  id: promo?.id ?? null,
+  title: normalizeText(promo?.title) || 'Kupon Hadiah',
+  description: normalizeText(promo?.description),
+  discountAmount: parseNumber(promo?.discount_amount, 0),
+  quota: parseNumber(promo?.quota, 0),
+  remainingQuota: parseNumber(promo?.remaining_quota, 0),
+  expiryDate: normalizeText(promo?.expiry_date),
+  isActive: Number(promo?.is_active) === 1 || promo?.is_active === true,
+  createdAt: promo?.created_at || null,
+})
+
+const formatDateInput = (value) => {
+  if (!value) return ''
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return ''
+  return date.toISOString().slice(0, 10)
+}
+
 const LoyaltyRewards = () => {
   const navigate = useNavigate()
   const auth = readStoredValue(STORAGE_KEYS.auth, null)
+
   const [users, setUsers] = useState([])
   const [products, setProducts] = useState([])
+  const [promos, setPromos] = useState([])
   const [searchTerm, setSearchTerm] = useState('')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
-
-  // State untuk Modal Tambah Hadiah / Promo Baru
-  const [isModalOpen, setIsModalOpen] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [editingPromoId, setEditingPromoId] = useState(null)
   const [formData, setFormData] = useState({
     title: '',
     description: '',
     discountAmount: '',
     quota: '',
     expiryDate: '',
+    isActive: true,
   })
 
   useEffect(() => {
@@ -92,16 +106,28 @@ const LoyaltyRewards = () => {
   const loadData = async () => {
     setLoading(true)
     setError('')
+
     try {
-      const [usersResponse, productsResponse] = await Promise.all([
+      const [usersResponse, productsResponse, promosResponse] = await Promise.all([
         axios.get(apiUrl('/api/users')),
         axios.get(apiUrl('/api/products')),
+        axios.get(apiUrl('/api/admin/promos')),
       ])
+
       setUsers(Array.isArray(usersResponse.data) ? usersResponse.data.map(normalizeUser) : [])
       setProducts(Array.isArray(productsResponse.data) ? productsResponse.data.map(normalizeProduct) : [])
+      setPromos(Array.isArray(promosResponse.data) ? promosResponse.data.map(normalizePromo) : [])
     } catch (fetchError) {
       console.error('Gagal memuat loyalty rewards:', fetchError)
-      setError(fetchError.response?.data?.message || fetchError.response?.data?.error || fetchError.message || 'Gagal memuat data loyalty.')
+      setError(
+        fetchError.response?.data?.message ||
+          fetchError.response?.data?.error ||
+          fetchError.message ||
+          'Gagal memuat data loyalty.'
+      )
+      setUsers([])
+      setProducts([])
+      setPromos([])
     } finally {
       setLoading(false)
     }
@@ -116,14 +142,16 @@ const LoyaltyRewards = () => {
     const activeMembers = users.filter((user) => parseNumber(user.points, 0) > 0).length
     const averagePoints = activeMembers > 0 ? Math.round(totalPoints / activeMembers) : 0
     const productsWithPoints = products.filter((product) => parseNumber(product.basePoints, 0) > 0).length
+    const activePromos = promos.filter((promo) => promo.isActive && promo.remainingQuota > 0).length
 
     return {
       totalPoints,
       activeMembers,
       averagePoints,
       productsWithPoints,
+      activePromos,
     }
-  }, [products, users])
+  }, [products, promos, users])
 
   const filteredProducts = useMemo(() => {
     const query = searchTerm.toLowerCase().trim()
@@ -132,62 +160,102 @@ const LoyaltyRewards = () => {
     if (!query) return sortedProducts
 
     return sortedProducts.filter((product) =>
-      [product.name, product.category, product.badge]
-        .filter(Boolean)
-        .join(' ')
-        .toLowerCase()
-        .includes(query)
+      [product.name, product.category, product.badge].filter(Boolean).join(' ').toLowerCase().includes(query)
     )
   }, [products, searchTerm])
 
   const topMembers = useMemo(() => {
-    return [...users]
-      .sort((a, b) => b.points - a.points)
-      .slice(0, 5)
+    return [...users].sort((a, b) => b.points - a.points).slice(0, 5)
   }, [users])
 
-  // Handler Kirim Data Hadiah / Promo Baru ke TiDB lewat Backend
-  const handleCreateReward = async (e) => {
-    e.preventDefault()
+  const openCreateModal = () => {
+    setEditingPromoId(null)
+    setFormData({
+      title: '',
+      description: '',
+      discountAmount: '',
+      quota: '',
+      expiryDate: '',
+      isActive: true,
+    })
+    setIsModalOpen(true)
+  }
+
+  const openEditModal = (promo) => {
+    setEditingPromoId(promo.id)
+    setFormData({
+      title: promo.title || '',
+      description: promo.description || '',
+      discountAmount: String(promo.discountAmount || ''),
+      quota: String(promo.quota || ''),
+      expiryDate: formatDateInput(promo.expiryDate),
+      isActive: promo.isActive,
+    })
+    setIsModalOpen(true)
+  }
+
+  const closeModal = () => {
+    setIsModalOpen(false)
+    setEditingPromoId(null)
+    setIsSaving(false)
+  }
+
+  const handleCreateOrUpdatePromo = async (event) => {
+    event.preventDefault()
     setIsSaving(true)
-    
-    const targetQuota = parseNumber(formData.quota)
 
     try {
-      await axios.post(apiUrl('/api/admin/promos'), {
+      const payload = {
         title: formData.title,
         description: formData.description,
         discount_amount: parseNumber(formData.discountAmount),
-        quota: targetQuota,
-        remaining_quota: targetQuota, 
+        quota: parseNumber(formData.quota),
         expiry_date: formData.expiryDate,
-        is_active: 1
-      })
-      
-      alert('Kupon hadiah berhasil disimpan!')
-      
-      setFormData({ title: '', description: '', discountAmount: '', quota: '', expiryDate: '' })
-      setIsModalOpen(false)
+        is_active: formData.isActive ? 1 : 0,
+      }
+
+      if (editingPromoId) {
+        await axios.put(apiUrl(`/api/admin/promos/${editingPromoId}`), payload)
+      } else {
+        await axios.post(apiUrl('/api/admin/promos'), {
+          ...payload,
+          remaining_quota: parseNumber(formData.quota),
+        })
+      }
+
+      closeModal()
       await loadData()
-    } catch (err) {
-      console.error('Gagal menyimpan kupon hadiah:', err)
-      alert(err.response?.data?.error || err.response?.data?.message || 'Gagal menyimpan item hadiah baru.')
+      alert(editingPromoId ? 'Kupon hadiah berhasil diperbarui!' : 'Kupon hadiah berhasil disimpan!')
+    } catch (saveError) {
+      console.error('Gagal menyimpan kupon hadiah:', saveError)
+      alert(saveError.response?.data?.error || saveError.response?.data?.message || 'Gagal menyimpan item hadiah baru.')
     } finally {
       setIsSaving(false)
     }
   }
 
+  const handleDeletePromo = async (promo) => {
+    const confirmed = window.confirm(`Hapus kupon "${promo.title}"?`)
+    if (!confirmed) return
+
+    try {
+      await axios.delete(apiUrl(`/api/admin/promos/${promo.id}`))
+      await loadData()
+    } catch (deleteError) {
+      console.error('Gagal menghapus kupon hadiah:', deleteError)
+      alert(deleteError.response?.data?.error || deleteError.response?.data?.message || 'Gagal menghapus kupon.')
+    }
+  }
+
   return (
-    <div className="flex min-h-screen flex-col bg-[#F8F9FA] overflow-hidden lg:flex-row">
+    <div className="flex min-h-screen flex-col overflow-hidden bg-[#F8F9FA] lg:flex-row">
       <Sidebar role="admin" />
 
       <main className="w-full flex-1 overflow-y-auto p-4 sm:p-6 lg:ml-72 lg:p-8">
         <header className="mb-8 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <h1 className="text-3xl font-extrabold text-[#2c1b0e]">Loyalty Rewards</h1>
-            <p className="text-gray-500">
-              Manajemen poin reward pelanggan dan konfigurasi nilai penukaran poin TiDB.
-            </p>
+            <p className="text-gray-500">Manajemen poin reward pelanggan dan kupon hadiah dari TiDB.</p>
           </div>
 
           <div className="flex flex-wrap gap-3">
@@ -201,16 +269,16 @@ const LoyaltyRewards = () => {
             </button>
             <button
               type="button"
-              onClick={() => setIsModalOpen(true)}
+              onClick={openCreateModal}
               className="inline-flex items-center gap-2 rounded-xl bg-[#e39b4f] px-5 py-3 font-bold text-white shadow-lg shadow-orange-900/20 transition hover:bg-[#c9863e]"
             >
               <Plus className="h-4 w-4" />
-              Tambah Item Hadiah
+              Tambah Kupon Hadiah
             </button>
           </div>
         </header>
 
-        <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
+        <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-5">
           <StatCard
             title="Total Poin Member"
             value={loading ? '...' : totalNumber(stats.totalPoints)}
@@ -239,6 +307,13 @@ const LoyaltyRewards = () => {
             icon={<Star className="text-yellow-500" />}
             color="bg-yellow-50"
           />
+          <StatCard
+            title="Kupon Aktif"
+            value={loading ? '...' : totalNumber(stats.activePromos)}
+            note="Kupon aktif dan masih punya kuota"
+            icon={<Gift className="text-rose-500" />}
+            color="bg-rose-50"
+          />
         </div>
 
         {error ? (
@@ -247,13 +322,12 @@ const LoyaltyRewards = () => {
           </div>
         ) : null}
 
-        {/* Search Bar */}
         <div className="mb-6 rounded-[2rem] border border-gray-100 bg-white p-4 shadow-sm">
           <div className="relative w-full md:w-80">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
             <input
               type="text"
-              placeholder="Cari menu atau kategori..."
+              placeholder="Cari menu, kategori, atau badge..."
               className="w-full rounded-xl border border-gray-200 bg-gray-50 py-2 pl-10 pr-4 focus:outline-none focus:ring-2 focus:ring-[#e39b4f]"
               value={searchTerm}
               onChange={(event) => setSearchTerm(event.target.value)}
@@ -261,7 +335,6 @@ const LoyaltyRewards = () => {
           </div>
         </div>
 
-        {/* Main Content Layout */}
         <div className="grid grid-cols-1 gap-8 xl:grid-cols-[1.35fr_0.65fr]">
           <section className="overflow-hidden rounded-[2rem] border border-gray-100 bg-white shadow-sm">
             <div className="border-b border-gray-100 px-6 py-5">
@@ -299,9 +372,7 @@ const LoyaltyRewards = () => {
                             {product.category}
                           </span>
                         </td>
-                        <td className="px-6 py-4 font-semibold text-orange-600">
-                          {product.basePoints} Poin
-                        </td>
+                        <td className="px-6 py-4 font-semibold text-orange-600">{product.basePoints} Poin</td>
                         <td className="px-6 py-4 font-medium">{formatRupiah(product.price)}</td>
                         <td className="px-6 py-4 text-gray-600">{product.stock} unit</td>
                         <td className="px-6 py-4">
@@ -330,7 +401,6 @@ const LoyaltyRewards = () => {
             </div>
           </section>
 
-          {/* Sidebar Leaderboard */}
           <aside className="space-y-6">
             <section className="rounded-[2rem] border border-gray-100 bg-white p-6 shadow-sm">
               <div className="mb-5 flex items-center gap-2">
@@ -367,105 +437,192 @@ const LoyaltyRewards = () => {
                 )}
               </div>
             </section>
+
+            <section className="rounded-[2rem] border border-gray-100 bg-white p-6 shadow-sm">
+              <div className="mb-5 flex items-center gap-2">
+                <div className="rounded-2xl bg-rose-50 p-3 text-rose-500">
+                  <Gift className="h-5 w-5" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-black text-[#2c1b0e]">Kupon Hadiah</h3>
+                  <p className="text-sm text-gray-500">Data disimpan di tabel `weekly_promos`.</p>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                {loading ? (
+                  <p className="py-6 text-center text-sm text-gray-400">Memuat kupon...</p>
+                ) : promos.length > 0 ? (
+                  promos.map((promo) => (
+                    <div key={promo.id} className="rounded-2xl border border-gray-100 bg-gray-50 p-4">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <p className="truncate font-bold text-[#2c1b0e]">{promo.title}</p>
+                          <p className="mt-1 text-xs text-gray-500">{promo.description || 'Tanpa deskripsi'}</p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() => openEditModal(promo)}
+                            className="rounded-lg p-2 text-blue-500 transition hover:bg-blue-50"
+                            title="Edit kupon"
+                          >
+                            <Edit3 size={16} />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDeletePromo(promo)}
+                            className="rounded-lg p-2 text-red-500 transition hover:bg-red-50"
+                            title="Hapus kupon"
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="mt-3 flex flex-wrap gap-2 text-xs font-semibold">
+                        <span className="rounded-full bg-white px-3 py-1 text-[#e39b4f]">
+                          Diskon {formatRupiah(promo.discountAmount)}
+                        </span>
+                        <span className="rounded-full bg-white px-3 py-1 text-gray-600">
+                          Kuota {totalNumber(promo.remainingQuota)}/{totalNumber(promo.quota)}
+                        </span>
+                        <span
+                          className={`rounded-full px-3 py-1 ${
+                            promo.isActive && promo.remainingQuota > 0
+                              ? 'bg-emerald-50 text-emerald-700'
+                              : 'bg-gray-200 text-gray-600'
+                          }`}
+                        >
+                          {promo.isActive && promo.remainingQuota > 0 ? 'Aktif' : 'Nonaktif'}
+                        </span>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <p className="py-6 text-center text-sm text-gray-400">Belum ada kupon tersimpan.</p>
+                )}
+              </div>
+            </section>
           </aside>
         </div>
-      </main>
 
-      {/* MODAL DIALOG COMPONENT: TAMBAH ITEM HADIAH / PROMO */}
-      {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm animate-fade-in">
-          <div className="w-full max-w-md overflow-hidden rounded-[2rem] border border-gray-100 bg-white p-6 shadow-2xl">
-            <div className="mb-4 flex items-center justify-between">
-              <h3 className="text-xl font-bold text-[#2c1b0e]">Tambah Kupon Hadiah</h3>
-              <button 
-                onClick={() => setIsModalOpen(false)}
-                className="rounded-xl p-1.5 hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition"
-              >
-                <X size={20} />
-              </button>
-            </div>
-
-            <form onSubmit={handleCreateReward} className="space-y-4">
-              {/* Form Input fields ... */}
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-1">Nama Hadiah / Promo</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="Contoh: Voucher Kopi Gratis Akhir Pekan"
-                  className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#e39b4f]"
-                  value={formData.title}
-                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-1">Deskripsi & Syarat</label>
-                <textarea
-                  placeholder="Tukarkan dengan 50 poin untuk potongan harga latte..."
-                  className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#e39b4f] h-20 resize-none"
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-1">Nilai Diskon (Rp)</label>
-                  <input
-                    type="number"
-                    required
-                    placeholder="15000"
-                    className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#e39b4f]"
-                    value={formData.discountAmount}
-                    onChange={(e) => setFormData({ ...formData, discountAmount: e.target.value })}
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-1">Kuota Klaim</label>
-                  <input
-                    type="number"
-                    required
-                    placeholder="50"
-                    className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#e39b4f]"
-                    value={formData.quota}
-                    onChange={(e) => setFormData({ ...formData, quota: e.target.value })}
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-1">Tanggal Kedaluwarsa</label>
-                <input
-                  type="date"
-                  required
-                  className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#e39b4f]"
-                  value={formData.expiryDate}
-                  onChange={(e) => setFormData({ ...formData, expiryDate: e.target.value })}
-                />
-              </div>
-
-              <div className="mt-6 flex justify-end gap-3">
+        {isModalOpen ? (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm">
+            <div className="w-full max-w-lg rounded-[2rem] bg-white p-6 shadow-2xl">
+              <div className="mb-5 flex items-center justify-between">
+                <h3 className="text-2xl font-black text-[#2c1b0e]">
+                  {editingPromoId ? 'Edit Kupon Hadiah' : 'Tambah Kupon Hadiah'}
+                </h3>
                 <button
                   type="button"
-                  onClick={() => setIsModalOpen(false)}
-                  className="rounded-xl border border-gray-200 px-4 py-2.5 text-sm font-bold text-gray-500 hover:bg-gray-50 transition"
+                  onClick={closeModal}
+                  className="rounded-xl p-1.5 text-gray-400 transition hover:bg-gray-100 hover:text-gray-600"
                 >
-                  Batal
-                </button>
-                <button
-                  type="submit"
-                  disabled={isSaving}
-                  className="inline-flex items-center gap-2 rounded-xl bg-[#e39b4f] px-5 py-2.5 text-sm font-bold text-white shadow-md hover:bg-[#c9863e] transition disabled:opacity-50"
-                >
-                  {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-                  Simpan Kupon
+                  <X size={20} />
                 </button>
               </div>
-            </form>
+
+              <form onSubmit={handleCreateOrUpdatePromo} className="space-y-4">
+                <div>
+                  <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-gray-500">
+                    Nama Hadiah / Promo
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="Contoh: Voucher Kopi Gratis Akhir Pekan"
+                    className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#e39b4f]"
+                    value={formData.title}
+                    onChange={(event) => setFormData({ ...formData, title: event.target.value })}
+                  />
+                </div>
+
+                <div>
+                  <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-gray-500">
+                    Deskripsi & Syarat
+                  </label>
+                  <textarea
+                    placeholder="Tukarkan dengan 50 poin untuk potongan harga latte..."
+                    className="h-24 w-full resize-none rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#e39b4f]"
+                    value={formData.description}
+                    onChange={(event) => setFormData({ ...formData, description: event.target.value })}
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-gray-500">
+                      Nilai Diskon (Rp)
+                    </label>
+                    <input
+                      type="number"
+                      required
+                      placeholder="15000"
+                      className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#e39b4f]"
+                      value={formData.discountAmount}
+                      onChange={(event) => setFormData({ ...formData, discountAmount: event.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-gray-500">
+                      Kuota Klaim
+                    </label>
+                    <input
+                      type="number"
+                      required
+                      placeholder="50"
+                      className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#e39b4f]"
+                      value={formData.quota}
+                      onChange={(event) => setFormData({ ...formData, quota: event.target.value })}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-gray-500">
+                    Tanggal Kedaluwarsa
+                  </label>
+                  <input
+                    type="date"
+                    required
+                    className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#e39b4f]"
+                    value={formData.expiryDate}
+                    onChange={(event) => setFormData({ ...formData, expiryDate: event.target.value })}
+                  />
+                </div>
+
+                <label className="flex items-center gap-3 rounded-xl border border-gray-200 px-4 py-3 text-sm font-semibold text-gray-700">
+                  <input
+                    type="checkbox"
+                    checked={formData.isActive}
+                    onChange={(event) => setFormData({ ...formData, isActive: event.target.checked })}
+                  />
+                  Aktifkan kupon setelah disimpan
+                </label>
+
+                <div className="mt-6 flex justify-end gap-3">
+                  <button
+                    type="button"
+                    onClick={closeModal}
+                    className="rounded-xl border border-gray-200 px-4 py-2.5 text-sm font-bold text-gray-500 transition hover:bg-gray-50"
+                  >
+                    Batal
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isSaving}
+                    className="inline-flex items-center gap-2 rounded-xl bg-[#e39b4f] px-5 py-2.5 text-sm font-bold text-white shadow-md transition hover:bg-[#c9863e] disabled:opacity-50"
+                  >
+                    {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+                    Simpan Kupon
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
-        </div>
-      )}
+        ) : null}
+      </main>
     </div>
   )
 }
