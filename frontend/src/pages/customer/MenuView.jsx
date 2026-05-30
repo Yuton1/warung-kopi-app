@@ -8,7 +8,7 @@ import PreOrderSection from './MenuViewComponents/PreOrderSection';
 import GroupOrderSection from './MenuViewComponents/GroupOrderSection';
 import CoffeeSubscription from './MenuViewComponents/CoffeeSubscription';
 import AnalyticsDashboard from './MenuViewComponents/AnalyticsDashboard';
-import CartFloating from '../../components/CartFloating';
+import CartFloating from './MenuViewComponents/CartFloating';
 import { coffeeSeed, subscriptionPlans as subscriptionSeed } from '../../data/menuSeed';
 import { STORAGE_KEYS, readStoredValue, writeStoredValue } from '../../data/customerStorage';
 import { getApiBaseUrl } from '../../utils/apiBaseUrl';
