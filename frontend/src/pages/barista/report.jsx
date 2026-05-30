@@ -1,225 +1,257 @@
-import React, { useState, useEffect } from 'react';
-import { 
-  TrendingUp, 
-  ShoppingBag, 
-  DollarSign, 
-  Award, 
-  Download, 
+import { useEffect, useMemo, useState } from 'react'
+import Sidebar from '../../components/Sidebar/Sidebar'
+import {
+  TrendingUp,
+  ShoppingBag,
+  DollarSign,
+  Award,
+  Download,
   Calendar,
-  Coffee
-} from 'lucide-react';
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+  Coffee,
+  Loader2,
+  RefreshCw,
+} from 'lucide-react'
+import axios from 'axios'
+import { getApiBaseUrl } from '../../utils/apiBaseUrl'
+import { formatRupiah } from '../../utils/formatRupiah'
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 
-export default function BaristaDailyReport() {
+const getReportApiUrl = () => {
+  const baseUrl = getApiBaseUrl()
+  return baseUrl ? `${baseUrl}/api/barista/reports/daily` : '/api/barista/reports/daily'
+}
+
+const parseNumber = (value, fallback = 0) => {
+  const parsed = Number(value)
+  return Number.isFinite(parsed) ? parsed : fallback
+}
+
+const BaristaDailyReport = () => {
   const [reportData, setReportData] = useState({
     totalEarnings: 0,
     totalTransactions: 0,
     averageOrderValue: 0,
     topProducts: [],
     hourlySales: []
-  });
-  const [loading, setLoading] = useState(true);
+  })
+  const [loading, setLoading] = useState(true)
+  const [refreshing, setRefreshing] = useState(false)
+  const [error, setError] = useState('')
+  const [lastUpdated, setLastUpdated] = useState(null)
 
-  // Mengambil data harian khusus porsi Barista
-  useEffect(() => {
-    const fetchDailyReport = async () => {
-      try {
-        // Sesuaikan dengan endpoint API backend kamu
-        // const response = await fetch('/api/barista/reports/daily');
-        // const data = await response.json();
-        
-        // Mock data untuk menyesuaikan visualisasi grafik dan list produk terlaris
-        const mockData = {
-          totalEarnings: 4250000,
-          totalTransactions: 142,
-          averageOrderValue: 29929,
-          topProducts: [
-            { name: 'Kopi Susu Gula Aren', sold: 45, revenue: 1260000 },
-            { name: 'Latte Gula Aren', sold: 32, revenue: 896000 },
-            { name: 'Caramel Macchiato', sold: 28, revenue: 784000 },
-            { name: 'Cireng Krispi', sold: 20, revenue: 200000 },
-          ],
-          hourlySales: [
-            { time: '08:00', sales: 350000 },
-            { time: '10:00', sales: 620000 },
-            { time: '12:00', sales: 980000 },
-            { time: '14:00', sales: 450000 },
-            { time: '16:00', sales: 710000 },
-            { time: '18:00', sales: 1140000 },
-          ]
-        };
-        
-        setReportData(mockData);
-        setLoading(false);
-      } catch (error) {
-        console.error("Gagal memuat laporan harian:", error);
-        setLoading(false);
+  const loadReportData = async (silent = false) => {
+    try {
+      if (silent) {
+        setRefreshing(true)
+      } else {
+        setLoading(true)
       }
-    };
+      setError('')
 
-    fetchDailyReport();
-  }, []);
+      // Tembak API report barista harian
+      const response = await axios.get(getReportApiUrl())
+      
+      // Mengamankan data dari backend
+      const nextData = {
+        totalEarnings: parseNumber(response.data?.totalEarnings),
+        totalTransactions: parseNumber(response.data?.totalTransactions),
+        averageOrderValue: parseNumber(response.data?.averageOrderValue),
+        topProducts: Array.isArray(response.data?.topProducts) ? response.data.topProducts : [],
+        hourlySales: Array.isArray(response.data?.hourlySales) ? response.data.hourlySales : []
+      }
 
-  const formatRupiah = (number) => {
-    return new Intl.NumberFormat('id-ID', {
-      style: 'currency',
-      currency: 'IDR',
-      minimumFractionDigits: 0
-    }).format(number);
-  };
-
-  if (loading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-[#fcf9f5]">
-        <div className="text-center">
-          <Coffee className="mx-auto h-12 w-12 animate-bounce text-orange-500" />
-          <p className="mt-4 text-gray-600 font-medium">Memproses laporan hari ini...</p>
-        </div>
-      </div>
-    );
+      setReportData(nextData)
+      setLastUpdated(new Date())
+    } catch (fetchError) {
+      console.error('Gagal memuat daily report barista:', fetchError)
+      setError(fetchError.response?.data?.error || fetchError.message || 'Gagal memuat laporan harian.')
+      
+      // Fallback Mock Data jika backend kamu belum siap, biar UI tidak pecah
+      const mockData = {
+        totalEarnings: 4250000,
+        totalTransactions: 142,
+        averageOrderValue: 29929,
+        topProducts: [
+          { name: 'Kopi Susu Gula Aren', sold: 45, revenue: 1260000 },
+          { name: 'Latte Gula Aren', sold: 32, revenue: 896000 },
+          { name: 'Caramel Macchiato', sold: 28, revenue: 784000 },
+          { name: 'Cireng Krispi', sold: 20, revenue: 200000 },
+        ],
+        hourlySales: [
+          { time: '08:00', sales: 350000 },
+          { time: '10:00', sales: 620000 },
+          { time: '12:00', sales: 980000 },
+          { time: '14:00', sales: 450000 },
+          { time: '16:00', sales: 710000 },
+          { time: '18:00', sales: 1140000 },
+        ]
+      }
+      setReportData(mockData)
+    } finally {
+      setLoading(false)
+      setRefreshing(false)
+    }
   }
 
+  useEffect(() => {
+    loadReportData()
+  }, [])
+
   return (
-    <div className="min-h-screen bg-[#fcf9f5] p-6 lg:p-8">
-      {/* Header Halaman */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-gray-200 pb-6 mb-8">
-        <div>
-          <div className="flex items-center gap-2">
-            <div className="p-2 bg-[#2c1b0e] text-white rounded-lg">
-              <TrendingUp size={20} />
-            </div>
-            <h1 className="text-2xl font-bold text-[#2c1b0e]">Daily Report</h1>
-          </div>
-          <p className="mt-1 text-sm text-gray-500">
-            Analisis performa penjualan, pesanan, dan menu terlaris shifts hari ini.
-          </p>
-        </div>
-        
-        <button 
-          onClick={() => window.print()}
-          className="inline-flex items-center justify-center gap-2 rounded-xl bg-white border border-gray-200 px-4 py-2.5 text-sm font-semibold text-gray-700 shadow-sm transition hover:bg-gray-50"
-        >
-          <Download size={16} />
-          <span>Export Laporan</span>
-        </button>
-      </div>
+    <div className="flex min-h-screen flex-col overflow-hidden bg-[#F8F9FA] font-['Fredoka'] lg:flex-row">
+      {/* Sidebar disamakan dengan inventory */}
+      <Sidebar role="barista" />
 
-      {/* Rangkuman Grid Ringkasan / Stat Cards */}
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 mb-8">
-        {/* Card 1: Pendapatan Hari Ini */}
-        <div className="rounded-2xl border border-emerald-100 bg-emerald-50/40 p-6 shadow-sm transition hover:shadow-md">
-          <div className="flex items-center justify-between">
-            <span className="text-sm font-semibold text-emerald-700">Pendapatan Hari Ini</span>
-            <div className="rounded-xl bg-emerald-500 p-2 text-white">
-              <DollarSign size={20} />
-            </div>
+      <main className="w-full flex-1 overflow-y-auto p-4 sm:p-6 lg:ml-72 lg:p-8">
+        <header className="mb-6 flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+          <div>
+            <h1 className="text-3xl font-extrabold text-[#2c1b0e]">Daily Report</h1>
+            <p className="text-gray-500">Analisis performa penjualan, pesanan, dan menu terlaris shifts hari ini.</p>
           </div>
-          <div className="mt-4">
-            <h3 className="text-2xl font-bold text-gray-900">{formatRupiah(reportData.totalEarnings)}</h3>
-            <span className="inline-flex items-center gap-1 mt-2 text-xs font-semibold text-emerald-700">
-              <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
-              Live dari kasir meja & takeaway
-            </span>
-          </div>
-        </div>
 
-        {/* Card 2: Total Transaksi */}
-        <div className="rounded-2xl border border-blue-100 bg-blue-50/30 p-6 shadow-sm transition hover:shadow-md">
-          <div className="flex items-center justify-between">
-            <span className="text-sm font-semibold text-blue-700">Total Transaksi</span>
-            <div className="rounded-xl bg-blue-500 p-2 text-white">
-              <ShoppingBag size={20} />
-            </div>
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => loadReportData(true)}
+              className="inline-flex items-center gap-2 rounded-2xl bg-white px-5 py-3 text-sm font-bold text-[#2c1b0e] shadow-sm transition hover:bg-[#f6efe7]"
+            >
+              <RefreshCw size={16} className={refreshing ? 'animate-spin' : ''} />
+              Refresh
+            </button>
+            
+            <button 
+              type="button"
+              onClick={() => window.print()}
+              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#2c1b0e] px-5 py-3 text-sm font-bold text-white shadow-lg shadow-orange-950/10 transition hover:bg-[#472f1b]"
+            >
+              <Download size={16} />
+              Export Laporan
+            </button>
           </div>
-          <div className="mt-4">
-            <h3 className="text-2xl font-bold text-gray-900">{reportData.totalTransactions} Pesanan</h3>
-            <span className="inline-flex items-center gap-1 mt-2 text-xs font-semibold text-blue-700">
-              <span className="inline-block h-1.5 w-1.5 rounded-full bg-blue-500"></span>
-              Semua status pesanan selesai
-            </span>
-          </div>
+        </header>
+
+        {/* Baris Statistik Ringkas */}
+        <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          <StatCard 
+            label="Pendapatan Hari Ini" 
+            value={formatRupiah(reportData.totalEarnings)} 
+            icon={<DollarSign size={20} className="text-emerald-600" />} 
+            note="Live dari kasir meja & takeaway" 
+          />
+          <StatCard 
+            label="Total Transaksi" 
+            value={`${reportData.totalTransactions} Pesanan`} 
+            icon={<ShoppingBag size={20} className="text-blue-600" />} 
+            note="Semua status pesanan selesai" 
+          />
+          <StatCard 
+            label="Rata-rata Struk" 
+            value={formatRupiah(reportData.averageOrderValue)} 
+            icon={<Award size={20} className="text-orange-600" />} 
+            note="Nilai pengeluaran per pelanggan" 
+          />
         </div>
 
-        {/* Card 3: Rata-rata Nilai Pesanan */}
-        <div className="rounded-2xl border border-orange-100 bg-orange-50/40 p-6 shadow-sm transition hover:shadow-md sm:col-span-2 lg:col-span-1">
-          <div className="flex items-center justify-between">
-            <span className="text-sm font-semibold text-orange-700">Rata-rata Pesanan</span>
-            <div className="rounded-xl bg-orange-500 p-2 text-white">
-              <Award size={20} />
-            </div>
+        {error ? (
+          <div className="mb-6 rounded-[1.5rem] border border-red-200 bg-red-50 px-5 py-4 text-sm font-semibold text-red-600">
+            {error} (Menampilkan mode simulasi lokal)
           </div>
-          <div className="mt-4">
-            <h3 className="text-2xl font-bold text-gray-900">{formatRupiah(reportData.averageOrderValue)}</h3>
-            <span className="inline-flex items-center gap-1 mt-2 text-xs font-semibold text-orange-700">
-              <span className="inline-block h-1.5 w-1.5 rounded-full bg-orange-500"></span>
-              Nilai pengeluaran per struk konsumen
-            </span>
-          </div>
-        </div>
-      </div>
+        ) : null}
 
-      {/* Main Content Sections */}
-      <div className="grid gap-8 lg:grid-cols-3">
-        {/* Grafik Lonjakan Pendapatan Jam Terpadat */}
-        <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm lg:col-span-2">
-          <div className="flex items-center justify-between border-b border-gray-50 pb-4 mb-6">
-            <div>
-              <h2 className="text-lg font-bold text-[#2c1b0e]">Grafik Pendapatan Terkini</h2>
-              <p className="text-xs text-gray-500">Tren grafik berdasarkan interval waktu operasional hari ini.</p>
-            </div>
-            <div className="inline-flex items-center gap-1.5 rounded-xl bg-gray-50 px-3 py-1.5 text-xs font-medium text-gray-600">
-              <Calendar size={14} />
-              <span>Hari Ini</span>
-            </div>
-          </div>
+        {/* Grafik & Tabel Split Layout */}
+        <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1.35fr_0.65fr]">
           
-          <div className="h-72 w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={reportData.hourlySales} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
-                <defs>
-                  <linearGradient id="colorSales" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#f97316" stopOpacity={0.2}/>
-                    <stop offset="95%" stopColor="#f97316" stopOpacity={0}/>
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f3f4f6" />
-                <XAxis dataKey="time" stroke="#9ca3af" fontSize={12} tickLine={false} />
-                <YAxis stroke="#9ca3af" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(v) => `Rp ${v/1000}k`} />
-                <Tooltip 
-                  formatter={(value) => [formatRupiah(value), 'Pendapatan']}
-                  contentStyle={{ backgroundColor: '#fff', borderRadius: '12px', borderColor: '#f3f4f6', shadow: 'sm' }}
-                />
-                <Area type="monotone" dataKey="sales" stroke="#f97316" strokeWidth={2} fillOpacity={1} fill="url(#colorSales)" />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-
-        {/* Daftar Produk Terlaris Shift Ini */}
-        <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
-          <div className="border-b border-gray-50 pb-4 mb-5">
-            <h2 className="text-lg font-bold text-[#2c1b0e]">Produk Terlaris</h2>
-            <p className="text-xs text-gray-500">Menu makanan & minuman paling banyak dibuat.</p>
-          </div>
-
-          <div className="divide-y divide-gray-50">
-            {reportData.topProducts.map((product, index) => (
-              <div key={index} className="flex items-center justify-between py-3.5 first:pt-0 last:pb-0">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-orange-50 text-sm font-bold text-orange-600">
-                    #{index + 1}
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold text-gray-900">{product.name}</p>
-                    <p className="text-xs text-gray-500">{product.sold} Porsi Terbuat</p>
-                  </div>
-                </div>
-                <p className="text-sm font-bold text-gray-700">{formatRupiah(product.revenue)}</p>
+          {/* Sektor Kiri: Grafik Area Penghasilan Jam */}
+          <section className="rounded-[2rem] border border-gray-100 bg-white p-6 shadow-sm">
+            <div className="mb-6 flex items-center justify-between border-b border-gray-50 pb-4">
+              <div>
+                <h2 className="text-xl font-bold text-[#2c1b0e]">Grafik Pendapatan Terkini</h2>
+                <p className="text-xs text-gray-400">Tren grafik berdasarkan interval waktu operasional hari ini.</p>
               </div>
-            ))}
-          </div>
+              <div className="inline-flex items-center gap-1.5 rounded-xl bg-gray-50 px-3 py-1.5 text-xs font-bold text-gray-500">
+                <Calendar size={14} />
+                Shift Hari Ini
+              </div>
+            </div>
+
+            <div className="h-72 w-full">
+              {loading ? (
+                <div className="flex h-full items-center justify-center text-gray-400">
+                  <Loader2 className="animate-spin" size={24} />
+                </div>
+              ) : (
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={reportData.hourlySales} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
+                    <defs>
+                      <linearGradient id="reportSalesColor" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#e39b4f" stopOpacity={0.2}/>
+                        <stop offset="95%" stopColor="#e39b4f" stopOpacity={0}/>
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f3f4f6" />
+                    <XAxis dataKey="time" stroke="#9ca3af" fontSize={11} tickLine={false} />
+                    <YAxis stroke="#9ca3af" fontSize={11} tickLine={false} axisLine={false} tickFormatter={(v) => `Rp ${v/1000}k`} />
+                    <Tooltip 
+                      formatter={(value) => [formatRupiah(value), 'Pendapatan']}
+                      contentStyle={{ backgroundColor: '#fff', borderRadius: '16px', borderColor: '#f3f4f6', fontFamily: 'Fredoka' }}
+                    />
+                    <Area type="monotone" dataKey="sales" stroke="#e39b4f" strokeWidth={3} fillOpacity={1} fill="url(#reportSalesColor)" />
+                  </AreaChart>
+                </ResponsiveContainer>
+              )}
+            </div>
+          </section>
+
+          {/* Sektor Kanan: Ranking Produk Terlaris */}
+          <aside className="rounded-[2rem] border border-gray-100 bg-white p-6 shadow-sm">
+            <div className="mb-5 border-b border-gray-50 pb-4">
+              <h2 className="text-xl font-bold text-[#2c1b0e]">Menu Terlaris</h2>
+              <p className="text-xs text-gray-400">Menu paling banyak diproduksi hari ini.</p>
+            </div>
+
+            <div className="divide-y divide-gray-100">
+              {loading ? (
+                <p className="py-6 text-center text-sm text-gray-400">Memuat rangking menu...</p>
+              ) : reportData.topProducts.length > 0 ? (
+                reportData.topProducts.map((product, index) => (
+                  <div key={index} className="flex items-center justify-between py-3.5 first:pt-0 last:pb-0">
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-orange-50 font-bold text-sm text-[#e39b4f]">
+                        #{index + 1}
+                      </div>
+                      <div>
+                        <p className="text-sm font-bold text-[#2c1b0e]">{product.name}</p>
+                        <p className="text-xs text-gray-400">{product.sold} Porsi Terbuat</p>
+                      </div>
+                    </div>
+                    <p className="text-sm font-bold text-gray-700">{formatRupiah(product.revenue)}</p>
+                  </div>
+                ))
+              ) : (
+                <p className="py-6 text-center text-sm text-gray-400">Belum ada data seduhan keluar.</p>
+              )}
+            </div>
+          </aside>
         </div>
-      </div>
+
+        {lastUpdated ? (
+          <p className="mt-4 text-xs text-gray-400">Terakhir disinkronkan: {lastUpdated.toLocaleTimeString('id-ID')}</p>
+        ) : null}
+      </main>
     </div>
-  );
+  )
 }
+
+// Sub-Komponen StatCard disesuaikan dengan arsitektur inventory agar lebar grid fleksibel
+const StatCard = ({ label, value, icon, note }) => (
+  <div className="rounded-[1.75rem] border border-gray-100 bg-white p-5 shadow-sm">
+    <div className="flex items-center justify-between mb-2">
+      <p className="text-xs uppercase tracking-[0.18em] text-gray-400">{label}</p>
+      <div className="rounded-xl bg-gray-50 p-2 shadow-sm">{icon}</div>
+    </div>
+    <p className="text-2xl font-black text-[#2c1b0e]">{value}</p>
+    <p className="mt-2 text-[11px] font-medium text-gray-400">{note}</p>
+  </div>
+)
+
+export default BaristaDailyReport
