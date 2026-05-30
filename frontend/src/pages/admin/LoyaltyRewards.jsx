@@ -142,16 +142,22 @@ const LoyaltyRewards = () => {
   const handleCreateReward = async (e) => {
     e.preventDefault()
     setIsSaving(true)
+    
+    const targetQuota = parseNumber(formData.quota)
+
     try {
-      // Menembak endpoint promos baru kamu
+      // PERBAIKAN: Menambahkan 'remaining_quota' yang nilainya disamakan dengan quota awal
       await axios.post(apiUrl('/api/admin/promos'), {
         title: formData.title,
         description: formData.description,
         discount_amount: parseNumber(formData.discountAmount),
-        quota: parseNumber(formData.quota),
+        quota: targetQuota,
+        remaining_quota: targetQuota, // Solusi menghentikan error field NOT NULL database
         expiry_date: formData.expiryDate,
         is_active: 1
       })
+      
+      alert('Kupon hadiah berhasil disimpan!')
       
       // Reset form dan tutup modal
       setFormData({ title: '', description: '', discountAmount: '', quota: '', expiryDate: '' })
@@ -160,7 +166,7 @@ const LoyaltyRewards = () => {
       await loadData()
     } catch (err) {
       console.error('Gagal menyimpan kupon hadiah:', err)
-      alert(err.response?.data?.error || 'Gagal menyimpan item hadiah baru.')
+      alert(err.response?.data?.error || err.response?.data?.message || 'Gagal menyimpan item hadiah baru.')
     } finally {
       setIsSaving(false)
     }
@@ -199,7 +205,7 @@ const LoyaltyRewards = () => {
           </div>
         </header>
 
-        {/* ... Bagian Stat Cards Tetap Sama ... */}
+        {/* PERBAIKAN: Memperbaiki nama pemanggilan fungsi dari totalNumber */}
         <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
           <StatCard
             title="Total Poin Member"
@@ -314,7 +320,8 @@ const LoyaltyRewards = () => {
                         Tidak ada menu yang cocok dengan pencarian ini.
                       </td>
                     </tr>
-                  )} 
+                  )
+                  } 
                 </tbody>
               </table>
             </div>
