@@ -16,6 +16,8 @@ import {
   Trophy,
   Users,
   Wallet,
+  Plus,
+  X
 } from 'lucide-react'
 
 const POINT_VALUE = 1000
@@ -62,48 +64,43 @@ const LoyaltyRewards = () => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
+  // State untuk Modal Tambah Hadiah / Promo Baru
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
+  const [formData, setFormData] = useState({
+    title: '',
+    description: '',
+    discountAmount: '',
+    quota: '',
+    expiryDate: '',
+  })
+
   useEffect(() => {
     if (!auth || auth.role !== 'admin') {
       navigate('/login', { replace: true })
     }
   }, [auth, navigate])
 
+  const loadData = async () => {
+    setLoading(true)
+    setError('')
+    try {
+      const [usersResponse, productsResponse] = await Promise.all([
+        axios.get(apiUrl('/api/users')),
+        axios.get(apiUrl('/api/products')),
+      ])
+      setUsers(Array.isArray(usersResponse.data) ? usersResponse.data.map(normalizeUser) : [])
+      setProducts(Array.isArray(productsResponse.data) ? productsResponse.data.map(normalizeProduct) : [])
+    } catch (fetchError) {
+      console.error('Gagal memuat loyalty rewards:', fetchError)
+      setError(fetchError.response?.data?.message || fetchError.response?.data?.error || fetchError.message || 'Gagal memuat data loyalty.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
   useEffect(() => {
-    let cancelled = false
-
-    const loadData = async () => {
-      setLoading(true)
-      setError('')
-
-      try {
-        const [usersResponse, productsResponse] = await Promise.all([
-          axios.get(apiUrl('/api/users')),
-          axios.get(apiUrl('/api/products')),
-        ])
-
-        if (!cancelled) {
-          setUsers(Array.isArray(usersResponse.data) ? usersResponse.data.map(normalizeUser) : [])
-          setProducts(Array.isArray(productsResponse.data) ? productsResponse.data.map(normalizeProduct) : [])
-        }
-      } catch (fetchError) {
-        console.error('Gagal memuat loyalty rewards:', fetchError)
-        if (!cancelled) {
-          setError(fetchError.response?.data?.message || fetchError.response?.data?.error || fetchError.message || 'Gagal memuat data loyalty.')
-          setUsers([])
-          setProducts([])
-        }
-      } finally {
-        if (!cancelled) {
-          setLoading(false)
-        }
-      }
-    }
-
     loadData()
-
-    return () => {
-      cancelled = true
-    }
   }, [])
 
   const stats = useMemo(() => {
@@ -122,10 +119,7 @@ const LoyaltyRewards = () => {
 
   const filteredProducts = useMemo(() => {
     const query = searchTerm.toLowerCase().trim()
-    const sortedProducts = [...products].sort((a, b) => {
-      if (b.basePoints !== a.basePoints) return b.basePoints - a.basePoints
-      return b.stock - a.stock
-    })
+    const sortedProducts = [...products].sort((a, b) => b.basePoints - a.basePoints)
 
     if (!query) return sortedProducts
 
@@ -144,23 +138,31 @@ const LoyaltyRewards = () => {
       .slice(0, 5)
   }, [users])
 
-  const refreshData = async () => {
-    setLoading(true)
-    setError('')
-
+  // Handler Kirim Data Hadiah / Promo Baru ke TiDB lewat Backend
+  const handleCreateReward = async (e) => {
+    e.preventDefault()
+    setIsSaving(true)
     try {
-      const [usersResponse, productsResponse] = await Promise.all([
-        axios.get(apiUrl('/api/users')),
-        axios.get(apiUrl('/api/products')),
-      ])
-
-      setUsers(Array.isArray(usersResponse.data) ? usersResponse.data.map(normalizeUser) : [])
-      setProducts(Array.isArray(productsResponse.data) ? productsResponse.data.map(normalizeProduct) : [])
-    } catch (fetchError) {
-      console.error('Gagal memuat loyalty rewards:', fetchError)
-      setError(fetchError.response?.data?.message || fetchError.response?.data?.error || fetchError.message || 'Gagal memuat data loyalty.')
+      // Menembak endpoint promos baru kamu
+      await axios.post(apiUrl('/api/admin/promos'), {
+        title: formData.title,
+        description: formData.description,
+        discount_amount: parseNumber(formData.discountAmount),
+        quota: parseNumber(formData.quota),
+        expiry_date: formData.expiryDate,
+        is_active: 1
+      })
+      
+      // Reset form dan tutup modal
+      setFormData({ title: '', description: '', discountAmount: '', quota: '', expiryDate: '' })
+      setIsModalOpen(false)
+      // Refresh data catalog
+      await loadData()
+    } catch (err) {
+      console.error('Gagal menyimpan kupon hadiah:', err)
+      alert(err.response?.data?.error || 'Gagal menyimpan item hadiah baru.')
     } finally {
-      setLoading(false)
+      setIsSaving(false)
     }
   }
 
@@ -173,14 +175,14 @@ const LoyaltyRewards = () => {
           <div>
             <h1 className="text-3xl font-extrabold text-[#2c1b0e]">Loyalty Rewards</h1>
             <p className="text-gray-500">
-              Data loyalty diambil langsung dari `users.points` dan `products.base_points` di TiDB.
+              Manajemen poin reward pelanggan dan konfigurasi nilai penukaran poin TiDB.
             </p>
           </div>
 
           <div className="flex flex-wrap gap-3">
             <button
               type="button"
-              onClick={refreshData}
+              onClick={loadData}
               className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-5 py-3 font-bold text-[#2c1b0e] shadow-sm transition hover:bg-gray-50"
             >
               <Loader2 className={loading ? 'h-4 w-4 animate-spin' : 'h-4 w-4'} />
@@ -188,15 +190,16 @@ const LoyaltyRewards = () => {
             </button>
             <button
               type="button"
-              onClick={() => navigate('/admin/menu')}
+              onClick={() => setIsModalOpen(true)}
               className="inline-flex items-center gap-2 rounded-xl bg-[#e39b4f] px-5 py-3 font-bold text-white shadow-lg shadow-orange-900/20 transition hover:bg-[#c9863e]"
             >
-              <ArrowRight className="h-4 w-4" />
-              Kelola Menu Berpoin
+              <Plus className="h-4 w-4" />
+              Tambah Item Hadiah
             </button>
           </div>
         </header>
 
+        {/* ... Bagian Stat Cards Tetap Sama ... */}
         <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
           <StatCard
             title="Total Poin Member"
@@ -234,6 +237,7 @@ const LoyaltyRewards = () => {
           </div>
         ) : null}
 
+        {/* Search Bar */}
         <div className="mb-6 rounded-[2rem] border border-gray-100 bg-white p-4 shadow-sm">
           <div className="relative w-full md:w-80">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
@@ -247,6 +251,7 @@ const LoyaltyRewards = () => {
           </div>
         </div>
 
+        {/* Main Content Layout */}
         <div className="grid grid-cols-1 gap-8 xl:grid-cols-[1.35fr_0.65fr]">
           <section className="overflow-hidden rounded-[2rem] border border-gray-100 bg-white shadow-sm">
             <div className="border-b border-gray-100 px-6 py-5">
@@ -309,12 +314,13 @@ const LoyaltyRewards = () => {
                         Tidak ada menu yang cocok dengan pencarian ini.
                       </td>
                     </tr>
-                  )}
+                  )} 
                 </tbody>
               </table>
             </div>
           </section>
 
+          {/* Sidebar Leaderboard */}
           <aside className="space-y-6">
             <section className="rounded-[2rem] border border-gray-100 bg-white p-6 shadow-sm">
               <div className="mb-5 flex items-center gap-2">
@@ -351,27 +357,104 @@ const LoyaltyRewards = () => {
                 )}
               </div>
             </section>
-
-            <section className="rounded-[2rem] border border-gray-100 bg-[#fff8ef] p-6 shadow-sm">
-              <div className="mb-3 flex items-center gap-2 text-sm font-bold text-[#2c1b0e]">
-                <Gift className="h-4 w-4 text-[#e39b4f]" />
-                Cara Kerja Loyalty
-              </div>
-              <ul className="space-y-3 text-sm text-[#6f6257]">
-                <li>• `products.base_points` dipakai sebagai nilai poin dasar tiap menu.</li>
-                <li>• `users.points` menyimpan saldo poin milik pelanggan.</li>
-                <li>• Setiap order sukses bisa menambah poin ke saldo user.</li>
-              </ul>
-              <div className="mt-5 rounded-2xl bg-white p-4 shadow-sm">
-                <p className="text-[11px] uppercase tracking-widest text-gray-400">Rate Default</p>
-                <strong className="mt-1 block text-xl text-[#2c1b0e]">
-                  {formatRupiah(POINT_VALUE)} / Poin
-                </strong>
-              </div>
-            </section>
           </aside>
         </div>
       </main>
+
+      {/* MODAL DIALOG COMPONENT: TAMBAH ITEM HADIAH / PROMO */}
+      {isModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm animate-fade-in">
+          <div className="w-full max-w-md overflow-hidden rounded-[2rem] border border-gray-100 bg-white p-6 shadow-2xl">
+            <div className="mb-4 flex items-center justify-between">
+              <h3 className="text-xl font-bold text-[#2c1b0e]">Tambah Kupon Hadiah</h3>
+              <button 
+                onClick={() => setIsModalOpen(false)}
+                className="rounded-xl p-1.5 hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <form onSubmit={handleCreateReward} className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-1">Nama Hadiah / Promo</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="Contoh: Voucher Kopi Gratis Akhir Pekan"
+                  className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#e39b4f]"
+                  value={formData.title}
+                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-1">Deskripsi & Syarat</label>
+                <textarea
+                  placeholder="Tukarkan dengan 50 poin untuk potongan harga latte..."
+                  className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#e39b4f] h-20 resize-none"
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-1">Nilai Diskon (Rp)</label>
+                  <input
+                    type="number"
+                    required
+                    placeholder="15000"
+                    className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#e39b4f]"
+                    value={formData.discountAmount}
+                    onChange={(e) => setFormData({ ...formData, discountAmount: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-1">Kuota Klaim</label>
+                  <input
+                    type="number"
+                    required
+                    placeholder="50"
+                    className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#e39b4f]"
+                    value={formData.quota}
+                    onChange={(e) => setFormData({ ...formData, quota: e.target.value })}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-1">Tanggal Kedaluwarsa</label>
+                <input
+                  type="date"
+                  required
+                  className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#e39b4f]"
+                  value={formData.expiryDate}
+                  onChange={(e) => setFormData({ ...formData, expiryDate: e.target.value })}
+                />
+              </div>
+
+              <div className="mt-6 flex justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={() => setIsModalOpen(false)}
+                  className="rounded-xl border border-gray-200 px-4 py-2.5 text-sm font-bold text-gray-500 hover:bg-gray-50 transition"
+                >
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSaving}
+                  className="inline-flex items-center gap-2 rounded-xl bg-[#e39b4f] px-5 py-2.5 text-sm font-bold text-white shadow-md hover:bg-[#c9863e] transition disabled:opacity-50"
+                >
+                  {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+                  Simpan Kupon
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
@@ -389,4 +472,4 @@ const StatCard = ({ title, value, note, icon, color }) => (
   </div>
 )
 
-export default LoyaltyRewards
+export default LoyaltyRewards;
