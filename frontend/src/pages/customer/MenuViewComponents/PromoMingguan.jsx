@@ -3,35 +3,46 @@ import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { promoSeed } from '../../../data/promoSeed';
 import { STORAGE_KEYS, readStoredValue } from '../../../data/customerStorage';
+import { getApiBaseUrl } from '../../../utils/apiBaseUrl';
+
+const apiUrl = (path) => {
+  const baseUrl = getApiBaseUrl();
+  if (!baseUrl) return path;
+  return `${baseUrl}${path.startsWith('/') ? path : `/${path}`}`;
+};
 
 const PromoMingguan = () => {
-  const [promos, setPromos] = useState(promoSeed);
+  const [promos, setPromos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [claimLoadingId, setClaimLoadingId] = useState(null); // Loading feedback per item
+  const [error, setError] = useState('');
   const [authUser] = useState(() => readStoredValue(STORAGE_KEYS.auth, null));
-
-  useEffect(() => {
-    fetchPromos();
-  }, []);
 
   const fetchPromos = async () => {
     try {
-      const response = await axios.get('/api/promos/weekly', {
+      setError('');
+      const response = await axios.get(apiUrl('/api/promos/weekly'), {
         params: authUser?.email ? { userEmail: authUser.email } : {},
       });
-      setPromos(Array.isArray(response.data) ? response.data : promoSeed);
+      const data = response.data;
+      setPromos(Array.isArray(data) && data.length > 0 ? data : promoSeed);
     } catch (error) {
       console.error("Gagal mengambil promo:", error);
+      setError(error.response?.data?.error || error.response?.data?.message || error.message || 'Gagal mengambil promo');
       setPromos(promoSeed);
     } finally {
       setLoading(false);
     }
   };
 
+  useEffect(() => {
+    fetchPromos();
+  }, []);
+
   const handleClaim = async (promoId) => {
     setClaimLoadingId(promoId);
     try {
-      const response = await axios.post('/api/promos/claim', {
+      const response = await axios.post(apiUrl('/api/promos/claim'), {
         promoId,
         userEmail: authUser?.email || null,
       });
@@ -45,7 +56,7 @@ const PromoMingguan = () => {
     }
   };
 
-  // State Loading Premium Shimmer Effect (Diberi margin juga agar tidak bergeser saat loading selesai)
+  // State Loading Premium Shimmer Effect
   if (loading) {
     return (
       <div className="w-full mt-10 md:mt-12 bg-[#1A120B]/50 backdrop-blur-md rounded-[2rem] p-6 border border-white/5 animate-pulse">
@@ -59,14 +70,14 @@ const PromoMingguan = () => {
   }
 
   const safePromos = Array.isArray(promos) ? promos : promoSeed;
-  const heroPromo = safePromos || null;
-  const railPromos = safePromos.slice(1);
+  
+  // 🛠️ PERBAIKAN: Ambil item pertama untuk Hero Promo, dan sisanya untuk Rail Promos
+  const heroPromo = safePromos.length > 0 ? safePromos[0] : null;
+  const railPromos = safePromos.length > 1 ? safePromos.slice(1) : [];
 
   return (
-    // 🛠️ PERBAIKAN: Menambahkan mt-10 md:mt-12 untuk memberikan jarak pas dari Banner atas
     <div className="w-full mt-10 md:mt-12 bg-gradient-to-br from-[#1A120B] to-[#2C1E12] rounded-[2.5rem] p-6 md:p-8 relative overflow-hidden">
       
-      {/* 🛠️ PERBAIKAN UX: Memperbaiki salah ketik dari "-pointer-events-none" menjadi "pointer-events-none" */}
       <div className="absolute top-0 left-0 w-72 h-72 bg-orange-500/10 rounded-full blur-[80px] pointer-events-none"></div>
 
       <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4 relative z-10">
@@ -86,11 +97,17 @@ const PromoMingguan = () => {
         </Link>
       </header>
 
+      {error ? (
+        <div className="mb-5 rounded-2xl border border-amber-500/20 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">
+          {error}
+        </div>
+      ) : null}
+
       {/* Grid Asimetris Responsif */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 relative z-10">
         
-        {/* HERO CARD (Promo Utama - 2 Kolom di Desktop) */}
-        {heroPromo && (
+        {/* HERO CARD (Promo Utama) */}
+        {heroPromo ? (
           <article className="lg:col-span-2 bg-[#4A3728]/40 backdrop-blur-md border border-white/10 rounded-[2rem] p-6 md:p-8 flex flex-col justify-between transition-all duration-300 hover:border-orange-500/40 group">
             <div>
               <div className="flex justify-between items-start mb-4">
@@ -121,15 +138,15 @@ const PromoMingguan = () => {
                 <button 
                   onClick={() => handleClaim(heroPromo.id)}
                   className={`px-6 py-2.5 rounded-xl text-xs font-black tracking-wide transition-all duration-300 active:scale-95 flex items-center justify-center min-w-[120px] ${
-                    heroPromo.remaining_quota <= 0 
+                    (heroPromo.remaining_quota ?? 0) <= 0 
                       ? 'bg-white/5 text-white/30 cursor-not-allowed' 
                       : 'bg-orange-500 text-white hover:bg-orange-600 shadow-lg shadow-orange-600/20'
                   }`}
-                  disabled={heroPromo.remaining_quota <= 0 || claimLoadingId === heroPromo.id}
+                  disabled={(heroPromo.remaining_quota ?? 0) <= 0 || claimLoadingId === heroPromo.id}
                 >
                   {claimLoadingId === heroPromo.id ? (
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  ) : heroPromo.remaining_quota <= 0 ? (
+                  ) : (heroPromo.remaining_quota ?? 0) <= 0 ? (
                     'Kuota Habis'
                   ) : (
                     'Klaim Voucher'
@@ -138,9 +155,13 @@ const PromoMingguan = () => {
               )}
             </div>
           </article>
+        ) : (
+          <div className="lg:col-span-2 flex items-center justify-center border border-dashed border-white/10 rounded-[2rem] p-8 text-center bg-black/10">
+            <p className="text-sm text-white/40">Tidak ada promo utama saat ini</p>
+          </div>
         )}
 
-        {/* SIDE RAIL CARDS (Promo List Tambahan - 1 Kolom Samping) */}
+        {/* SIDE RAIL CARDS (Promo Tambahan) */}
         <div className="flex flex-col gap-4 max-h-[340px] lg:max-h-none overflow-y-auto pr-1 custom-scrollbar">
           {railPromos.length > 0 ? (
             railPromos.map((promo) => (
@@ -166,10 +187,12 @@ const PromoMingguan = () => {
                     <button 
                       onClick={() => handleClaim(promo.id)}
                       className="text-xs font-bold text-orange-400 hover:text-orange-300 transition-colors flex items-center gap-1 group/btn disabled:opacity-50"
-                      disabled={claimLoadingId === promo.id}
+                      disabled={claimLoadingId === promo.id || (promo.remaining_quota ?? 0) <= 0}
                     >
                       {claimLoadingId === promo.id ? (
                         <div className="w-3 h-3 border-2 border-orange-400 border-t-transparent rounded-full animate-spin"></div>
+                      ) : (promo.remaining_quota ?? 0) <= 0 ? (
+                        <span className="text-white/30 cursor-not-allowed">Habis</span>
                       ) : (
                         <>Klaim Sekarang <span className="transition-transform group-hover/btn:translate-x-1">→</span></>
                       )}
@@ -179,7 +202,7 @@ const PromoMingguan = () => {
               </article>
             ))
           ) : (
-            <div className="h-full flex items-center justify-center border border-dashed border-white/10 rounded-2xl p-6 text-center">
+            <div className="h-full min-h-[150px] flex items-center justify-center border border-dashed border-white/10 rounded-2xl p-6 text-center bg-black/10">
               <p className="text-xs text-white/40">Tidak ada promo tambahan tersedia</p>
             </div>
           )}
