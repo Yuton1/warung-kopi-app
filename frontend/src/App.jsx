@@ -21,6 +21,7 @@ import SalesReports from './pages/admin/SalesReports';
 import BannerManagement from './pages/admin/BannerManagement';
 import OrderQueue from './pages/barista/OrderQueue';
 import Inventory from './pages/barista/Inventory';
+import BaristaDailyReport from './pages/barista/report';
 import CartPage from './pages/customer/CartPage';
 import MenuDetail from './pages/customer/MenuDetail';
 import ConfirmPesanan from './pages/customer/confirmpesanan';
@@ -46,6 +47,7 @@ function App() {
         <Route path="/barista" element={<Navigate to="/barista/order-queue" replace />} />
         <Route path="/barista/order-queue" element={<OrderQueue />} />
         <Route path="/barista/inventory" element={<Inventory />} />
+        <Route path="/barista/report" element={<BaristaDailyReport />} />
 
         {/* CUSTOMER ROUTES - Mobile/User View */}
         <Route element={<CustomerLayout />}>
