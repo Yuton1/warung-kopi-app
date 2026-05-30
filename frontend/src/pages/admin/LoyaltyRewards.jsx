@@ -22,6 +22,11 @@ import {
 
 const POINT_VALUE = 1000
 
+// ==========================================
+// UTILITY / HELPER FUNCTIONS (DITAROH DI ATAS)
+// ==========================================
+const totalNumber = (value) => Number(value || 0).toLocaleString('id-ID')
+
 const apiUrl = (path) => {
   const baseUrl = getApiBaseUrl()
   if (!baseUrl) return path
@@ -55,6 +60,9 @@ const normalizeProduct = (product) => ({
   badge: normalizeText(product?.badge),
 })
 
+// ==========================================
+// MAIN COMPONENT
+// ==========================================
 const LoyaltyRewards = () => {
   const navigate = useNavigate()
   const auth = readStoredValue(STORAGE_KEYS.auth, null)
@@ -146,23 +154,20 @@ const LoyaltyRewards = () => {
     const targetQuota = parseNumber(formData.quota)
 
     try {
-      // PERBAIKAN: Menambahkan 'remaining_quota' yang nilainya disamakan dengan quota awal
       await axios.post(apiUrl('/api/admin/promos'), {
         title: formData.title,
         description: formData.description,
         discount_amount: parseNumber(formData.discountAmount),
         quota: targetQuota,
-        remaining_quota: targetQuota, // Solusi menghentikan error field NOT NULL database
+        remaining_quota: targetQuota, 
         expiry_date: formData.expiryDate,
         is_active: 1
       })
       
       alert('Kupon hadiah berhasil disimpan!')
       
-      // Reset form dan tutup modal
       setFormData({ title: '', description: '', discountAmount: '', quota: '', expiryDate: '' })
       setIsModalOpen(false)
-      // Refresh data catalog
       await loadData()
     } catch (err) {
       console.error('Gagal menyimpan kupon hadiah:', err)
@@ -205,7 +210,6 @@ const LoyaltyRewards = () => {
           </div>
         </header>
 
-        {/* PERBAIKAN: Memperbaiki nama pemanggilan fungsi dari totalNumber */}
         <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
           <StatCard
             title="Total Poin Member"
@@ -320,8 +324,7 @@ const LoyaltyRewards = () => {
                         Tidak ada menu yang cocok dengan pencarian ini.
                       </td>
                     </tr>
-                  )
-                  } 
+                  )}
                 </tbody>
               </table>
             </div>
@@ -383,6 +386,7 @@ const LoyaltyRewards = () => {
             </div>
 
             <form onSubmit={handleCreateReward} className="space-y-4">
+              {/* Form Input fields ... */}
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-1">Nama Hadiah / Promo</label>
                 <input
@@ -466,8 +470,6 @@ const LoyaltyRewards = () => {
   )
 }
 
-const totalNumber = (value) => Number(value || 0).toLocaleString('id-ID')
-
 const StatCard = ({ title, value, note, icon, color }) => (
   <div className={`${color} rounded-[1.5rem] border border-white p-6 shadow-sm transition-shadow hover:shadow-md`}>
     <div className="mb-4 flex items-start justify-between">
@@ -479,4 +481,4 @@ const StatCard = ({ title, value, note, icon, color }) => (
   </div>
 )
 
-export default LoyaltyRewards;
+export default LoyaltyRewards
