@@ -103,9 +103,9 @@ const getDashboardSummary = async (periodInput = 'Daily') => {
     db.execute(
       `
       SELECT COALESCE(SUM(total_amount), 0) AS total_earnings
-      FROM orders
+      FROM orders o
       WHERE ${dateConfig.rangeExpr}
-        AND LOWER(COALESCE(status, '')) NOT IN ('dibatalkan', 'cancelled')
+        AND LOWER(COALESCE(o.status, '')) NOT IN ('dibatalkan', 'cancelled')
       `
     )
   )
@@ -130,8 +130,8 @@ const getDashboardSummary = async (periodInput = 'Daily') => {
     db.execute(
       `
       SELECT COUNT(*) AS total_orders,
-             SUM(CASE WHEN LOWER(COALESCE(status, '')) NOT IN ('dibatalkan', 'cancelled') THEN 1 ELSE 0 END) AS processed_orders
-      FROM orders
+             SUM(CASE WHEN LOWER(COALESCE(o.status, '')) NOT IN ('dibatalkan', 'cancelled') THEN 1 ELSE 0 END) AS processed_orders
+      FROM orders o
       WHERE ${dateConfig.rangeExpr}
       `
     )
