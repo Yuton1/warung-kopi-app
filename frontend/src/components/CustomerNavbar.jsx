@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
+import { motion, AnimatePresence } from 'framer-motion'
 import { STORAGE_KEYS, readStoredValue } from '../data/customerStorage'
 
 const navItems = [
@@ -16,8 +17,7 @@ const menuDropdownItems = [
   { label: 'Cemilan', to: '/menu/cemilan' },
 ]
 
-// Icon modern sesuai desain Group 50
-const Icon = ({ name }) => {
+const Icon = ({ name, isOpen }) => {
   switch (name) {
     case 'search':
       return (
@@ -28,7 +28,19 @@ const Icon = ({ name }) => {
       )
     case 'chevron-down':
       return (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: '16px' }}>
+        <svg 
+          viewBox="0 0 24 24" 
+          fill="none" 
+          stroke="currentColor" 
+          strokeWidth="2" 
+          strokeLinecap="round" 
+          strokeLinejoin="round" 
+          style={{ 
+            width: '16px', 
+            transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)', 
+            transition: 'transform 0.2s ease' 
+          }}
+        >
           <path d="m6 9 6 6 6-6" />
         </svg>
       )
@@ -46,9 +58,11 @@ const Icon = ({ name }) => {
 
 const CustomerNavbar = () => {
   const navigate = useNavigate()
+  const dropdownRef = useRef(null)
   const [searchValue, setSearchValue] = useState('')
   const [counts, setCounts] = useState({ orders: 0, cart: 0 })
   const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false)
 
   useEffect(() => {
     const updateState = () => {
@@ -67,23 +81,31 @@ const CustomerNavbar = () => {
     updateState()
     window.addEventListener('storage', updateState)
     window.addEventListener('warungkopi-state-changed', updateState)
+    
+    // Close dropdown when clicking outside
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsDropdownOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+
     return () => {
       window.removeEventListener('storage', updateState)
       window.removeEventListener('warungkopi-state-changed', updateState)
+      document.removeEventListener('mousedown', handleClickOutside)
     }
   }, [])
 
   const handleSearchSubmit = (e) => {
     e.preventDefault()
-
     const query = searchValue.trim()
     if (!query) return
-
     navigate(`/?q=${encodeURIComponent(query)}`, { replace: false })
   }
 
   return (
-    <header className="site-header" style={{ backgroundColor: '#ffffff' }}>
+    <header className="site-header" style={{ backgroundColor: '#ffffff', position: 'relative', zIndex: 100 }}>
       <div className="customer-navbar__inner">
         
         {/* LOGO */}
@@ -91,7 +113,7 @@ const CustomerNavbar = () => {
           <img src="/Logo_Warkop_Nav.png" alt="Logo Warung Kopi" style={{ height: '40px', width: 'auto' }} />
         </Link>
 
-        {/* SEARCH FORM - Dibuat Flex Grow agar melebar */}
+        {/* SEARCH FORM */}
         <form
           className="customer-navbar__search"
           onSubmit={handleSearchSubmit}
@@ -114,23 +136,84 @@ const CustomerNavbar = () => {
 
         {/* NAV ACTIONS */}
         <div className="customer-navbar__actions">
-          <nav className="customer-navbar__nav">
+          <nav className="customer-navbar__nav" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             {navItems.map((item) => {
               if (item.type === 'dropdown') {
                 return (
-                  <details key={item.label} className="customer-navbar__menu-group">
-                    <summary className="customer-navbar__pill customer-navbar__pill--menu">
+                  <div key={item.label} className="customer-navbar__menu-group" ref={dropdownRef} style={{ position: 'relative' }}>
+                    <button 
+                      type="button"
+                      className={`customer-navbar__pill customer-navbar__pill--menu ${isDropdownOpen ? 'customer-navbar__pill--active' : ''}`}
+                      onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                      style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}
+                    >
                       <span>{item.label}</span>
-                      <Icon name="chevron-down" />
-                    </summary>
-                    <div className="customer-navbar__dropdown">
-                      {menuDropdownItems.map((opt) => (
-                        <button key={opt.label} type="button" onClick={() => navigate(opt.to)}>
-                          {opt.label}
-                        </button>
-                      ))}
-                    </div>
-                  </details>
+                      <Icon name="chevron-down" isOpen={isDropdownOpen} />
+                    </button>
+
+                    {/* ANIMATED DROPDOWN */}
+                    <AnimatePresence>
+                      {isDropdownOpen && (
+                        <motion.div 
+                          initial={{ opacity: 0, y: -12, scale: 0.95 }}
+                          animate={{ opacity: 1, y: 0, scale: 1 }}
+                          exit={{ opacity: 0, y: -12, scale: 0.95 }}
+                          transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }} // Custom premium ease-out
+                          className="customer-navbar__dropdown"
+                          style={{
+                            position: 'absolute',
+                            top: '120%',
+                            left: '50%',
+                            transform: 'translateX(-50%)',
+                            backgroundColor: '#fffdfa', // Warna krem warkop bersih
+                            border: '1px solid #eaddcf',
+                            borderRadius: '12px',
+                            padding: '8px',
+                            boxShadow: '0 10px 25px -5px rgba(45, 26, 16, 0.1), 0 8px 10px -6px rgba(45, 26, 16, 0.1)',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '4px',
+                            minWidth: '150px',
+                            zIndex: 110
+                          }}
+                        >
+                          {menuDropdownItems.map((opt) => (
+                            <button 
+                              key={opt.label} 
+                              type="button" 
+                              onClick={() => {
+                                navigate(opt.to)
+                                setIsDropdownOpen(false)
+                              }}
+                              style={{
+                                width: '100%',
+                                textAlign: 'left',
+                                padding: '10px 16px',
+                                background: 'transparent',
+                                border: 'none',
+                                borderRadius: '8px',
+                                fontSize: '15px',
+                                fontWeight: '500',
+                                color: '#2d1a10', // KUNCI UTAMA: Mengubah warna font menjadi cokelat gelap
+                                cursor: 'pointer',
+                                transition: 'all 0.15s ease',
+                              }}
+                              onMouseEnter={(e) => {
+                                e.target.style.backgroundColor = '#f3e6d8'
+                                e.target.style.color = '#c2410c' // Mengubah warna teks ke oranye hangat saat hover
+                              }}
+                              onMouseLeave={(e) => {
+                                e.target.style.backgroundColor = 'transparent'
+                                e.target.style.color = '#2d1a10'
+                              }}
+                            >
+                              {opt.label}
+                            </button>
+                          ))}
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
                 )
               }
 
@@ -160,7 +243,8 @@ const CustomerNavbar = () => {
             <Link to="/login" className="customer-navbar__pill customer-navbar__pill--active">
               Login
             </Link>
-          )}
+          )
+        }
         </div>
 
       </div>
